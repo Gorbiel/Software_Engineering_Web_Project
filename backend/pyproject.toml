@@ -1,5 +1,5 @@
 [project]
-name = "GlazedIn Backend"
+name = "backend"
 version = "0.1.0"
 description = "Backend for GlazedIn, a software engineering project, part of the Software Engineering course at AGH UST 2026. Written in Python using Django framework."
 authors = [
