@@ -38,3 +38,6 @@ select = ["E", "F", "I"]  # errors, flakes, import sorting
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
+
+[tool.setuptools]
+packages = ["config", "core"]
