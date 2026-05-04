@@ -35,6 +35,9 @@ target-version = "py314"
 [tool.ruff.lint]
 select = ["E", "F", "I"]  # errors, flakes, import sorting
 
+[tool.ruff.lint.per-file-ignores]
+"config/settings/*.py" = ["E501"]
+
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
