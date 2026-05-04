@@ -1,0 +1,40 @@
+[project]
+name = "GlazedIn Backend"
+version = "0.1.0"
+description = "Backend for GlazedIn, a software engineering project, part of the Software Engineering course at AGH UST 2026. Written in Python using Django framework."
+authors = [
+    { name = "John Doe", email = "john.doe@example.com" },
+    { name = "Jane Smith", email = "jane.smith@example.com" }
+]
+requires-python = ">=3.14"
+
+dependencies = [
+    "asgiref==3.11.1",
+    "Django==6.0.4",
+    "psycopg==3.3.3",
+    "sqlparse==0.5.5",
+]
+
+# Optional: separates dev-only deps cleanly
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-django",
+    "ruff",
+    "black",
+]
+
+[tool.black]
+line-length = 88
+target-version = ["py314"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]  # errors, flakes, import sorting
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
