@@ -28,7 +28,7 @@ services:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       DJANGO_DEBUG: "True"
-      DJANGO_SETTINGS_MODULE: glazedin.settings.dev
+      DJANGO_SETTINGS_MODULE: config.settings.dev
     depends_on:
       db:
         condition: service_healthy
