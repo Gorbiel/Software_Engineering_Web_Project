@@ -20,6 +20,7 @@ class Migration(migrations.Migration):
                           UPDATE public.core_user
                           SET deactivation_date = now()
                           WHERE (active IS FALSE AND deactivation_date IS NULL);
+                          RETURN NEW;
                           END
         $$;
 
@@ -43,8 +44,8 @@ class Migration(migrations.Migration):
             (
             SELECT user_id_id
             FROM public.core_achievementconfirmation
-            WHERE user_id_id = NEW.user_id_id)
-                = (SELECT user_id_id FROM public.core_achievement WHERE public.core_achievement.id = NEW.achievement_id_id)
+            WHERE user_id_id = NEW.user_id_id LIMIT 1)
+                = (SELECT user_id_id FROM public.core_achievement WHERE public.core_achievement.id = NEW.achievement_id_id LIMIT 1)
                 THEN
                 RAISE EXCEPTION 'User cannot confirm their own achievement';
             end if;
@@ -71,8 +72,8 @@ class Migration(migrations.Migration):
             (
             SELECT receiving_user_id_id
             FROM public.core_confirmationrequest
-            WHERE receiving_user_id_id = NEW.receiving_user_id_id)
-                = (SELECT user_id_id FROM public.core_achievement WHERE public.core_achievement.id = NEW.achievement_id_id)
+            WHERE receiving_user_id_id = NEW.receiving_user_id_id LIMIT 1)
+                = (SELECT user_id_id FROM public.core_achievement WHERE public.core_achievement.id = NEW.achievement_id_id LIMIT 1)
                 THEN
                 RAISE EXCEPTION 'User cannot confirm their own achievement';
             end if;

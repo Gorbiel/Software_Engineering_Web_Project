@@ -12,3 +12,7 @@ lint:
 
 test:
 	$(PYTHON) -m pytest
+
+mock-db:
+	python manage.py migrate
+	python mock_data_create.py

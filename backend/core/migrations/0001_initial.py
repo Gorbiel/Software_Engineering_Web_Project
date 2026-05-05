@@ -84,7 +84,7 @@ class Migration(migrations.Migration):
                 ('deactivation_date', models.DateTimeField(blank=True, default=None, null=True)),
             ],
             options={
-                'constraints': [models.CheckConstraint(condition=models.Q(('creation_date__lt', models.F('deactivation_date')), ('deactivation_date__isnull', True), _connector='OR'), name='deleted_after_created'), models.CheckConstraint(condition=models.Q(models.Q(('active__exact', False), ('deactivation_date__isnull', False)), models.Q(('active__exact', True), ('deactivation_date__isnull', True)), _connector='OR'), name='inactive_when_deactivation_date_is_not_null')],
+                'constraints': [models.CheckConstraint(condition=models.Q(('creation_date__lt', models.F('deactivation_date')), ('deactivation_date__isnull', True), _connector='OR'), name='deleted_after_created')],
             },
         ),
         migrations.CreateModel(

@@ -29,11 +29,6 @@ class User(models.Model):
                 condition=models.Q(creation_date__lt=models.F("deactivation_date")) |
                           models.Q(deactivation_date__isnull=True)
             ),
-            models.CheckConstraint(
-                name="inactive_when_deactivation_date_is_not_null",
-                condition=(models.Q(active__exact=False) & models.Q(deactivation_date__isnull=False)) |
-                          (models.Q(active__exact=True) & models.Q(deactivation_date__isnull=True))
-            )
         ]
 
 class Achievement(models.Model):
@@ -66,17 +61,19 @@ class Glaze(models.Model):
 class AchievementConfirmation(models.Model):
     """
     User confirming someone else's achievement
+    user_id is validated by a trigger
     """
     achievement_id = models.ForeignKey(Achievement, on_delete=models.CASCADE)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE) #TODO: create migration trigger so the user cant confirm their own achievement
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     creation_date = models.DateTimeField(auto_now_add=True)
 
 class ConfirmationRequest(models.Model):
     """
     User send this to a second user to confirm their achievement
+    receiving_user_id is validated by a trigger
     """
     achievement_id = models.ForeignKey(Achievement, on_delete=models.CASCADE)
-    receiving_user_id = models.ForeignKey(User, on_delete=models.CASCADE) # TODO: create migration trigger so the user cant send a confirmtion to themself
+    receiving_user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     creation_date = models.DateTimeField(auto_now_add=True)
 
 class Team(models.Model):
