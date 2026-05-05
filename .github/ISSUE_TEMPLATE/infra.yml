@@ -1,0 +1,51 @@
+name: Infrastructure
+description: Docker, CI/CD, deployment, environment, or configuration work
+title: "[Infra]: "
+labels: ["infra"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What infrastructure change or issue is this about?
+      placeholder: Describe the infra issue or task...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Docker
+        - Docker Compose
+        - GitHub Actions
+        - Deployment
+        - Environment variables
+        - Database
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_behavior
+    attributes:
+      label: Current behavior
+      placeholder: What happens now?
+
+  - type: textarea
+    id: desired_behavior
+    attributes:
+      label: Desired behavior
+      placeholder: What should happen instead?
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / errors
+      description: Paste relevant CI logs, Docker logs, or deployment errors
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional notes

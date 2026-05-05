@@ -1,0 +1,24 @@
+name: External Integration
+description: Request integration with an external service or tool
+title: "[Integration]: "
+labels: ["integration"]
+body:
+  - type: input
+    id: service
+    attributes:
+      label: Service name
+      placeholder: e.g. PostgreSQL, Docker Hub, GitHub Actions
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What should be integrated?
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: Additional details
