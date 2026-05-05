@@ -1,0 +1,31 @@
+name: API Change
+description: Propose or modify API endpoints
+title: "[API]: "
+labels: ["api"]
+body:
+  - type: textarea
+    id: endpoint
+    attributes:
+      label: Endpoint
+      placeholder: POST /orders
+    validations:
+      required: true
+
+  - type: textarea
+    id: request
+    attributes:
+      label: Request format
+      placeholder: JSON body...
+
+  - type: textarea
+    id: response
+    attributes:
+      label: Response format
+      placeholder: JSON response...
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+    validations:
+      required: true

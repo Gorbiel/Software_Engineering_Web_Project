@@ -1,0 +1,37 @@
+name: Frontend
+description: Report or request frontend UI, UX, or Next.js work
+title: "[Frontend]: "
+labels: ["frontend"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What needs to be changed or fixed?
+      placeholder: Describe the frontend issue or request...
+    validations:
+      required: true
+
+  - type: textarea
+    id: affected_pages
+    attributes:
+      label: Affected pages/components
+      placeholder: e.g. /dashboard, LoginForm, Navbar
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: What should the user see or be able to do?
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or recordings
+      description: Add screenshots, recordings, or design references if applicable
+
+  - type: input
+    id: environment
+    attributes:
+      label: Browser / device
+      placeholder: e.g. Chrome on macOS, Safari on iPhone
