@@ -1,8 +1,6 @@
-from django.db import models
 from django.core import validators
+from django.db import models
 from django.db.models import Count
-from django.views.decorators.http import condition
-
 
 # Create your models here.
 
@@ -102,8 +100,16 @@ class Glaze(models.Model):
     """
     A shout-out from one user to another
     """
-    posting_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="poster")
-    receiving_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="receiver")
+    posting_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="poster"
+    )
+    receiving_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="receiver"
+    )
     title = models.TextField()
     body = models.TextField()
     creation_date = models.DateTimeField(auto_now_add=True)
