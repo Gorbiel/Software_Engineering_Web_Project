@@ -7,21 +7,20 @@ import core.models as obj
 
 
 class Command(BaseCommand):
-    help = 'Does whatever your script does'
+    help = "Does whatever your script does"
 
     def handle(self, *args, **options):
         random.seed(123456789)
         mock_user_csv = csv.reader(open("mock_data/mock_users.csv"), delimiter=",")
         mock_post_csv = csv.reader(open("mock_data/mock_posts.csv"), delimiter=",")
         mock_teams_csv = set(
-            name[0] for name in csv.reader(
-                open("mock_data/mock_team_names.csv"),
-                delimiter=",")
+            name[0]
+            for name in csv.reader(open("mock_data/mock_team_names.csv"), delimiter=",")
         )
         mock_reactions_tags = set(
-            text[0] for text in csv.reader(
-                open("mock_data/mock_tags_reactions.csv"),
-                delimiter=","
+            text[0]
+            for text in csv.reader(
+                open("mock_data/mock_tags_reactions.csv"), delimiter=","
             )
         )
 
@@ -41,9 +40,7 @@ class Command(BaseCommand):
             team.full_clean()
             team.save()
             members = list(
-                set(
-                    [random.choice(users) for i in range(2, random.randint(3, 40))]
-                )
+                set([random.choice(users) for i in range(2, random.randint(3, 40))])
             )
             leader = obj.TeamLeader(team=team, user=members[0])
             leader.full_clean()
@@ -64,31 +61,22 @@ class Command(BaseCommand):
                 achievement.save()
                 achievements.append(achievement)
                 conf_users = list(
-                    set(
-                        [
-                            random.choice(users)
-                            for i in range(2, random.randint(0, 10))
-                        ]
-                    ) - {user})
+                    set([random.choice(users) for i in range(2, random.randint(0, 10))])
+                    - {user}
+                )
                 for u in conf_users:
                     confirmation = obj.AchievementConfirmation(
-                        achievement=achievement,
-                        user=u
+                        achievement=achievement, user=u
                     )
                     confirmation.full_clean()
                     confirmation.save()
                 conf_users = list(
-                    set(
-                        [
-                            random.choice(users)
-                            for i in range(2, random.randint(0, 10))
-                        ]
-                    ) - {user}
+                    set([random.choice(users) for i in range(2, random.randint(0, 10))])
+                    - {user}
                 )
                 for u in conf_users:
                     confirmation = obj.ConfirmationRequest(
-                        achievement=achievement,
-                        receiving_user=u
+                        achievement=achievement, receiving_user=u
                     )
                     confirmation.full_clean()
                     confirmation.save()
@@ -102,7 +90,7 @@ class Command(BaseCommand):
                     posting_user=sending_user,
                     receiving_user=receiving_user,
                     title=title,
-                    body=body
+                    body=body,
                 )
                 glaze.full_clean()
                 glaze.save()
@@ -118,8 +106,7 @@ class Command(BaseCommand):
                     if random.random() < 0.5:
                         achievement = random.choice(achievements)
                         achievement_tag = obj.AchievementTag(
-                            achievement=achievement,
-                            tag=tag
+                            achievement=achievement, tag=tag
                         )
                         achievement_tag.full_clean()
                         achievement_tag.save()
@@ -137,18 +124,14 @@ class Command(BaseCommand):
                     if random.random() < 0.5:
                         achievement = random.choice(achievements)
                         achievement_tag = obj.AchievementReaction(
-                            achievement=achievement,
-                            reaction=reaction,
-                            user=user
+                            achievement=achievement, reaction=reaction, user=user
                         )
                         achievement_tag.full_clean()
                         achievement_tag.save()
                     else:
                         glaze = random.choice(glazes)
                         glaze_reaction = obj.GlazeReaction(
-                            glaze=glaze,
-                            reaction=reaction,
-                            user=user
+                            glaze=glaze, reaction=reaction, user=user
                         )
                         glaze_reaction.full_clean()
                         glaze_reaction.save()

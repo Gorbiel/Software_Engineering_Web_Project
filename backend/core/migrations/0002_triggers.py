@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0001_initial'),
+        ("core", "0001_initial"),
     ]
 
     operations = [
@@ -32,8 +32,7 @@ class Migration(migrations.Migration):
                               EXECUTE FUNCTION set_deactivated_date_on_deactivation();
                           """),
         # check that the user didn't confirm themself
-        migrations.RunSQL(
-            """
+        migrations.RunSQL("""
             CREATE FUNCTION func_check_confirmation_receiver()
                 RETURNS trigger
     LANGUAGE plpgsql
@@ -57,11 +56,9 @@ class Migration(migrations.Migration):
                 ON public.core_achievementconfirmation
                 FOR EACH ROW
                 EXECUTE FUNCTION func_check_confirmation_receiver();
-            """
-        ),
+            """),
         # check that the user didn't send a confirmation request to themself
-        migrations.RunSQL(
-            """
+        migrations.RunSQL("""
             CREATE FUNCTION func_check_confirmation_request_receiver()
                 RETURNS trigger
     LANGUAGE plpgsql
@@ -85,6 +82,5 @@ class Migration(migrations.Migration):
                 ON public.core_confirmationrequest
                 FOR EACH ROW
                 EXECUTE FUNCTION func_check_confirmation_request_receiver();
-            """
-        )
+            """),
     ]
