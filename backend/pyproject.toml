@@ -31,6 +31,7 @@ target-version = ["py314"]
 [tool.ruff]
 line-length = 88
 target-version = "py314"
+extend-exclude = ["core/migrations/*.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]  # errors, flakes, import sorting
