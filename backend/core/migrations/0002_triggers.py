@@ -42,10 +42,10 @@ class Migration(migrations.Migration):
             BEGIN
             IF
             (
-            SELECT user_id_id
+            SELECT user_id
             FROM public.core_achievementconfirmation
-            WHERE user_id_id = NEW.user_id_id LIMIT 1)
-                = (SELECT user_id_id FROM public.core_achievement WHERE public.core_achievement.id = NEW.achievement_id_id LIMIT 1)
+            WHERE user_id = NEW.user_id LIMIT 1)
+                = (SELECT user_id FROM public.core_achievement WHERE public.core_achievement.id = NEW.achievement_id LIMIT 1)
                 THEN
                 RAISE EXCEPTION 'User cannot confirm their own achievement';
             end if;
@@ -70,10 +70,10 @@ class Migration(migrations.Migration):
             BEGIN
             IF
             (
-            SELECT receiving_user_id_id
+            SELECT receiving_user_id
             FROM public.core_confirmationrequest
-            WHERE receiving_user_id_id = NEW.receiving_user_id_id LIMIT 1)
-                = (SELECT user_id_id FROM public.core_achievement WHERE public.core_achievement.id = NEW.achievement_id_id LIMIT 1)
+            WHERE receiving_user_id = NEW.receiving_user_id LIMIT 1)
+                = (SELECT user_id FROM public.core_achievement WHERE public.core_achievement.id = NEW.achievement_id LIMIT 1)
                 THEN
                 RAISE EXCEPTION 'User cannot confirm their own achievement';
             end if;
