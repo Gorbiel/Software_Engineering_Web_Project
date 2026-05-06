@@ -2,14 +2,56 @@ name: CI
 
 on:
   push:
-    branches: ["main", "master"]
+    branches: ["main", "dev"]
   pull_request:
-    branches: ["main", "master"]
+    branches: ["main", "dev"]
 
 jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: read
+
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      docker: ${{ steps.filter.outputs.docker }}
+      workflows: ${{ steps.filter.outputs.workflows }}
+      infra: ${{ steps.filter.outputs.infra }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - "backend/**"
+              - ".github/workflows/ci.yml"
+            frontend:
+              - "frontend/**"
+              - ".github/workflows/ci.yml"
+            docker:
+              - "compose.yaml"
+              - "compose.yml"
+              - "**/Dockerfile"
+              - "**/Dockerfile.*"
+              - ".github/workflows/ci.yml"
+            workflows:
+              - ".github/workflows/**"
+            infra:
+              - "infra/**"
+              - ".github/workflows/ci.yml"
+
   backend:
     name: Backend lint and test
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
 
     permissions:
       contents: read
@@ -45,6 +87,8 @@ jobs:
   frontend:
     name: Frontend lint, typecheck and build
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
 
     permissions:
       contents: read
@@ -79,7 +123,14 @@ jobs:
   docker:
     name: Docker Compose build
     runs-on: ubuntu-latest
-    needs: [backend, frontend]
+    needs: [changes, backend, frontend]
+    if: |
+      always() &&
+      (
+        needs.changes.outputs.docker == 'true' ||
+        needs.changes.outputs.backend == 'true' ||
+        needs.changes.outputs.frontend == 'true'
+      )
 
     permissions:
       contents: read
@@ -93,3 +144,27 @@ jobs:
 
       - name: Build services
         run: docker compose -f compose.yaml build
+
+  ci-status:
+    name: CI Status
+    runs-on: ubuntu-latest
+    needs: [changes, backend, frontend, docker]
+    if: always()
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check CI result
+        run: |
+          if [[ "${{ needs.backend.result }}" == "failure" || \
+                "${{ needs.frontend.result }}" == "failure" || \
+                "${{ needs.docker.result }}" == "failure" || \
+                "${{ needs.backend.result }}" == "cancelled" || \
+                "${{ needs.frontend.result }}" == "cancelled" || \
+                "${{ needs.docker.result }}" == "cancelled" ]]; then
+            echo "One or more required CI jobs failed or were cancelled."
+            exit 1
+          fi
+
+          echo "CI passed."
