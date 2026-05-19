@@ -1,6 +1,5 @@
+from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.authentication import JWTAuthentication
-
-from apps.users.models import User
 
 
 class CustomJWTAuthentication(JWTAuthentication):
@@ -10,12 +9,14 @@ class CustomJWTAuthentication(JWTAuthentication):
         if user_id is None:
             return None
 
+        User = get_user_model()
+
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
             return None
 
-        if not user.active:
+        if not user.is_active:
             return None
 
         return user

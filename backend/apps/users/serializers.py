@@ -1,4 +1,3 @@
-from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 
 from apps.users.models import User
@@ -17,14 +16,28 @@ class UserSerializer(serializers.ModelSerializer):
             "creation_date",
             "active",
             "deactivation_date",
+            "is_staff",
+            "is_superuser",
         ]
-        read_only_fields = ["id", "creation_date", "deactivation_date"]
+        read_only_fields = [
+            "id",
+            "creation_date",
+            "deactivation_date",
+            "is_staff",
+            "is_superuser",
+        ]
 
     def create(self, validated_data):
-        validated_data["password"] = make_password(validated_data["password"])
-        return super().create(validated_data)
+        return User.objects.create_user(**validated_data)
 
     def update(self, instance, validated_data):
-        if "password" in validated_data:
-            validated_data["password"] = make_password(validated_data["password"])
-        return super().update(instance, validated_data)
+        password = validated_data.pop("password", None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        if password is not None:
+            instance.set_password(password)
+
+        instance.save()
+        return instance

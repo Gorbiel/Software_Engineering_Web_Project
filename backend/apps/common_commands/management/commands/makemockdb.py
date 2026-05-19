@@ -44,9 +44,11 @@ class Command(BaseCommand):
         users = []
         print("Generating users")
         for name, email, password in mock_user_csv:
-            user = User(name=name, email=email, password=password)
-            user.full_clean()
-            user.save()
+            user = User.objects.create_user(
+                name=name,
+                email=email,
+                password=password,
+            )
             users.append(user)
             if random.random() < 0.1:
                 admin = Admin(user=user)
