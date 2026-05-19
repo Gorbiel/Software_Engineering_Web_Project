@@ -1,34 +1,37 @@
 from django.db import models
 from django.db.models import Count
+
 from apps.teams.models import TeamMember
 from apps.users.models import User
+
 
 class AchievementConfirmationQuerySet(models.QuerySet):
 
     def with_weighted_score_for_user(self, user):
-        user_teams = TeamMember.objects.filter(
-            user_id=user
-        ).values_list('team_id', flat=True)
+        user_teams = TeamMember.objects.filter(user_id=user).values_list(
+            "team_id", flat=True
+        )
 
-        confirmer_avg_rank_in_shared_teams = TeamMember.objects.filter(
-            user_id=models.OuterRef('user_id'),
-            team_id__in=user_teams
-        ).values('user_id').annotate(
-            avg_rank=models.Avg('rank')
-        ).values('avg_rank')
+        confirmer_avg_rank_in_shared_teams = (
+            TeamMember.objects.filter(
+                user_id=models.OuterRef("user_id"), team_id__in=user_teams
+            )
+            .values("user_id")
+            .annotate(avg_rank=models.Avg("rank"))
+            .values("avg_rank")
+        )
 
-        return (
-            self.annotate(
-                rank=models.Case(
-                    models.When(
-                        user_id__teammember__team_id__in=user_teams,
-                        then=models.Subquery(confirmer_avg_rank_in_shared_teams[:1])
-                    ),
-                    default=models.Value(1),
-                    output_field=models.IntegerField()
-                )
+        return self.annotate(
+            rank=models.Case(
+                models.When(
+                    user_id__teammember__team_id__in=user_teams,
+                    then=models.Subquery(confirmer_avg_rank_in_shared_teams[:1]),
+                ),
+                default=models.Value(1),
+                output_field=models.IntegerField(),
             )
         )
+
 
 class AchievementQuerySet(models.QuerySet):
     def by_user(self, user):
