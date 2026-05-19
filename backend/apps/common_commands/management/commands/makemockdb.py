@@ -3,7 +3,24 @@ import random
 
 from django.core.management.base import BaseCommand
 
-import core.models as obj
+from apps.achievements.models import (
+    Achievement,
+    AchievementConfirmation,
+    ConfirmationRequest,
+)
+from apps.glazes.models import Glaze
+from apps.reactions.models import (
+    AchievementReaction,
+    GlazeReaction,
+    Reaction,
+)
+from apps.tags.models import (
+    AchievementTag,
+    GlazeTag,
+    Tag,
+)
+from apps.teams.models import Team, TeamLeader, TeamMember
+from apps.users.models import Admin, User
 
 
 class Command(BaseCommand):
@@ -27,26 +44,26 @@ class Command(BaseCommand):
         users = []
         print("Generating users")
         for name, email, password in mock_user_csv:
-            user = obj.User(name=name, email=email, password=password)
+            user = User(name=name, email=email, password=password)
             user.full_clean()
             user.save()
             users.append(user)
             if random.random() < 0.1:
-                admin = obj.Admin(user=user)
+                admin = Admin(user=user)
                 admin.save()
         print("Generating teams")
         for name in mock_teams_csv:
-            team = obj.Team(name=name)
+            team = Team(name=name)
             team.full_clean()
             team.save()
             members = list(
                 set([random.choice(users) for i in range(2, random.randint(3, 40))])
             )
-            leader = obj.TeamLeader(team=team, user=members[0])
+            leader = TeamLeader(team=team, user=members[0])
             leader.full_clean()
             leader.save()
             for m in members:
-                member = obj.TeamMember(team=team, user=m, rank=random.randint(0, 10))
+                member = TeamMember(team=team, user=m, rank=random.randint(0, 10))
                 member.full_clean()
                 member.save()
 
@@ -56,7 +73,7 @@ class Command(BaseCommand):
         for title, body in mock_post_csv:
             if random.random() < 0.5:
                 user = random.choice(users)
-                achievement = obj.Achievement(user=user, title=title, body=body)
+                achievement = Achievement(user=user, title=title, body=body)
                 achievement.full_clean()
                 achievement.save()
                 achievements.append(achievement)
@@ -65,7 +82,7 @@ class Command(BaseCommand):
                     - {user}
                 )
                 for u in conf_users:
-                    confirmation = obj.AchievementConfirmation(
+                    confirmation = AchievementConfirmation(
                         achievement=achievement, user=u
                     )
                     confirmation.full_clean()
@@ -75,7 +92,7 @@ class Command(BaseCommand):
                     - {user}
                 )
                 for u in conf_users:
-                    confirmation = obj.ConfirmationRequest(
+                    confirmation = ConfirmationRequest(
                         achievement=achievement, receiving_user=u
                     )
                     confirmation.full_clean()
@@ -86,7 +103,7 @@ class Command(BaseCommand):
                 sending_user = random.choice(users)
                 while sending_user == receiving_user:
                     sending_user = random.choice(users)
-                glaze = obj.Glaze(
+                glaze = Glaze(
                     posting_user=sending_user,
                     receiving_user=receiving_user,
                     title=title,
@@ -99,44 +116,44 @@ class Command(BaseCommand):
         print("Generating tags and reactions")
         for text in mock_reactions_tags:
             if random.random() < 0.5:
-                tag = obj.Tag(tag_text=text)
+                tag = Tag(tag_text=text)
                 tag.full_clean()
                 tag.save()
                 for i in range(random.randint(0, 100)):
                     if random.random() < 0.5:
                         achievement = random.choice(achievements)
-                        achievement_tag = obj.AchievementTag(
+                        achievement_tag = AchievementTag(
                             achievement=achievement, tag=tag
                         )
                         achievement_tag.full_clean()
                         achievement_tag.save()
                     else:
                         glaze = random.choice(glazes)
-                        glaze_tag = obj.GlazeTag(glaze=glaze, tag=tag)
+                        glaze_tag = GlazeTag(glaze=glaze, tag=tag)
                         glaze_tag.full_clean()
                         glaze_tag.save()
             else:
                 user = random.choice(users)
-                reaction = obj.Reaction(name=text, code=f":{text}:")
+                reaction = Reaction(name=text, code=f":{text}:")
                 reaction.full_clean()
                 reaction.save()
                 for i in range(random.randint(0, 100)):
                     if random.random() < 0.5:
                         achievement = random.choice(achievements)
-                        achievement_tag = obj.AchievementReaction(
+                        achievement_tag = AchievementReaction(
                             achievement=achievement, reaction=reaction, user=user
                         )
                         achievement_tag.full_clean()
                         achievement_tag.save()
                     else:
                         glaze = random.choice(glazes)
-                        glaze_reaction = obj.GlazeReaction(
+                        glaze_reaction = GlazeReaction(
                             glaze=glaze, reaction=reaction, user=user
                         )
                         glaze_reaction.full_clean()
                         glaze_reaction.save()
 
-        print("generating inacive users")
-        for i in range(50):
-            users[i].active = False
-            users[i].save()
+        print("generating inactive users")
+        for user in users[:50]:
+            user.active = False
+            user.save()
