@@ -8,7 +8,9 @@ class CustomJWTAuthentication(JWTAuthentication):
         user_id = validated_token.get("user_id")
 
         if user_id is None:
-            raise AuthenticationFailed("Token contained no recognizable user identification")
+            raise AuthenticationFailed(
+                "Token contained no recognizable user identification"
+            )
 
         User = get_user_model()
 
