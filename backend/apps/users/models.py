@@ -56,9 +56,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                name="deleted_after_created",
-                condition=models.Q(creation_date__lt=models.F("deactivation_date"))
-                | models.Q(deactivation_date__isnull=True),
+                name="active_user_has_no_deactivation_date",
+                condition=(
+                        models.Q(active=True, deactivation_date__isnull=True)
+                        | models.Q(active=False, deactivation_date__isnull=False)
+                ),
             ),
         ]
 
@@ -67,10 +69,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class Admin(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"Admin: {self.user.email}"
-
-# class Admin(models.Model):
-#     user = models.OneToOneField(User, on_delete=models.CASCADE)

@@ -56,6 +56,21 @@ jobs:
     permissions:
       contents: read
 
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: glazedin
+          POSTGRES_USER: glazedin
+          POSTGRES_PASSWORD: glazedin
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U glazedin -d glazedin"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     defaults:
       run:
         working-directory: backend
@@ -82,6 +97,13 @@ jobs:
         run: black --check .
 
       - name: Test
+        env:
+            DJANGO_SETTINGS_MODULE: config.settings.test
+            POSTGRES_DB: glazedin
+            POSTGRES_USER: glazedin
+            POSTGRES_PASSWORD: glazedin
+            POSTGRES_HOST: localhost
+            POSTGRES_PORT: 5432
         run: pytest
 
   frontend:

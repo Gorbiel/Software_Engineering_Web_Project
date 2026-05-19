@@ -34,6 +34,8 @@ class LoginView(APIView):
 
 
 class MeView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         return Response(UserSerializer(request.user).data)
 
