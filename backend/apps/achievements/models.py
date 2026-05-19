@@ -26,7 +26,7 @@ class AchievementQuerySet(models.QuerySet):
 
 class Achievement(models.Model):
     """
-        A users achievement
+    A users achievement
     """
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -40,8 +40,8 @@ class Achievement(models.Model):
 
 class AchievementConfirmation(models.Model):
     """
-        User confirming someone else's achievement
-        user is validated by a trigger
+    User confirming someone else's achievement
+    user is validated by a trigger
     """
 
     achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE)
@@ -51,8 +51,8 @@ class AchievementConfirmation(models.Model):
 
 class ConfirmationRequest(models.Model):
     """
-        User send this to a second user to confirm their achievement
-        receiving_user is validated by a trigger
+    User send this to a second user to confirm their achievement
+    receiving_user is validated by a trigger
     """
 
     achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE)

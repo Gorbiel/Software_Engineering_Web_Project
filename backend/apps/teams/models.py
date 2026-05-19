@@ -18,7 +18,7 @@ class TeamQuerySet(models.QuerySet):
 
 class Team(models.Model):
     """
-        Team declaration
+    Team declaration
     """
 
     name = models.CharField(max_length=128, unique=True)
@@ -30,8 +30,8 @@ class Team(models.Model):
 
 class TeamLeader(models.Model):
     """
-        Defines a team leader for a team, a user can be a team leader of multiple teams
-        and a team can have multiple leaders.
+    Defines a team leader for a team, a user can be a team leader of multiple teams
+    and a team can have multiple leaders.
     """
 
     team = models.ForeignKey(Team, on_delete=models.RESTRICT)
@@ -40,8 +40,8 @@ class TeamLeader(models.Model):
 
 class TeamMember(models.Model):
     """
-        Defines a member of a team and their rank in the team.
-        Ranks shouldn't be compared between teams.
+    Defines a member of a team and their rank in the team.
+    Ranks shouldn't be compared between teams.
     """
 
     team = models.ForeignKey(Team, on_delete=models.RESTRICT)

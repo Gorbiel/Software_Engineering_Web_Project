@@ -20,7 +20,7 @@ class GlazeQuerySet(models.QuerySet):
 
 class Glaze(models.Model):
     """
-        A shout-out from one user to another
+    A shout-out from one user to another
     """
 
     posting_user = models.ForeignKey(

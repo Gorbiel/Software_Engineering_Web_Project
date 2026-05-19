@@ -1,8 +1,8 @@
 from django.db import models
 
-from apps.users.models import User
-from apps.glazes.models import Glaze
 from apps.achievements.models import Achievement
+from apps.glazes.models import Glaze
+from apps.users.models import User
 
 
 class Reaction(models.Model):

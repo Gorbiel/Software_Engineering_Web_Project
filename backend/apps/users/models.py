@@ -11,13 +11,12 @@ class UserQuerySet(models.QuerySet):
 
 class User(models.Model):
     """
-        Normal user
-        name - combined name and surname / username
-        creation_date - set automatically
-        active - sets the user as active, defaults to True
-        deactivation_date - set automatically
+    Normal user
+    name - combined name and surname / username
+    creation_date - set automatically
+    active - sets the user as active, defaults to True
+    deactivation_date - set automatically
     """
-
 
     name = models.CharField(max_length=64)
     email = models.EmailField(unique=True)
@@ -41,7 +40,7 @@ class User(models.Model):
 
 class Admin(models.Model):
     """
-        Defines a user with administrative privileges in the app.
+    Defines a user with administrative privileges in the app.
     """
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)

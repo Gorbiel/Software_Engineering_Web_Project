@@ -1,12 +1,12 @@
 from django.db import models
 
-from apps.glazes.models import Glaze
 from apps.achievements.models import Achievement
+from apps.glazes.models import Glaze
 
 
 class Tag(models.Model):
     """
-        Defines an achievent/glaze tag
+    Defines an achievent/glaze tag
     """
 
     tag_text = models.CharField(max_length=64, unique=True)
@@ -15,7 +15,7 @@ class Tag(models.Model):
 
 class AchievementTag(models.Model):
     """
-        Achievements tagged with specific tags
+    Achievements tagged with specific tags
     """
 
     achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE)
