@@ -16,6 +16,7 @@ dependencies = [
     "djangorestframework-simplejwt>=5.5",
     "psycopg==3.3.4",
     "sqlparse==0.5.5",
+    "python-dotenv"
 ]
 
 # Optional: separates dev-only deps cleanly
