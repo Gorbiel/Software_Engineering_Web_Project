@@ -4,7 +4,7 @@ from apps.users.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=True)
+    password = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = User
@@ -28,6 +28,8 @@ class UserSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
+        if "password" not in validated_data:
+            raise serializers.ValidationError({"password": "This field is required."})
         return User.objects.create_user(**validated_data)
 
     def update(self, instance, validated_data):

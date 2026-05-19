@@ -71,3 +71,6 @@ class Admin(models.Model):
 
     def __str__(self):
         return f"Admin: {self.user.email}"
+
+# class Admin(models.Model):
+#     user = models.OneToOneField(User, on_delete=models.CASCADE)

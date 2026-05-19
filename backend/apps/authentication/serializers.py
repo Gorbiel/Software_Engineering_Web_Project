@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate
 from rest_framework import serializers
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class LoginSerializer(serializers.Serializer):
@@ -20,3 +21,11 @@ class LoginSerializer(serializers.Serializer):
 
         attrs["user"] = user
         return attrs
+
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+
+    def save(self):
+        refresh_token = self.validated_data["refresh"]
+        token = RefreshToken(refresh_token)
+        token.blacklist()
