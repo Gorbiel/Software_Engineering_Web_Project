@@ -1,0 +1,64 @@
+/api/auth/
+  POST /login
+  POST /logout
+  POST /refresh
+  GET  /me
+
+/api/users/
+  GET    /
+  POST   /
+  GET    /{id}
+  PATCH  /{id}
+  DELETE /{id}
+  PATCH  /{id}/activate
+  PATCH  /{id}/deactivate
+
+/api/teams/
+  GET    /
+  POST   /
+  GET    /{id}
+  PATCH  /{id}
+  DELETE /{id}
+  POST   /{id}/members
+  DELETE /{id}/members/{user_id}
+  PATCH  /{id}/members/{user_id}/rank
+  POST   /{id}/leaders
+  DELETE /{id}/leaders/{user_id}
+
+/api/glazes/
+  GET    /
+  POST   /
+  GET    /{id}
+  DELETE /{id}
+  POST   /{id}/reactions
+  DELETE /{id}/reactions/{reaction_id}
+
+/api/achievements/
+  GET    /
+  POST   /
+  GET    /{id}
+  PATCH  /{id}
+  DELETE /{id}
+  POST   /{id}/confirmations/request
+  POST   /{id}/confirmations
+  DELETE /{id}/confirmations/{user_id}
+  POST   /{id}/reactions
+  DELETE /{id}/reactions/{reaction_id}
+
+/api/tags/
+  GET /
+  POST /
+  DELETE /{id}
+
+/api/reactions/
+  GET /
+  POST /
+  DELETE /{id}
+
+/api/statistics/
+  GET /users/{id}
+  GET /teams/{id}
+  GET /leaderboard
+
+/api/reports/
+  POST /generate
