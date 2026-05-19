@@ -1,0 +1,11 @@
+namespace: staging
+
+resources:
+  - namespace.yaml
+  - ../../base
+
+images:
+  - name: ghcr.io/gorbiel/software_engineering_web_project/backend
+    newTag: staging
+  - name: ghcr.io/gorbiel/software_engineering_web_project/frontend
+    newTag: staging
