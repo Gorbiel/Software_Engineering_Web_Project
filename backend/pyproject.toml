@@ -34,7 +34,7 @@ target-version = ["py314"]
 [tool.ruff]
 line-length = 88
 target-version = "py314"
-extend-exclude = ["core/migrations/*.py"]
+extend-exclude = ["apps/*/migrations/*.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]  # errors, flakes, import sorting
@@ -47,4 +47,4 @@ DJANGO_SETTINGS_MODULE = "config.settings.test"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
 
 [tool.setuptools]
-packages = ["config", "core"]
+packages = ["config", "apps", "common"]
