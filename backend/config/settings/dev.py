@@ -38,9 +38,17 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "core.apps.GlazedinBackendConfig",
     "rest_framework",
     "corsheaders",
+
+    "core.apps.GlazedinBackendConfig",
+
+    "apps.users",
+    "apps.teams",
+    "apps.glazes",
+    "apps.achievements",
+    "apps.tags",
+    "apps.reactions",
 ]
 
 MIDDLEWARE = [
