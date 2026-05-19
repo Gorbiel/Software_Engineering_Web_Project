@@ -1,0 +1,11 @@
+namespace: production
+
+resources:
+  - namespace.yaml
+  - ../../base
+
+images:
+  - name: ghcr.io/gorbiel/software_engineering_web_project/backend
+    newTag: production
+  - name: ghcr.io/gorbiel/software_engineering_web_project/frontend
+    newTag: production
