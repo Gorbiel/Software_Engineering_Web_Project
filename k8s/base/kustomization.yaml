@@ -1,5 +1,9 @@
 resources:
   - backend/deployment.yaml
   - backend/service.yaml
+
   - frontend/deployment.yaml
   - frontend/service.yaml
+
+  - postgres/deployment.yaml
+  - postgres/service.yaml

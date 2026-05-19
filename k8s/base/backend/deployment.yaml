@@ -20,3 +20,18 @@ spec:
           env:
             - name: DJANGO_SETTINGS_MODULE
               value: config.settings.production
+
+            - name: POSTGRES_DB
+              value: glazedin
+
+            - name: POSTGRES_USER
+              value: glazedin
+
+            - name: POSTGRES_PASSWORD
+              value: glazedin
+
+            - name: POSTGRES_HOST
+              value: postgres
+
+            - name: POSTGRES_PORT
+              value: "5432"
