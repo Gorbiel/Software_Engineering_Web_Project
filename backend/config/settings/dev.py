@@ -38,7 +38,17 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "core.apps.GlazedinBackendConfig",
+    "rest_framework",
+    "corsheaders",
+    "apps.users",
+    "apps.teams",
+    "apps.glazes",
+    "apps.achievements",
+    "apps.tags",
+    "apps.reactions",
+    "apps.common_commands",
+    # "apps.notifications",
+    # "apps.reports",
 ]
 
 MIDDLEWARE = [
@@ -49,7 +59,14 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
 
 ROOT_URLCONF = "config.urls"
 
