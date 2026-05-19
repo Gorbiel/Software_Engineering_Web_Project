@@ -22,6 +22,7 @@ class LoginSerializer(serializers.Serializer):
         attrs["user"] = user
         return attrs
 
+
 class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField()
 

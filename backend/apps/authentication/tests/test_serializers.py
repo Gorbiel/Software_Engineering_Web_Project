@@ -1,5 +1,4 @@
 from django.test import TestCase
-from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.authentication.serializers import LoginSerializer, LogoutSerializer

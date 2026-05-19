@@ -1,7 +1,6 @@
-from .dev import *
-
 import os
 
+from .dev import *
 
 DATABASES = {
     "default": {

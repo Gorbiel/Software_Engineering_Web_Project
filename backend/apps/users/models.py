@@ -58,8 +58,8 @@ class User(AbstractBaseUser, PermissionsMixin):
             models.CheckConstraint(
                 name="active_user_has_no_deactivation_date",
                 condition=(
-                        models.Q(active=True, deactivation_date__isnull=True)
-                        | models.Q(active=False, deactivation_date__isnull=False)
+                    models.Q(active=True, deactivation_date__isnull=True)
+                    | models.Q(active=False, deactivation_date__isnull=False)
                 ),
             ),
         ]
