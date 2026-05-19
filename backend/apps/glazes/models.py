@@ -37,7 +37,6 @@ class Glaze(models.Model):
     glazes = GlazeQuerySet.as_manager()
 
     class Meta:
-        app_label = "core"
         constraints = [
             models.CheckConstraint(
                 name="user_cant_glaze_themself",

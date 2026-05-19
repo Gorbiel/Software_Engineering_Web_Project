@@ -41,14 +41,15 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
 
-    "core.apps.GlazedinBackendConfig",
-
     "apps.users",
     "apps.teams",
     "apps.glazes",
     "apps.achievements",
     "apps.tags",
     "apps.reactions",
+    "apps.common_commands",
+    # "apps.notifications",
+    # "apps.reports",
 ]
 
 MIDDLEWARE = [

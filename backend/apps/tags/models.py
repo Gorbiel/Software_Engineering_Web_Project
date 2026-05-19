@@ -12,9 +12,6 @@ class Tag(models.Model):
     tag_text = models.CharField(max_length=64, unique=True)
     creation_date = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        app_label = "core"
-
 
 class AchievementTag(models.Model):
     """
@@ -24,13 +21,7 @@ class AchievementTag(models.Model):
     achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
 
-    class Meta:
-        app_label = "core"
-
 
 class GlazeTag(models.Model):
     glaze = models.ForeignKey(Glaze, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-
-    class Meta:
-        app_label = "core"

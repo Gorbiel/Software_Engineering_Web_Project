@@ -27,9 +27,6 @@ class Team(models.Model):
     objects = models.Manager()
     teams = TeamQuerySet.as_manager()
 
-    class Meta:
-        app_label = "core"
-
 
 class TeamLeader(models.Model):
     """
@@ -39,9 +36,6 @@ class TeamLeader(models.Model):
 
     team = models.ForeignKey(Team, on_delete=models.RESTRICT)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    class Meta:
-        app_label = "core"
 
 
 class TeamMember(models.Model):
@@ -53,6 +47,3 @@ class TeamMember(models.Model):
     team = models.ForeignKey(Team, on_delete=models.RESTRICT)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     rank = models.IntegerField(default=1, validators=[validators.MinValueValidator(0)])
-
-    class Meta:
-        app_label = "core"

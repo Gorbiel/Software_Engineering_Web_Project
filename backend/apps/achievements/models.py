@@ -37,9 +37,6 @@ class Achievement(models.Model):
     objects = models.Manager()
     achievements = AchievementQuerySet.as_manager()
 
-    class Meta:
-        app_label = "core"
-
 
 class AchievementConfirmation(models.Model):
     """
@@ -51,9 +48,6 @@ class AchievementConfirmation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     creation_date = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        app_label = "core"
-
 
 class ConfirmationRequest(models.Model):
     """
@@ -64,6 +58,3 @@ class ConfirmationRequest(models.Model):
     achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE)
     receiving_user = models.ForeignKey(User, on_delete=models.CASCADE)
     creation_date = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        app_label = "core"
