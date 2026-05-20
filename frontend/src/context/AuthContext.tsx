@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import {
   type AuthUser,
@@ -9,6 +9,7 @@ import {
   getRefreshToken,
   getStoredUser,
   logoutRequest,
+  subscribeToAuth,
 } from "@/utils/auth";
 
 type AuthContextValue = {
@@ -20,7 +21,12 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [user, setUser] = useState<AuthUser | null>(getStoredUser);
+
+  const user = useSyncExternalStore(
+    subscribeToAuth,
+    getStoredUser,
+    () => null,
+  );
 
   const logout = useCallback(async () => {
     const access = getAccessToken();
@@ -35,7 +41,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     clearSession();
-    setUser(null);
     router.push("/login");
   }, [router]);
 

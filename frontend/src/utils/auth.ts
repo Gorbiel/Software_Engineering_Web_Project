@@ -14,6 +14,10 @@ const ACCESS_TOKEN_KEY = "glazedin_access_token";
 const REFRESH_TOKEN_KEY = "glazedin_refresh_token";
 const USER_KEY = "glazedin_user";
 
+// Cached snapshot for useSyncExternalStore — stable reference until auth changes.
+let userSnapshot: AuthUser | null = null;
+let userSnapshotReady = false;
+
 function isBrowser() {
   return typeof window !== "undefined";
 }
@@ -93,6 +97,7 @@ function parseLoginResponse(payload: unknown): AuthSession {
 }
 
 const SESSION_COOKIE = "glazedin_session";
+const AUTH_CHANGE_EVENT = "glazedin-auth-change";
 
 function setSessionCookie() {
   document.cookie = `${SESSION_COOKIE}=1; path=/; SameSite=Lax`;
@@ -100,6 +105,16 @@ function setSessionCookie() {
 
 function clearSessionCookie() {
   document.cookie = `${SESSION_COOKIE}=; path=/; max-age=0; SameSite=Lax`;
+}
+
+function dispatchAuthChange() {
+  userSnapshotReady = false;
+  window.dispatchEvent(new CustomEvent(AUTH_CHANGE_EVENT));
+}
+
+export function subscribeToAuth(callback: () => void): () => void {
+  window.addEventListener(AUTH_CHANGE_EVENT, callback);
+  return () => window.removeEventListener(AUTH_CHANGE_EVENT, callback);
 }
 
 export function saveSession(session: AuthSession) {
@@ -110,6 +125,7 @@ export function saveSession(session: AuthSession) {
   localStorage.setItem(REFRESH_TOKEN_KEY, session.refresh);
   localStorage.setItem(USER_KEY, JSON.stringify(session.user));
   setSessionCookie();
+  dispatchAuthChange();
 }
 
 export function saveUser(user: AuthUser) {
@@ -117,6 +133,7 @@ export function saveUser(user: AuthUser) {
     return;
   }
   localStorage.setItem(USER_KEY, JSON.stringify(user));
+  dispatchAuthChange();
 }
 
 export function clearSession() {
@@ -127,6 +144,7 @@ export function clearSession() {
   localStorage.removeItem(REFRESH_TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
   clearSessionCookie();
+  dispatchAuthChange();
 }
 
 export function getAccessToken(): string | null {
@@ -148,18 +166,27 @@ export function getStoredUser(): AuthUser | null {
     return null;
   }
 
+  if (userSnapshotReady) {
+    return userSnapshot;
+  }
+
   const raw = localStorage.getItem(USER_KEY);
   if (!raw) {
+    userSnapshot = null;
+    userSnapshotReady = true;
     return null;
   }
 
   try {
-    return parseAuthUser(JSON.parse(raw));
+    userSnapshot = parseAuthUser(JSON.parse(raw));
   } catch (error) {
     console.error("Failed to read stored user.", error);
     localStorage.removeItem(USER_KEY);
-    return null;
+    userSnapshot = null;
   }
+
+  userSnapshotReady = true;
+  return userSnapshot;
 }
 
 export async function loginRequest(
