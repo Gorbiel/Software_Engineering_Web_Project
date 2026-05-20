@@ -14,6 +14,9 @@
   --color-accent-softer: #fbeff4;
   --color-accent-2: #5cb3f9;
   --color-accent-2-soft: #e7f5fe;
+  --color-accent-2-softer: #f2f9fc;
+  --color-accent-3: #fdd81c;
+  --color-accent-3-soft: #fff6ce;
 
   --layout-max: 1400px;
   --layout-sidebar-left: 280px;
@@ -36,6 +39,9 @@
   --color-accent-softer: var(--color-accent-softer);
   --color-accent-2: var(--color-accent-2);
   --color-accent-2-soft: var(--color-accent-2-soft);
+  --color-accent-2-softer: var(--color-accent-2-softer);
+  --color-accent-3: var(--color-accent-3);
+  --color-accent-3-soft: var(--color-accent-3-soft);
   --font-sans: var(--font-nunito);
 }
 
