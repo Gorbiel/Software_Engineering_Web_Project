@@ -1,9 +1,11 @@
 resources:
   - backend/deployment.yaml
   - backend/service.yaml
+  - backend/ingress.yaml
 
   - frontend/deployment.yaml
   - frontend/service.yaml
+  - frontend/ingress.yaml
 
   - postgres/deployment.yaml
   - postgres/service.yaml

@@ -9,3 +9,20 @@ images:
     newTag: staging
   - name: ghcr.io/gorbiel/software_engineering_web_project/frontend
     newTag: staging
+
+patches:
+  - target:
+      kind: Ingress
+      name: frontend
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: staging.glazedin.click
+
+  - target:
+      kind: Ingress
+      name: backend
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: api.staging.glazedin.click
