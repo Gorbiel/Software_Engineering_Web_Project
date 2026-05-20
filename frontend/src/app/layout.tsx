@@ -30,7 +30,7 @@ export default function RootLayout({
               <aside className="hidden w-(--layout-sidebar-left) flex-col gap-6 md:flex">
                 <div className="glaze-card flex flex-col items-center gap-3 text-center">
                   {/* placeholdery */}
-                  <div className="bg-accent-soft h-20 w-20 rounded-3xl" />
+                  <div className="bg-background h-20 w-20 rounded-3xl" />
                   <div className="flex flex-col gap-1">
                     <p className="text-text text-base font-semibold">
                       User Name
@@ -40,7 +40,7 @@ export default function RootLayout({
                     </p>
                   </div>
                   <div className="w-full">
-                    <div className="bg-surface-strong h-2 w-full rounded-full">
+                    <div className="bg-accent-softer h-2 w-full rounded-full">
                       <div className="bg-accent h-full w-2/3 rounded-full" />
                     </div>
                     <p className="text-accent mt-2 text-xs font-semibold">
@@ -58,7 +58,7 @@ export default function RootLayout({
               </div>
             </div>
           </main>
-          <footer className="border-border bg-surface-muted border-t">
+          <footer className="border-border bg-surface border-t">
             <div className="text-text-muted mx-auto flex w-full max-w-(--layout-max) flex-col items-start justify-between gap-3 px-4 py-6 text-sm sm:flex-row sm:items-center md:px-8">
               <span className="text-primary text-[20px] font-bold tracking-[-0.02em]">
                 &copy; 2026 GlazedIn

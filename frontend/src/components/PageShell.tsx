@@ -3,10 +3,7 @@ type PageShellProps = {
   sidebar: React.ReactNode;
 };
 
-export function PageShell({
-  children,
-  sidebar,
-}: PageShellProps) {
+export function PageShell({ children, sidebar }: PageShellProps) {
   return (
     <section className="flex flex-col gap-6">
       <div className="flex flex-col gap-6 xl:flex-row">

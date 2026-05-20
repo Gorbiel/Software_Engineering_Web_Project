@@ -46,7 +46,7 @@ export function TopNav() {
   }, []);
 
   return (
-    <header className="border-border bg-surface/90 sticky top-0 z-20 border-b backdrop-blur">
+    <header className="border-border bg-surface sticky top-0 z-20 border-b backdrop-blur">
       <div className="mx-auto flex h-16 w-full max-w-(--layout-max) items-center justify-between px-4 md:px-8">
         <div className="flex items-center gap-8">
           <Link
@@ -55,19 +55,25 @@ export function TopNav() {
           >
             GlazedIn
           </Link>
-          <div className="bg-surface-strong text-text-muted hidden items-center rounded-full px-4 py-2 transition-all select-none md:flex">
-            <Search className="mr-2 h-5 w-5" />
+          <div className="bg-background text-text-muted hidden items-center rounded-full px-4 py-2 transition-all select-none md:flex">
             <input
               className="placeholder:text-text-muted w-72 bg-transparent text-sm focus:outline-none"
               placeholder="Search for a teammate..."
               type="text"
             />
+            {/* placeholder */}
+            <button
+              className="text-accent-2 hover:bg-background cursor-pointer rounded-full transition"
+              type="button"
+            >
+              <Search className="h-5 w-5" />
+            </button>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <div className="relative" ref={notificationsRef}>
             <button
-              className="text-primary hover:bg-surface-strong cursor-pointer rounded-full p-2 transition"
+              className="text-accent-2 hover:bg-accent-2-soft cursor-pointer rounded-full p-2 transition"
               type="button"
               aria-haspopup="menu"
               aria-expanded={openMenu === "notifications"}
@@ -93,7 +99,7 @@ export function TopNav() {
                   {notifications.map((item) => (
                     <div
                       key={item.title}
-                      className="bg-surface-strong flex flex-col gap-1 rounded-2xl px-3 py-2"
+                      className="bg-background flex flex-col gap-1 rounded-2xl px-3 py-2"
                     >
                       <span className="text-text text-xs font-semibold">
                         {item.title}
@@ -112,7 +118,7 @@ export function TopNav() {
           </div>
           <div className="relative" ref={avatarRef}>
             <button
-              className="border-border bg-surface-strong hover:border-primary h-10 w-10 cursor-pointer rounded-full border transition"
+              className="border-border bg-background hover:border-primary h-10 w-10 cursor-pointer rounded-full border transition"
               type="button"
               aria-haspopup="menu"
               aria-expanded={openMenu === "avatar"}
@@ -123,11 +129,11 @@ export function TopNav() {
               }
             />
             {openMenu === "avatar" ? (
-              <div className="glaze-card absolute right-0 top-14 w-48 rounded-3xl p-3">
+              <div className="glaze-card absolute top-14 right-0 w-48 rounded-3xl p-3">
                 <div className="flex flex-col">
                   <Link
                     href="/profile"
-                    className="hover:bg-surface-strong text-text flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-semibold"
+                    className="hover:bg-background text-text flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-semibold"
                     onClick={() => setOpenMenu(null)}
                   >
                     <User className="h-4 w-4" />
@@ -135,14 +141,15 @@ export function TopNav() {
                   </Link>
                   <Link
                     href="/settings"
-                    className="hover:bg-surface-strong text-text flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-semibold"
+                    className="hover:bg-background text-text flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-semibold"
                     onClick={() => setOpenMenu(null)}
                   >
                     <Settings className="h-4 w-4" />
                     Settings
                   </Link>
+                  {/* placeholder */}
                   <button
-                    className="hover:bg-surface-strong text-text-muted flex items-center gap-2 rounded-2xl px-3 py-2 text-left text-sm font-semibold"
+                    className="hover:bg-background text-text-muted flex items-center gap-2 rounded-2xl px-3 py-2 text-left text-sm font-semibold"
                     type="button"
                   >
                     <LogOut className="h-4 w-4" />

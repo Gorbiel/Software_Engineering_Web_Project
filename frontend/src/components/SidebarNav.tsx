@@ -39,7 +39,7 @@ export function SidebarNav({
               className={`flex h-10 w-10 items-center justify-center rounded-full text-sm transition ${
                 active
                   ? "bg-accent-soft text-accent"
-                  : "text-text-muted hover:bg-surface-strong"
+                  : "text-text-muted hover:bg-background"
               }`}
             >
               <item.icon className="h-5 w-5" />
@@ -62,7 +62,7 @@ export function SidebarNav({
             className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition select-none ${
               active
                 ? "bg-accent-soft text-accent"
-                : "text-text-muted hover:bg-surface-strong"
+                : "text-text-muted hover:bg-background"
             }`}
           >
             <item.icon
