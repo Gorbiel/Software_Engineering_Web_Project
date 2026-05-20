@@ -1,65 +1,122 @@
-import Image from "next/image";
+import { PageShell } from "@/components/PageShell";
+import { Tag } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <PageShell
+      sidebar={
+        <div className="hidden flex-col gap-6 xl:flex">
+          <div className="glaze-card flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-text text-sm font-semibold">Confirmations</h2>
+              <span className="bg-accent-softer text-accent rounded-full px-2 py-1 text-xs font-semibold">
+                3
+              </span>
+            </div>
+            <div className="flex flex-col gap-3">
+              <div className="bg-background flex items-center gap-3 rounded-2xl p-3">
+                <div className="bg-surface h-9 w-9 rounded-full" />
+                <div className="flex-1">
+                  <div className="bg-surface h-3 w-32 rounded-full" />
+                  <div className="bg-surface mt-2 h-3 w-20 rounded-full" />
+                </div>
+                <div className="bg-surface h-7 w-16 rounded-full" />
+              </div>
+              <button className="bg-background border-border text-text-muted hover:bg-primary hover:text-primary-contrast cursor-pointer rounded-full border px-4 py-2 text-xs font-semibold transition select-none">
+                View All Requests
+              </button>
+            </div>
+          </div>
+          <div className="glaze-card flex flex-col gap-4">
+            <h2 className="text-text text-sm font-semibold">Top Glazers</h2>
+            <div className="flex flex-col gap-3">
+              {["#1", "#2", "#3"].map((rank) => (
+                <div
+                  key={rank}
+                  className="bg-background flex items-center justify-between rounded-2xl px-3 py-2"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-text-muted text-xs font-semibold select-none">
+                      {rank}
+                    </span>
+                    <div className="bg-surface h-8 w-8 rounded-full" />
+                    <div className="bg-surface h-3 w-24 rounded-full" />
+                  </div>
+                  <div className="bg-surface h-3 w-12 rounded-full" />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="glaze-card flex flex-col gap-4">
+            <h2 className="text-text text-sm font-semibold">Your Team</h2>
+            <div className="flex flex-col gap-3">
+              {["Lead", "Developer", "Manager"].map((role) => (
+                <div
+                  key={role}
+                  className="bg-background flex items-center justify-between rounded-2xl px-3 py-2"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="bg-surface h-8 w-8 rounded-full" />
+                    <div>
+                      <div className="bg-surface h-3 w-20 rounded-full" />
+                      <div className="bg-surface mt-2 h-3 w-14 rounded-full" />
+                    </div>
+                  </div>
+                  <span className="bg-accent h-2 w-2 rounded-full" />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      }
+    >
+      <div className="glaze-card flex flex-col gap-4">
+        <div className="bg-background h-28 rounded-2xl px-4 py-3">
+          <textarea
+            className="placeholder:text-text-muted h-full w-full resize-none bg-transparent text-sm focus:outline-none"
+            placeholder="Share your latest achievement..."
+          />
         </div>
-      </main>
-    </div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <button
+            className="text-accent-2 hover:bg-accent-2-soft cursor-pointer rounded-full p-2 transition"
+            type="button"
+          >
+            <Tag className="h-5 w-5" />
+          </button>
+          <button className="bg-primary text-primary-contrast hover:bg-primary-strong cursor-pointer rounded-full px-4 py-2 text-sm font-semibold transition select-none">
+            Add Achievement
+          </button>
+        </div>
+      </div>
+      <div className="glaze-card flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-background h-10 w-10 rounded-full" />
+            <div>
+              <div className="bg-background h-3 w-24 rounded-full" />
+              <div className="bg-background mt-2 h-3 w-16 rounded-full" />
+            </div>
+          </div>
+          <div className="bg-background h-6 w-20 rounded-full" />
+        </div>
+        <div className="bg-background h-16 rounded-2xl" />
+        <div className="text-text-muted flex items-center gap-4 text-xs">
+          <span className="bg-background h-3 w-24 rounded-full" />
+          <span className="bg-background h-3 w-20 rounded-full" />
+        </div>
+      </div>
+      <div className="glaze-card flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          <div className="bg-background h-10 w-10 rounded-full" />
+          <div className="bg-background h-3 w-32 rounded-full" />
+        </div>
+        <div className="bg-background h-20 rounded-2xl" />
+        <div className="flex items-center gap-3">
+          <div className="bg-background h-8 w-16 rounded-full" />
+          <div className="bg-background h-8 w-20 rounded-full" />
+        </div>
+      </div>
+    </PageShell>
   );
 }
