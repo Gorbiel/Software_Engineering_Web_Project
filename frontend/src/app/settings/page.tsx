@@ -3,7 +3,7 @@ import { PageShell } from "@/components/PageShell";
 export default function Home() {
   return (
     <PageShell sidebar={null}>
-      <h1>Dashboard</h1>
+      <h1>Settings</h1>
     </PageShell>
   );
 }
