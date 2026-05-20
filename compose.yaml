@@ -60,6 +60,8 @@ services:
     profiles: ["dev"]
     build:
       context: ./frontend
+      args:
+        BACKEND_URL: http://backend:8000
     environment:
       NODE_ENV: development
       PORT: 3000
@@ -72,6 +74,8 @@ services:
     profiles: ["prod"]
     build:
       context: ./frontend
+      args:
+        BACKEND_URL: http://backend_prod:8000
     environment:
       NODE_ENV: production
       PORT: 3000
