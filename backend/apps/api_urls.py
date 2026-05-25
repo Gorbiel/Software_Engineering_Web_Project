@@ -5,5 +5,5 @@ urlpatterns = [
     path("teams/", include("apps.teams.urls")),
     path("glazes/", include("apps.glazes.urls")),
     path("auth/", include("apps.authentication.urls")),
-    path("profile/", include("apps.users.urls"))
+    path("profile/", include("apps.users.urls")),
 ]
