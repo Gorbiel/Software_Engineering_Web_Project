@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Bell, LogOut, Search, Settings, User } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const notifications = [
   {
@@ -25,7 +26,9 @@ const notifications = [
 type OpenMenu = "notifications" | "avatar" | null;
 
 export function TopNav() {
+  const { user, logout } = useAuth();
   const [openMenu, setOpenMenu] = useState<OpenMenu>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const notificationsRef = useRef<HTMLDivElement>(null);
   const avatarRef = useRef<HTMLDivElement>(null);
 
@@ -45,6 +48,21 @@ export function TopNav() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  async function handleLogout() {
+    setIsLoggingOut(true);
+    setOpenMenu(null);
+    await logout();
+  }
+
+  const initials = user?.name
+    ? user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : null;
+
   return (
     <header className="border-border bg-surface sticky top-0 z-20 border-b backdrop-blur">
       <div className="mx-auto flex h-16 w-full max-w-(--layout-max) items-center justify-between px-4 md:px-8">
@@ -61,7 +79,6 @@ export function TopNav() {
               placeholder="Search for a teammate..."
               type="text"
             />
-            {/* placeholder */}
             <button
               className="text-accent-2 hover:bg-background cursor-pointer rounded-full transition"
               type="button"
@@ -118,7 +135,7 @@ export function TopNav() {
           </div>
           <div className="relative" ref={avatarRef}>
             <button
-              className="border-border bg-background hover:border-primary h-10 w-10 cursor-pointer rounded-full border transition"
+              className="border-border bg-background hover:border-primary text-text-muted flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border text-xs font-bold transition"
               type="button"
               aria-haspopup="menu"
               aria-expanded={openMenu === "avatar"}
@@ -127,9 +144,19 @@ export function TopNav() {
                   current === "avatar" ? null : "avatar",
                 )
               }
-            />
+            >
+              {initials}
+            </button>
             {openMenu === "avatar" ? (
               <div className="glaze-card absolute top-14 right-0 w-48 rounded-3xl p-3">
+                {user ? (
+                  <div className="border-border mb-2 border-b px-3 pb-2">
+                    <p className="text-text text-xs font-semibold">
+                      {user.name}
+                    </p>
+                    <p className="text-text-muted text-xs">{user.email}</p>
+                  </div>
+                ) : null}
                 <div className="flex flex-col">
                   <Link
                     href="/profile"
@@ -147,13 +174,14 @@ export function TopNav() {
                     <Settings className="h-4 w-4" />
                     Settings
                   </Link>
-                  {/* placeholder */}
                   <button
-                    className="hover:bg-background text-text-muted flex items-center gap-2 rounded-2xl px-3 py-2 text-left text-sm font-semibold"
+                    className="hover:bg-background text-text-muted flex items-center gap-2 rounded-2xl px-3 py-2 text-left text-sm font-semibold disabled:opacity-50"
                     type="button"
+                    disabled={isLoggingOut}
+                    onClick={handleLogout}
                   >
                     <LogOut className="h-4 w-4" />
-                    Log out
+                    {isLoggingOut ? "Logging out…" : "Log out"}
                   </button>
                 </div>
               </div>
