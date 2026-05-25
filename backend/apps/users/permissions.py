@@ -14,6 +14,7 @@ class IsGlazedInAdmin(BasePermission):
 
         return Admin.objects.filter(user=user).exists()
 
+
 class IsSelf(BasePermission):
     message = "You can't access another user's data"
 

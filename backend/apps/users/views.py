@@ -36,10 +36,9 @@ class UserViewSet(viewsets.ModelViewSet):
         user.save(update_fields=["active", "deactivation_date"])
         return Response(self.get_serializer(user).data)
 
+
 class ProfileViewSet(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet
+    mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet
 ):
     permission_classes = [IsSelf]
     serializer_class = UserSerializer
