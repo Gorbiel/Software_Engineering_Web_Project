@@ -3,6 +3,7 @@ Common Django settings for GlazedIn.
 Shared across all environments.
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -91,6 +92,8 @@ USE_TZ = True
 
 # Static files
 STATIC_URL = "static/"
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # Custom user model
 AUTH_USER_MODEL = "users.User"
