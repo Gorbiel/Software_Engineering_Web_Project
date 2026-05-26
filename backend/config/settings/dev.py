@@ -15,6 +15,11 @@ SECRET_KEY = os.getenv(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# SECURITY: Explicitly set allowed hosts
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+if not ALLOWED_HOSTS or ALLOWED_HOSTS == [""]:
+    raise ValueError("ALLOWED_HOSTS environment variable is not set!")
+
 # Database
 DATABASES = {
     "default": {
