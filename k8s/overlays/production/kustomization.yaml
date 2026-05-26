@@ -9,3 +9,14 @@ images:
     newTag: production
   - name: ghcr.io/gorbiel/software_engineering_web_project/frontend
     newTag: production
+
+patches:
+  - target:
+      kind: Deployment
+      name: backend
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: ALLOWED_HOSTS
+          value: "api.glazedin.click,glazedin.click,www.glazedin.click"
