@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+  apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
@@ -22,15 +22,9 @@ spec:
           ports:
             - containerPort: 5432
 
-          env:
-            - name: POSTGRES_USER
-              value: glazedin
-
-            - name: POSTGRES_PASSWORD
-              value: glazedin
-
-            - name: POSTGRES_DB
-              value: glazedin
+          envFrom:
+            - secretRef:
+                name: postgres-secret
 
           volumeMounts:
             - name: postgres-data

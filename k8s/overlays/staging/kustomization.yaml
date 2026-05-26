@@ -26,3 +26,13 @@ patches:
       - op: replace
         path: /spec/rules/0/host
         value: api.staging.glazedin.click
+        
+  - target:
+      kind: Deployment
+      name: backend
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: ALLOWED_HOSTS
+          value: "api.staging.glazedin.click,staging.glazedin.click"
