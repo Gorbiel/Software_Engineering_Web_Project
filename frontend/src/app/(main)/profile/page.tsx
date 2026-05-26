@@ -2,7 +2,7 @@
 
 import { Award, Lock, Rocket } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { PageShell } from "@/components/PageShell";
+import { PageShell } from "@/components/layout/PageShell";
 import { AchievementCard } from "@/components/profile/AchievementCard";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileStats } from "@/components/profile/ProfileStats";

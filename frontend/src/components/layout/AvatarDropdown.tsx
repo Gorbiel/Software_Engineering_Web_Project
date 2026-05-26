@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { LogOut, Settings, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { getInitials } from "@/components/ui/AvatarInitials";
+import { getInitials } from "@/components/misc/AvatarInitials";
 
 export function AvatarDropdown() {
   const { user, logout } = useAuth();

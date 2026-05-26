@@ -1,5 +1,5 @@
 import { Heart, MessageSquare } from "lucide-react";
-import { AvatarInitials } from "@/components/ui/AvatarInitials";
+import { AvatarInitials } from "@/components/misc/AvatarInitials";
 
 type AchievementCardProps = {
   authorName: string;

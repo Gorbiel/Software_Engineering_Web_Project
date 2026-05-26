@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PageShell } from "@/components/PageShell";
+import { PageShell } from "@/components/layout/PageShell";
 import { RankingRow } from "@/components/leaderboards/RankingRow";
 import { RankingPodium } from "@/components/leaderboards/RankingPodium";
 import type { RankingEntry } from "@/components/leaderboards/types";

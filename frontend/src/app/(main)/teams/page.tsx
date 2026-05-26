@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PageShell } from "@/components/PageShell";
+import { PageShell } from "@/components/layout/PageShell";
 import { TeamSelector } from "@/components/teams/TeamSelector";
 import { TeamStructure } from "@/components/teams/TeamStructure";
 import type { Team } from "@/components/teams/types";

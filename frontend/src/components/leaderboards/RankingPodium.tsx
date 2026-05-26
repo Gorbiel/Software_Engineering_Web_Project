@@ -1,4 +1,4 @@
-import { AvatarInitials } from "@/components/ui/AvatarInitials";
+import { AvatarInitials } from "@/components/misc/AvatarInitials";
 import { TrendIcon } from "./TrendIcon";
 import type { RankingEntry } from "./types";
 

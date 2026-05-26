@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
-import { NotificationsDropdown } from "@/components/topnav/NotificationsDropdown";
-import { AvatarDropdown } from "@/components/topnav/AvatarDropdown";
+import { NotificationsDropdown } from "./NotificationsDropdown";
+import { AvatarDropdown } from "./AvatarDropdown";
 
 export function TopNav() {
   return (

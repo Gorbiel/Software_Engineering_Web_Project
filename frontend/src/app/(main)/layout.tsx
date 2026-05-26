@@ -1,5 +1,5 @@
-import { SidebarNav } from "@/components/SidebarNav";
-import { TopNav } from "@/components/TopNav";
+import { SidebarNav } from "@/components/layout/SidebarNav";
+import { TopNav } from "@/components/layout/TopNav";
 import { AuthProvider } from "@/context/AuthContext";
 
 export default function MainLayout({
