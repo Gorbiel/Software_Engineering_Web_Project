@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Bell, LogOut, Search, Settings, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { getInitials } from "@/components/ui/AvatarInitials";
 
 const notifications = [
   {
@@ -54,14 +55,7 @@ export function TopNav() {
     await logout();
   }
 
-  const initials = user?.name
-    ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase()
-    : null;
+  const initials = user?.name ? getInitials(user.name) : null;
 
   return (
     <header className="border-border bg-surface sticky top-0 z-20 border-b backdrop-blur">
@@ -149,14 +143,6 @@ export function TopNav() {
             </button>
             {openMenu === "avatar" ? (
               <div className="glaze-card absolute top-14 right-0 w-48 rounded-3xl p-3">
-                {user ? (
-                  <div className="border-border mb-2 border-b px-3 pb-2">
-                    <p className="text-text text-xs font-semibold">
-                      {user.name}
-                    </p>
-                    <p className="text-text-muted text-xs">{user.email}</p>
-                  </div>
-                ) : null}
                 <div className="flex flex-col">
                   <Link
                     href="/profile"
@@ -175,7 +161,7 @@ export function TopNav() {
                     Settings
                   </Link>
                   <button
-                    className="hover:bg-background text-text-muted flex items-center gap-2 rounded-2xl px-3 py-2 text-left text-sm font-semibold disabled:opacity-50"
+                    className="hover:bg-background text-text flex cursor-pointer items-center gap-2 rounded-2xl px-3 py-2 text-sm font-semibold disabled:opacity-50"
                     type="button"
                     disabled={isLoggingOut}
                     onClick={handleLogout}

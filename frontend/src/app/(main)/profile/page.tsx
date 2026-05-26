@@ -1,29 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Award,
-  Heart,
-  Lock,
-  MessageSquare,
-  Pencil,
-  Rocket,
-  Star,
-  Zap,
-} from "lucide-react";
+import { Award, Lock, Pencil, Rocket, Star, Zap } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { PageShell } from "@/components/PageShell";
+import { AchievementCard } from "@/components/AchievementCard";
 
 export default function ProfilePage() {
   const { user } = useAuth();
 
   const displayName = user?.name ?? "Alex Baker";
-  const initials = displayName
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
 
   const sidebar = (
     <div className="hidden flex-col gap-6 xl:flex">
@@ -147,80 +133,29 @@ export default function ProfilePage() {
       <div className="flex flex-col gap-4">
         <h2 className="text-text text-base font-semibold">My Achievements</h2>
 
-        <article className="glaze-card flex flex-col gap-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="bg-accent-soft text-accent flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold">
-                {initials}
-              </div>
-              <div>
-                <h4 className="text-text text-sm font-bold">
-                  Q3 Product Launch Hero
-                </h4>
-                <p className="text-text-muted text-xs">Shared 2 days ago</p>
-              </div>
-            </div>
-          </div>
-          <p className="text-text-muted text-sm">
-            So proud of the team for getting the Doughnut Dashboard across the
-            finish line! Huge shoutout to the dev team for staying late to
-            polish the sprinkle animations. We did it!
-          </p>
+        <AchievementCard
+          authorName={displayName}
+          title="Q3 Product Launch Hero"
+          date="Shared 2 days ago"
+          likes={24}
+          comments={8}
+        >
+          So proud of the team for getting the Doughnut Dashboard across the
+          finish line! Huge shoutout to the dev team for staying late to polish
+          the sprinkle animations. We did it!
+        </AchievementCard>
 
-          <div className="text-text-muted flex items-center gap-4 text-xs">
-            <button
-              className="hover:text-accent flex items-center gap-1 transition-colors"
-              type="button"
-            >
-              <Heart className="h-4 w-4" />
-              <span className="font-bold">24</span>
-            </button>
-            <button
-              className="hover:text-accent-2 flex items-center gap-1 transition-colors"
-              type="button"
-            >
-              <MessageSquare className="h-4 w-4" />
-              <span className="font-bold">8</span>
-            </button>
-          </div>
-        </article>
-
-        <article className="glaze-card flex flex-col gap-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="bg-accent-soft text-accent flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold">
-                {initials}
-              </div>
-              <div>
-                <h4 className="text-text text-sm font-bold">
-                  Design System Revamp
-                </h4>
-                <p className="text-text-muted text-xs">Shared 1 week ago</p>
-              </div>
-            </div>
-          </div>
-          <p className="text-text-muted text-sm">
-            Finally updated the &ldquo;Crust&rdquo; component library.
-            Accessibility is now at 100%! Ready to roll this out across all
-            platforms. #UX #GlazedDesign
-          </p>
-          <div className="text-text-muted flex items-center gap-4 text-xs">
-            <button
-              className="hover:text-accent flex items-center gap-1 transition-colors"
-              type="button"
-            >
-              <Heart className="h-4 w-4" />
-              <span className="font-bold">11</span>
-            </button>
-            <button
-              className="hover:text-accent-2 flex items-center gap-1 transition-colors"
-              type="button"
-            >
-              <MessageSquare className="h-4 w-4" />
-              <span className="font-bold">3</span>
-            </button>
-          </div>
-        </article>
+        <AchievementCard
+          authorName={displayName}
+          title="Design System Revamp"
+          date="Shared 1 week ago"
+          likes={11}
+          comments={3}
+        >
+          Finally updated the &ldquo;Crust&rdquo; component library.
+          Accessibility is now at 100%! Ready to roll this out across all
+          platforms. #UX #GlazedDesign
+        </AchievementCard>
       </div>
     </PageShell>
   );
