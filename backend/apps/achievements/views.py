@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -17,6 +19,8 @@ from apps.achievements.serializers import (
     AchievementSerializer,
     ConfirmationRequestSerializer,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class AchievementViewSet(viewsets.ModelViewSet):
@@ -74,8 +78,12 @@ class AchievementViewSet(viewsets.ModelViewSet):
             )
             serializer = ConfirmationRequestSerializer(confirmation_request)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception:
+            logger.exception("Failed to create confirmation request.")
+            return Response(
+                {"detail": "Unable to create confirmation request."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     @action(detail=True, methods=["get", "post"], permission_classes=[IsAuthenticated])
     def confirmations(self, request, pk=None):
@@ -102,5 +110,9 @@ class AchievementViewSet(viewsets.ModelViewSet):
                 )
                 serializer = AchievementConfirmationSerializer(confirmation)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            except Exception as e:
-                return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception:
+                logger.exception("Failed to create achievement confirmation.")
+                return Response(
+                    {"detail": "Unable to create confirmation."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
