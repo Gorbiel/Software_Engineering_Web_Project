@@ -17,9 +17,7 @@ class Command(BaseCommand):
         password = options["password"]
 
         if User.objects.filter(email=email).exists():
-            self.stdout.write(
-                self.style.WARNING("User already exists")
-            )
+            self.stdout.write(self.style.WARNING("User already exists"))
             return
 
         user = User.objects.create_superuser(
@@ -30,6 +28,4 @@ class Command(BaseCommand):
 
         Admin.objects.create(user=user)
 
-        self.stdout.write(
-            self.style.SUCCESS(f"Created admin: {email}")
-        )
+        self.stdout.write(self.style.SUCCESS(f"Created admin: {email}"))
