@@ -74,9 +74,7 @@ class AchievementSerializer(serializers.ModelSerializer):
     tag_ids = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True, write_only=True, required=False
     )
-    tags = TagSerializer(
-        source="achievementtag_set", many=True, read_only=True
-    )
+    tags = TagSerializer(source="achievementtag_set", many=True, read_only=True)
 
     class Meta:
         model = Achievement

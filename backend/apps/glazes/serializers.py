@@ -22,15 +22,16 @@ class TagSerializer(serializers.ModelSerializer):
 class GlazeSerializer(serializers.ModelSerializer):
     posting_user = UserBasicSerializer(read_only=True)
     posting_user_id = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), write_only=True, source="posting_user", required=False
+        queryset=User.objects.all(),
+        write_only=True,
+        source="posting_user",
+        required=False,
     )
     receiving_user = UserBasicSerializer(read_only=True)
     receiving_user_id = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(), write_only=True, source="receiving_user"
     )
-    tags = TagSerializer(
-        source="glazetag_set", many=True, read_only=True
-    )
+    tags = TagSerializer(source="glazetag_set", many=True, read_only=True)
     tag_ids = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True, write_only=True, required=False
     )

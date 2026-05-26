@@ -75,9 +75,7 @@ class AchievementViewSet(viewsets.ModelViewSet):
             serializer = ConfirmationRequestSerializer(confirmation_request)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
-            return Response(
-                {"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=["get", "post"], permission_classes=[IsAuthenticated])
     def confirmations(self, request, pk=None):
@@ -105,6 +103,4 @@ class AchievementViewSet(viewsets.ModelViewSet):
                 serializer = AchievementConfirmationSerializer(confirmation)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             except Exception as e:
-                return Response(
-                    {"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST
-                )
+                return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)

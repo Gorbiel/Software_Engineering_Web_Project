@@ -116,7 +116,9 @@ class AchievementConfirmationTests(APITestCase):
         return response.data["access"]
 
     def test_confirm_achievement(self):
-        """Test POST /api/achievements/{id}/confirmations/ - potwierdzenie osiągnięcia"""
+        """
+        Test POST /api/achievements/{id}/confirmations/ - potwierdzenie osiągnięcia
+        """
         token = self.login(email="user2@example.com")
 
         response = self.client.post(
@@ -204,4 +206,3 @@ class AchievementConfirmationTests(APITestCase):
             HTTP_AUTHORIZATION=f"Bearer {token}",
         )
         self.assertEqual(response.data["confirmation_count"], 1)
-
