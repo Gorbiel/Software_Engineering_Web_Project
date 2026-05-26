@@ -26,7 +26,17 @@ patches:
       - op: replace
         path: /spec/rules/0/host
         value: api.glazedin.click
-        
+
+  - target:
+      kind: Deployment
+      name: backend
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: ENVIRONMENT
+          value: "production"
+
   - target:
       kind: Deployment
       name: backend
