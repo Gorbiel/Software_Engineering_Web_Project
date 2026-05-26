@@ -6,4 +6,5 @@ urlpatterns = [
     path("glazes/", include("apps.glazes.urls")),
     path("achievements/", include("apps.achievements.urls")),
     path("auth/", include("apps.authentication.urls")),
+    path("profile/", include("apps.users.urls")),
 ]

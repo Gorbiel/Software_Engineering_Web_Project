@@ -1,23 +1,51 @@
+"""
+Test settings for GlazedIn.
+Optimized for fast test runs with PostgreSQL.
+"""
+
 import os
 
-from .dev import *
+from .common import *
 
+# Use a simple secret key for tests
+SECRET_KEY = "test-secret-key"
+
+# Disable debug for test consistency
+DEBUG = False
+
+ALLOWED_HOSTS = ["*"]
+
+# PostgreSQL database for tests (matches production/dev)
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("POSTGRES_DB"),
-        "USER": os.getenv("POSTGRES_USER"),
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
-        "HOST": os.getenv("POSTGRES_HOST"),
-        "PORT": os.getenv("POSTGRES_PORT"),
-        "TEST": {
-            "NAME": "test_glazedin",
-        },
+        "NAME": os.getenv("POSTGRES_DB_TEST", "test_glazedin"),
+        "USER": os.getenv("POSTGRES_USER", "postgres"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD", "password"),
+        "HOST": os.getenv("POSTGRES_HOST", "localhost"),
+        "PORT": os.getenv("POSTGRES_PORT", "5432"),
     }
 }
 
+# Fast password hashing for tests
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.MD5PasswordHasher",
 ]
 
+# In-memory email backend
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+
+# Reduce logging noise in tests
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+}

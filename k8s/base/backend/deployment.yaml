@@ -15,23 +15,20 @@ spec:
       containers:
         - name: backend
           image: ghcr.io/gorbiel/software_engineering_web_project/backend:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8000
+
+          envFrom:
+            - secretRef:
+                name: postgres-secret
+
           env:
             - name: DJANGO_SETTINGS_MODULE
               value: config.settings.production
 
-            - name: POSTGRES_DB
-              value: glazedin
-
-            - name: POSTGRES_USER
-              value: glazedin
-
-            - name: POSTGRES_PASSWORD
-              value: glazedin
-
-            - name: POSTGRES_HOST
-              value: postgres
-
-            - name: POSTGRES_PORT
-              value: "5432"
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: django-secret
+                  key: SECRET_KEY
