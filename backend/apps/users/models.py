@@ -43,6 +43,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     is_staff = models.BooleanField(default=False)
 
+    profile_picture = models.ImageField(
+        upload_to="media/", default=None, blank=True, null=True
+    )
+    job_title = models.CharField(max_length=128, default=None, blank=True, null=True)
+    bio_text = models.TextField(default=None, blank=True, null=True)
+
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["name"]
 
