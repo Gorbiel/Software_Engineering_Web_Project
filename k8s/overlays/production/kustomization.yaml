@@ -12,6 +12,22 @@ images:
 
 patches:
   - target:
+      kind: Ingress
+      name: frontend
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: glazedin.click
+
+  - target:
+      kind: Ingress
+      name: backend
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: api.glazedin.click
+        
+  - target:
       kind: Deployment
       name: backend
     patch: |-
