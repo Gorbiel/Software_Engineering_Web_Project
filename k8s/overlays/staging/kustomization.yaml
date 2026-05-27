@@ -58,4 +58,4 @@ patches:
         path: /spec/template/spec/containers/0/env/-
         value:
           name: ALLOWED_HOSTS
-          value: "api.staging.glazedin.click,staging.glazedin.click"
+          value: "backend,api.staging.glazedin.click,staging.glazedin.click"
