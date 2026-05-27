@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PageShell } from "@/components/layout/PageShell";
 import { TeamSelector } from "@/components/teams/TeamSelector";
 import { TeamStructure } from "@/components/teams/TeamStructure";
+import { TopPerformingTeamsCard } from "@/components/teams/sidebar/TopPerformingTeamsCard";
 import type { Team } from "@/components/teams/types";
 
 const teams: Team[] = [
@@ -38,32 +39,7 @@ export default function TeamsPage() {
   const [selectedTeam, setSelectedTeam] = useState<Team>(teams[0]);
 
   return (
-    <PageShell
-      sidebar={
-        <div className="glaze-card flex flex-col gap-4">
-          <h2 className="text-text text-sm font-semibold">
-            Top Performing Teams
-          </h2>
-          <div className="flex flex-col gap-3">
-            {["Information Security", "Quality Assurance"].map((team) => (
-              <div
-                key={team}
-                className="bg-background flex items-center justify-between rounded-2xl px-3 py-2"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="bg-surface h-8 w-8 rounded-full" />
-                  <div className="bg-surface h-3 w-24 rounded-full" />
-                </div>
-                <div className="bg-surface h-3 w-16 rounded-full" />
-              </div>
-            ))}
-          </div>
-          <button className="bg-background border-border text-text-muted hover:bg-primary hover:text-primary-contrast cursor-pointer rounded-full border px-4 py-2 text-xs font-semibold transition select-none">
-            View Leaderboard
-          </button>
-        </div>
-      }
-    >
+    <PageShell sidebar={<TopPerformingTeamsCard />}>
       <TeamSelector
         teams={teams}
         selectedTeam={selectedTeam}
