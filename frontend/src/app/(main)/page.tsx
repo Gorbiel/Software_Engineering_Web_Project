@@ -37,9 +37,9 @@ export default function Home() {
         likes={27}
         comments={9}
       >
-        Onboarded Diego this week and he just shipped his first PR to the
-        design tokens repo. Watching the lightbulb moments is honestly the best
-        part of this job. #mentoring
+        Onboarded Diego this week and he just shipped his first PR to the design
+        tokens repo. Watching the lightbulb moments is honestly the best part of
+        this job. #mentoring
       </AchievementCard>
     </PageShell>
   );

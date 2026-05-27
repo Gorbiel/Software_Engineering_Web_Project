@@ -1,5 +1,5 @@
-import { SidebarNav } from "@/components/layout/SidebarNav";
-import { TopNav } from "@/components/layout/TopNav";
+import { SidebarNav } from "@/components/layout/sidenav/SidebarNav";
+import { TopNav } from "@/components/layout/topnav/TopNav";
 import { Footer } from "@/components/layout/Footer";
 import { AuthProvider } from "@/context/AuthContext";
 

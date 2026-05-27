@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { BarChart3, LayoutGrid, Users, User } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { SidebarUserCard } from "@/components/layout/SidebarUserCard";
+import { SidebarUserCard } from "@/components/layout/sidenav/SidebarUserCard";
 
 const navItems: Array<{ href: string; label: string; icon: LucideIcon }> = [
   { href: "/", label: "Feed", icon: LayoutGrid },
