@@ -18,6 +18,12 @@ patches:
       - op: replace
         path: /spec/rules/0/host
         value: glazedin.click
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: glazedin.click
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: production-frontend-tls
 
   - target:
       kind: Ingress
@@ -26,6 +32,13 @@ patches:
       - op: replace
         path: /spec/rules/0/host
         value: api.glazedin.click
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: api.glazedin.click
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: production-backend-tls
+        
 
   - target:
       kind: Deployment

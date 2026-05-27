@@ -2,7 +2,14 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: backend
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-http
 spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - api.placeholder.example.com
+      secretName: backend-tls
   rules:
     - host: api.placeholder.example.com
       http:
