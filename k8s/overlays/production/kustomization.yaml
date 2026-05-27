@@ -39,6 +39,17 @@ patches:
         path: /spec/tls/0/secretName
         value: production-backend-tls
         
+
+  - target:
+      kind: Deployment
+      name: backend
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: ENVIRONMENT
+          value: "production"
+
   - target:
       kind: Deployment
       name: backend
