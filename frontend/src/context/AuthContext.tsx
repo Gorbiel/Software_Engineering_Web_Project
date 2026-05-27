@@ -1,6 +1,11 @@
 "use client";
 
-import { createContext, useCallback, useContext, useSyncExternalStore } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useSyncExternalStore,
+} from "react";
 import { useRouter } from "next/navigation";
 import {
   type AuthUser,
@@ -22,11 +27,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
-  const user = useSyncExternalStore(
-    subscribeToAuth,
-    getStoredUser,
-    () => null,
-  );
+  const user = useSyncExternalStore(subscribeToAuth, getStoredUser, () => null);
 
   const logout = useCallback(async () => {
     const access = getAccessToken();
