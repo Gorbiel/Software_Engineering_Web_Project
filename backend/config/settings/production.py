@@ -74,9 +74,9 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
     # HS256 is sufficient for most cases; can switch to RS256 if needed
     "ALGORITHM": os.getenv("JWT_ALGORITHM", "HS256"),
-    # Uses SECRET_KEY from Django settings (which is required in production)
-    "SIGNING_KEY": None,
-    "VERIFYING_KEY": None,
+    # Signing/verification keys intentionally omitted here so SimpleJWT will
+    # use Django's SECRET_KEY by default. If you need RS256 set VERIFYING_KEY
+    # and SIGNING_KEY explicitly in a secure way (e.g. from a secret store).
     # Standard bearer token authentication
     "AUTH_HEADER_TYPES": ("Bearer",),
     "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",

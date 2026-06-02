@@ -14,8 +14,9 @@ BLACKLIST_AFTER_ROTATION = True  # Blacklist old refresh tokens after rotation
 
 # Algorithm and Signing
 ALGORITHM = "HS256"  # HMAC with SHA-256
-SIGNING_KEY = None  # Will use Django SECRET_KEY if not set
-VERIFYING_KEY = None  # For asymmetric algorithms (RS256, etc.)
+# Do NOT set SIGNING_KEY/VERIFYING_KEY here. If you need an asymmetric key
+# provide them via environment-specific settings (production) or leave them
+# unset so SimpleJWT falls back to Django's SECRET_KEY by default.
 
 # Token Type
 TOKEN_TYPE_CLAIM = "token_type"  # JWT claim for token type (access/refresh)
@@ -43,8 +44,9 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": ROTATE_REFRESH_TOKENS,
     "BLACKLIST_AFTER_ROTATION": BLACKLIST_AFTER_ROTATION,
     "ALGORITHM": ALGORITHM,
-    "SIGNING_KEY": SIGNING_KEY,
-    "VERIFYING_KEY": VERIFYING_KEY,
+    # Signing/verification keys intentionally omitted to allow SimpleJWT to
+    # use Django's SECRET_KEY by default. Set explicit keys in production
+    # only if you're using asymmetric algorithms (RS256).
     "AUTH_HEADER_TYPES": AUTH_HEADER_TYPES,
     "AUTH_HEADER_NAME": AUTH_HEADER_NAME,
     "USER_ID_FIELD": USER_ID_FIELD,
