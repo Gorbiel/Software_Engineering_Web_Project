@@ -50,9 +50,9 @@ SECURE_CONTENT_SECURITY_POLICY = {
 }
 
 # CORS Configuration - Strict in production
-CORS_ALLOWED_ORIGINS = os.getenv(
-    "CORS_ALLOWED_ORIGINS", "https://glazedin.com"
-).split(",")
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "https://glazedin.com").split(
+    ","
+)
 CORS_ALLOW_CREDENTIALS = True
 
 # JWT Token Settings - Production Overrides
