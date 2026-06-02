@@ -14,7 +14,6 @@ const ACCESS_TOKEN_KEY = "glazedin_access_token";
 const REFRESH_TOKEN_KEY = "glazedin_refresh_token";
 const USER_KEY = "glazedin_user";
 
-// Cached snapshot for useSyncExternalStore — stable reference until auth changes.
 let userSnapshot: AuthUser | null = null;
 let userSnapshotReady = false;
 
@@ -136,6 +135,13 @@ export function saveUser(user: AuthUser) {
   dispatchAuthChange();
 }
 
+function setAccessToken(access: string) {
+  if (!isBrowser()) {
+    return;
+  }
+  localStorage.setItem(ACCESS_TOKEN_KEY, access);
+}
+
 export function clearSession() {
   if (!isBrowser()) {
     return;
@@ -220,6 +226,53 @@ export async function fetchMe(accessToken: string): Promise<AuthUser> {
   }
 
   return parseAuthUser(data);
+}
+
+let refreshInFlight: Promise<boolean> | null = null;
+
+export function refreshSession(): Promise<boolean> {
+  if (refreshInFlight) {
+    return refreshInFlight;
+  }
+
+  refreshInFlight = (async () => {
+    const refresh = getRefreshToken();
+    if (!refresh) {
+      return false;
+    }
+
+    try {
+      const response = await fetch("/api/auth/refresh/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh }),
+      });
+
+      if (!response.ok) {
+        clearSession();
+        return false;
+      }
+
+      const data = (await readJson(response)) as Record<string, unknown> | null;
+      const access = data?.access;
+      if (typeof access !== "string") {
+        clearSession();
+        return false;
+      }
+
+      setAccessToken(access);
+      if (typeof data?.refresh === "string") {
+        localStorage.setItem(REFRESH_TOKEN_KEY, data.refresh);
+      }
+      return true;
+    } catch {
+      return false;
+    } finally {
+      refreshInFlight = null;
+    }
+  })();
+
+  return refreshInFlight;
 }
 
 export async function logoutRequest(
