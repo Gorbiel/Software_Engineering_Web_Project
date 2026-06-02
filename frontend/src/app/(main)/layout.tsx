@@ -10,11 +10,11 @@ export default function MainLayout({
 }) {
   return (
     <AuthProvider>
-      <div className="flex min-h-screen flex-col">
+      <div className="flex h-dvh flex-col overflow-hidden">
         <TopNav />
-        <main className="flex-1">
-          <div className="mx-auto flex w-full max-w-(--layout-max) gap-6 px-4 py-6 md:px-8">
-            <aside className="hidden flex-col gap-6 md:flex md:w-(--layout-sidebar-left-md) lg:w-(--layout-sidebar-left)">
+        <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+          <div className="mx-auto flex w-full max-w-(--layout-max) flex-1 items-start gap-6 px-4 py-6 md:px-8">
+            <aside className="sticky top-6 hidden max-h-[calc(100dvh-7rem)] flex-col gap-6 self-start overflow-y-auto md:flex md:w-(--layout-sidebar-left-md) lg:w-(--layout-sidebar-left)">
               <SidebarNav />
             </aside>
             <div className="flex min-w-0 flex-1 flex-col gap-6">
@@ -24,8 +24,9 @@ export default function MainLayout({
               {children}
             </div>
           </div>
+          {/* full-width, scrolls in at the end of the content */}
+          <Footer />
         </main>
-        <Footer />
       </div>
     </AuthProvider>
   );

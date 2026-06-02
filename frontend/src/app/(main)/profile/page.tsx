@@ -35,9 +35,7 @@ export default function ProfilePage() {
       .catch((err) => {
         if (active) {
           setError(
-            err instanceof Error
-              ? err.message
-              : "Unable to load achievements.",
+            err instanceof Error ? err.message : "Unable to load achievements.",
           );
         }
       })
