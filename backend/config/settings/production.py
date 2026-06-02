@@ -4,6 +4,7 @@ Strict security and performance settings.
 """
 
 import os
+from datetime import timedelta
 
 from .common import *
 
@@ -46,6 +47,54 @@ SECURE_HSTS_PRELOAD = True
 # SECURITY: Additional headers
 SECURE_CONTENT_SECURITY_POLICY = {
     "default-src": ("'self'",),
+}
+
+# CORS Configuration - Strict in production
+CORS_ALLOWED_ORIGINS = os.getenv(
+    "CORS_ALLOWED_ORIGINS", "https://glazedin.com"
+).split(",")
+CORS_ALLOW_CREDENTIALS = True
+
+# JWT Token Settings - Production Overrides
+# These are stricter than development for security
+
+SIMPLE_JWT = {
+    # Shorter access token lifetime for security
+    # If a token is compromised, it's only valid for 30 minutes
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        minutes=int(os.getenv("JWT_ACCESS_TOKEN_LIFETIME_MINUTES", "30"))
+    ),
+    # Refresh tokens valid for 30 days (enforces re-login every month for security)
+    "REFRESH_TOKEN_LIFETIME": timedelta(
+        days=int(os.getenv("JWT_REFRESH_TOKEN_LIFETIME_DAYS", "30"))
+    ),
+    # Security: Rotate refresh tokens on each refresh request
+    "ROTATE_REFRESH_TOKENS": True,
+    # Security: Blacklist old tokens after rotation
+    "BLACKLIST_AFTER_ROTATION": True,
+    # HS256 is sufficient for most cases; can switch to RS256 if needed
+    "ALGORITHM": os.getenv("JWT_ALGORITHM", "HS256"),
+    # Uses SECRET_KEY from Django settings (which is required in production)
+    "SIGNING_KEY": None,
+    "VERIFYING_KEY": None,
+    # Standard bearer token authentication
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+    # User identification
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+    "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
+    # Token identification
+    "JTI_CLAIM": "jti",
+    "TOKEN_TYPE_CLAIM": "token_type",
+    "TOKEN_USER_CLASS": "rest_framework_simplejwt.models.TokenUser",
+    # Security: Check if token is blacklisted
+    "CHECK_REVOKE_TOKEN": True,
+    # Performance: Don't update user.last_login on every token generation (prevents DB writes)
+    "UPDATE_LAST_LOGIN": False,
+    # Sliding token settings (unused but included for completeness)
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
+    "SLIDING_TOKEN_LIFETIME": timedelta(hours=5),
 }
 
 # Logging - error tracking in production
