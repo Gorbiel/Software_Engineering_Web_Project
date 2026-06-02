@@ -6,6 +6,8 @@ Shared across all environments.
 import os
 from pathlib import Path
 
+from .jwt import SIMPLE_JWT
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -48,6 +50,8 @@ REST_FRAMEWORK = {
         "apps.authentication.authentication.CustomJWTAuthentication",
     ),
 }
+
+SIMPLE_JWT = SIMPLE_JWT
 
 ROOT_URLCONF = "config.urls"
 
