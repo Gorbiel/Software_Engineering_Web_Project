@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { Check, Pencil, Trash2 } from "lucide-react";
 import { AchievementCard } from "@/components/achievements/AchievementCard";
 import {
   type Achievement,
+  confirmAchievement,
   deleteAchievement,
   updateAchievement,
 } from "@/utils/achievements";
@@ -27,11 +28,21 @@ export function AchievementItem({
   const [title, setTitle] = useState(achievement.title);
   const [body, setBody] = useState(achievement.body);
   const [isPending, setIsPending] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const canModify =
+  const isOwner =
     currentUserId !== undefined &&
     String(achievement.user.id) === String(currentUserId);
+
+  const alreadyConfirmed =
+    currentUserId !== undefined &&
+    achievement.confirmations.some(
+      (c) => String(c.user.id) === String(currentUserId),
+    );
+
+  const canConfirm =
+    currentUserId !== undefined && !isOwner && !alreadyConfirmed;
 
   const confirmedBy = achievement.confirmations.map((c) => c.user.name);
 
@@ -84,6 +95,29 @@ export function AchievementItem({
     }
   }
 
+  async function handleConfirm() {
+    if (!canConfirm || isConfirming) {
+      return;
+    }
+    setError(null);
+    setIsConfirming(true);
+
+    try {
+      const confirmation = await confirmAchievement(achievement.id);
+      onChanged({
+        ...achievement,
+        confirmations: [...achievement.confirmations, confirmation],
+        confirmation_count: achievement.confirmation_count + 1,
+      });
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Unable to confirm achievement.",
+      );
+    } finally {
+      setIsConfirming(false);
+    }
+  }
+
   if (isEditing) {
     return (
       <div className="glaze-card flex flex-col gap-4">
@@ -128,37 +162,59 @@ export function AchievementItem({
     );
   }
 
-  return (
-    <AchievementCard
-      authorName={achievement.user.name}
-      title={achievement.title}
-      date={`Shared ${formatRelativeTime(achievement.creation_date)}`}
-      likes={0}
-      comments={0}
-      confirmedBy={confirmedBy}
-      actions={
-        canModify ? (
-          <>
-            <button
-              className="hover:text-accent-2 hover:bg-accent-2-soft flex cursor-pointer items-center gap-1 rounded-full px-2 py-1 transition select-none"
-              type="button"
-              onClick={startEditing}
-            >
-              <Pencil className="h-4 w-4" />
-            </button>
-            <button
-              className="hover:text-accent hover:bg-accent-softer flex cursor-pointer items-center gap-1 rounded-full px-2 py-1 transition select-none disabled:cursor-not-allowed disabled:opacity-60"
-              type="button"
-              onClick={handleDelete}
-              disabled={isPending}
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </>
-        ) : null
-      }
+  const actions = isOwner ? (
+    <>
+      <button
+        className="hover:text-accent-2 hover:bg-accent-2-soft flex cursor-pointer items-center gap-1 rounded-full px-2 py-1 transition select-none"
+        type="button"
+        onClick={startEditing}
+      >
+        <Pencil className="h-4 w-4" />
+      </button>
+      <button
+        className="hover:text-accent hover:bg-accent-softer flex cursor-pointer items-center gap-1 rounded-full px-2 py-1 transition select-none disabled:cursor-not-allowed disabled:opacity-60"
+        type="button"
+        onClick={handleDelete}
+        disabled={isPending}
+      >
+        <Trash2 className="h-4 w-4" />
+      </button>
+    </>
+  ) : alreadyConfirmed ? (
+    <span className="text-accent-2 flex items-center gap-1 px-2 py-1 font-semibold">
+      <Check className="h-4 w-4" />
+      Confirmed
+    </span>
+  ) : canConfirm ? (
+    <button
+      className="text-accent-2 hover:bg-accent-2-soft flex cursor-pointer items-center gap-1 rounded-full px-3 py-1 font-semibold transition select-none disabled:cursor-not-allowed disabled:opacity-60"
+      type="button"
+      onClick={handleConfirm}
+      disabled={isConfirming}
     >
-      {achievement.body}
-    </AchievementCard>
+      <Check className="h-4 w-4" />
+      {isConfirming ? "Confirming…" : "Confirm"}
+    </button>
+  ) : null;
+
+  return (
+    <div className="flex flex-col gap-2">
+      <AchievementCard
+        authorName={achievement.user.name}
+        title={achievement.title}
+        date={`Shared ${formatRelativeTime(achievement.creation_date)}`}
+        likes={0}
+        comments={0}
+        confirmedBy={confirmedBy}
+        actions={actions}
+      >
+        {achievement.body}
+      </AchievementCard>
+      {error ? (
+        <p className="bg-accent-softer text-accent rounded-2xl px-4 py-2 text-xs font-semibold">
+          {error}
+        </p>
+      ) : null}
+    </div>
   );
 }

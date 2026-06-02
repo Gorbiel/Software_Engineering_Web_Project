@@ -86,3 +86,14 @@ export async function deleteAchievement(id: number): Promise<void> {
     throw new ApiError("Unable to delete achievement.", response.status, null);
   }
 }
+
+export function confirmAchievement(
+  id: number,
+): Promise<AchievementConfirmation> {
+  return apiJson<AchievementConfirmation>(
+    `/achievements/${id}/confirmations/`,
+    {
+      method: "POST",
+    },
+  );
+}
