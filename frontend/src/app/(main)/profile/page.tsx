@@ -9,15 +9,39 @@ import { ProfileAchievements } from "@/components/profile/ProfileAchievements";
 import { BadgesCard } from "@/components/profile/sidebar/BadgesCard";
 import { LevelProgressCard } from "@/components/profile/sidebar/LevelProgressCard";
 import { type Achievement, fetchAchievements } from "@/utils/achievements";
+import { fetchMyProfile, type UserProfile } from "@/utils/profile";
 
 export default function ProfilePage() {
   const { user } = useAuth();
-  const displayName = user?.name ?? "Alex Baker";
   const userId = user?.id;
 
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [achievementsError, setAchievementsError] = useState<string | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [profileError, setProfileError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    fetchMyProfile()
+      .then((data) => {
+        if (active) {
+          setProfile(data);
+        }
+      })
+      .catch((err) => {
+        if (active) {
+          setProfileError(
+            err instanceof Error ? err.message : "Couldn't load profile.",
+          );
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (userId === undefined) {
@@ -34,7 +58,7 @@ export default function ProfilePage() {
       })
       .catch((err) => {
         if (active) {
-          setError(
+          setAchievementsError(
             err instanceof Error ? err.message : "Unable to load achievements.",
           );
         }
@@ -70,9 +94,16 @@ export default function ProfilePage() {
       }
     >
       <ProfileHeader
-        name={displayName}
-        subtitle="Senior Experience Designer • Engineering Team"
+        name={profile?.name ?? ""}
+        subtitle={profile?.job_title ?? undefined}
+        bio={profile?.bio_text ?? undefined}
       />
+
+      {profileError ? (
+        <p className="bg-accent-softer text-accent rounded-2xl px-4 py-3 text-sm font-semibold">
+          {profileError}
+        </p>
+      ) : null}
 
       <ProfileStats
         achievements={achievements.length}
@@ -85,7 +116,7 @@ export default function ProfilePage() {
         currentUserId={userId}
         achievements={achievements}
         isLoading={isLoading}
-        error={error}
+        error={achievementsError}
         onChanged={handleChanged}
         onDeleted={handleDeleted}
       />
