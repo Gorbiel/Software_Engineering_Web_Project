@@ -1,17 +1,56 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { PageShell } from "@/components/layout/PageShell";
-import { AchievementCard } from "@/components/achievements/AchievementCard";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileStats } from "@/components/profile/ProfileStats";
+import { ProfileAchievements } from "@/components/profile/ProfileAchievements";
 import { BadgesCard } from "@/components/profile/sidebar/BadgesCard";
 import { LevelProgressCard } from "@/components/profile/sidebar/LevelProgressCard";
+import { type Achievement, fetchAchievements } from "@/utils/achievements";
 
 export default function ProfilePage() {
   const { user } = useAuth();
-
   const displayName = user?.name ?? "Alex Baker";
+  const userId = user?.id;
+
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (userId === undefined) {
+      return;
+    }
+
+    let active = true;
+
+    fetchAchievements({ userId })
+      .then((data) => {
+        if (active) {
+          setAchievements(data);
+        }
+      })
+      .catch((err) => {
+        if (active) {
+          setError(
+            err instanceof Error
+              ? err.message
+              : "Unable to load achievements.",
+          );
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [userId]);
 
   return (
     <PageShell
@@ -28,39 +67,18 @@ export default function ProfilePage() {
       />
 
       <ProfileStats
-        achievements={42}
+        achievements={achievements.length}
         shoutoutsGiven={128}
         shoutoutsReceived={84}
         totalSprinkles={4250}
       />
 
-      <div className="flex flex-col gap-4">
-        <h2 className="text-text text-base font-semibold">My Achievements</h2>
-
-        <AchievementCard
-          authorName={displayName}
-          title="Q3 Product Launch Hero"
-          date="Shared 2 days ago"
-          likes={24}
-          comments={8}
-        >
-          So proud of the team for getting the Doughnut Dashboard across the
-          finish line! Huge shoutout to the dev team for staying late to polish
-          the sprinkle animations. We did it!
-        </AchievementCard>
-
-        <AchievementCard
-          authorName={displayName}
-          title="Design System Revamp"
-          date="Shared 1 week ago"
-          likes={11}
-          comments={3}
-        >
-          Finally updated the &ldquo;Crust&rdquo; component library.
-          Accessibility is now at 100%! Ready to roll this out across all
-          platforms. #UX #GlazedDesign
-        </AchievementCard>
-      </div>
+      <ProfileAchievements
+        authorName={displayName}
+        achievements={achievements}
+        isLoading={isLoading}
+        error={error}
+      />
     </PageShell>
   );
 }
