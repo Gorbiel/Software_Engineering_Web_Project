@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { PageShell } from "@/components/layout/PageShell";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
@@ -52,6 +52,16 @@ export default function ProfilePage() {
     };
   }, [userId]);
 
+  const handleChanged = useCallback((updated: Achievement) => {
+    setAchievements((prev) =>
+      prev.map((a) => (a.id === updated.id ? updated : a)),
+    );
+  }, []);
+
+  const handleDeleted = useCallback((id: number) => {
+    setAchievements((prev) => prev.filter((a) => a.id !== id));
+  }, []);
+
   return (
     <PageShell
       sidebar={
@@ -74,10 +84,12 @@ export default function ProfilePage() {
       />
 
       <ProfileAchievements
-        authorName={displayName}
+        currentUserId={userId}
         achievements={achievements}
         isLoading={isLoading}
         error={error}
+        onChanged={handleChanged}
+        onDeleted={handleDeleted}
       />
     </PageShell>
   );

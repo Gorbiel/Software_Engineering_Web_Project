@@ -1,19 +1,22 @@
-import { AchievementCard } from "@/components/achievements/AchievementCard";
+import { AchievementItem } from "@/components/achievements/AchievementItem";
 import type { Achievement } from "@/utils/achievements";
-import { formatRelativeTime } from "@/utils/date";
 
 type ProfileAchievementsProps = {
-  authorName: string;
+  currentUserId: number | string | undefined;
   achievements: Achievement[];
   isLoading: boolean;
   error: string | null;
+  onChanged: (achievement: Achievement) => void;
+  onDeleted: (id: number) => void;
 };
 
 export function ProfileAchievements({
-  authorName,
+  currentUserId,
   achievements,
   isLoading,
   error,
+  onChanged,
+  onDeleted,
 }: ProfileAchievementsProps) {
   return (
     <div className="flex flex-col gap-4">
@@ -29,17 +32,13 @@ export function ProfileAchievements({
         <p className="text-text-muted px-1 text-sm">No achievements yet.</p>
       ) : (
         achievements.map((achievement) => (
-          <AchievementCard
+          <AchievementItem
             key={achievement.id}
-            authorName={authorName}
-            title={achievement.title}
-            date={`Shared ${formatRelativeTime(achievement.creation_date)}`}
-            likes={0}
-            comments={0}
-            confirmedBy={achievement.confirmations.map((c) => c.user.name)}
-          >
-            {achievement.body}
-          </AchievementCard>
+            achievement={achievement}
+            currentUserId={currentUserId}
+            onChanged={onChanged}
+            onDeleted={onDeleted}
+          />
         ))
       )}
     </div>

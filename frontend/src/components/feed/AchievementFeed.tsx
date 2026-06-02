@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AchievementCard } from "@/components/achievements/AchievementCard";
+import { useAuth } from "@/context/AuthContext";
+import { AchievementItem } from "@/components/achievements/AchievementItem";
 import { AchievementInput } from "@/components/feed/AchievementInput";
 import { type Achievement, fetchAchievements } from "@/utils/achievements";
-import { formatRelativeTime } from "@/utils/date";
 
 export function AchievementFeed() {
+  const { user } = useAuth();
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +43,16 @@ export function AchievementFeed() {
     setAchievements((prev) => [achievement, ...prev]);
   }, []);
 
+  const handleChanged = useCallback((updated: Achievement) => {
+    setAchievements((prev) =>
+      prev.map((a) => (a.id === updated.id ? updated : a)),
+    );
+  }, []);
+
+  const handleDeleted = useCallback((id: number) => {
+    setAchievements((prev) => prev.filter((a) => a.id !== id));
+  }, []);
+
   return (
     <>
       <AchievementInput onCreated={handleCreated} />
@@ -58,17 +69,13 @@ export function AchievementFeed() {
         </p>
       ) : (
         achievements.map((achievement) => (
-          <AchievementCard
+          <AchievementItem
             key={achievement.id}
-            authorName={achievement.user.name}
-            title={achievement.title}
-            date={`Shared ${formatRelativeTime(achievement.creation_date)}`}
-            likes={0}
-            comments={0}
-            confirmedBy={achievement.confirmations.map((c) => c.user.name)}
-          >
-            {achievement.body}
-          </AchievementCard>
+            achievement={achievement}
+            currentUserId={user?.id}
+            onChanged={handleChanged}
+            onDeleted={handleDeleted}
+          />
         ))
       )}
     </>

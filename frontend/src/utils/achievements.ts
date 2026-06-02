@@ -1,4 +1,4 @@
-import { apiJson } from "@/utils/api";
+import { apiFetch, apiJson, ApiError } from "@/utils/api";
 
 export type AchievementUser = {
   id: number | string;
@@ -60,4 +60,29 @@ export function createAchievement(
       body: input.body,
     }),
   });
+}
+
+export type UpdateAchievementInput = {
+  title: string;
+  body: string;
+};
+
+export function updateAchievement(
+  id: number,
+  input: UpdateAchievementInput,
+): Promise<Achievement> {
+  return apiJson<Achievement>(`/achievements/${id}/`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      title: input.title,
+      body: input.body,
+    }),
+  });
+}
+
+export async function deleteAchievement(id: number): Promise<void> {
+  const response = await apiFetch(`/achievements/${id}/`, { method: "DELETE" });
+  if (!response.ok) {
+    throw new ApiError("Unable to delete achievement.", response.status, null);
+  }
 }

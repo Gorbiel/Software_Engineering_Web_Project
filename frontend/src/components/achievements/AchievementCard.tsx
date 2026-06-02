@@ -9,6 +9,7 @@ type AchievementCardProps = {
   likes: number;
   comments: number;
   confirmedBy?: string[];
+  actions?: React.ReactNode;
   children: React.ReactNode;
 };
 
@@ -19,6 +20,7 @@ export function AchievementCard({
   likes,
   comments,
   confirmedBy = [],
+  actions,
   children,
 }: AchievementCardProps) {
   return (
@@ -57,21 +59,26 @@ export function AchievementCard({
         <h3 className="text-text text-lg font-bold wrap-break-word">{title}</h3>
         <p className="text-text-muted text-sm wrap-break-word">{children}</p>
       </div>
-      <div className="text-text-muted flex items-center gap-4 text-xs">
-        <button
-          className="hover:text-accent flex cursor-pointer items-center gap-1 transition-colors select-none"
-          type="button"
-        >
-          <Heart className="h-4 w-4" />
-          <span className="font-bold">{likes}</span>
-        </button>
-        <button
-          className="hover:text-accent-2 flex cursor-pointer items-center gap-1 transition-colors select-none"
-          type="button"
-        >
-          <MessageSquare className="h-4 w-4" />
-          <span className="font-bold">{comments}</span>
-        </button>
+      <div className="text-text-muted flex items-center justify-between gap-4 text-xs">
+        <div className="flex items-center gap-4">
+          <button
+            className="hover:text-accent flex cursor-pointer items-center gap-1 transition-colors select-none"
+            type="button"
+          >
+            <Heart className="h-4 w-4" />
+            <span className="font-bold">{likes}</span>
+          </button>
+          <button
+            className="hover:text-accent-2 flex cursor-pointer items-center gap-1 transition-colors select-none"
+            type="button"
+          >
+            <MessageSquare className="h-4 w-4" />
+            <span className="font-bold">{comments}</span>
+          </button>
+        </div>
+        {actions ? (
+          <div className="flex items-center gap-1">{actions}</div>
+        ) : null}
       </div>
     </article>
   );
