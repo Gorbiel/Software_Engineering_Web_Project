@@ -32,9 +32,14 @@ export function AchievementCard({
             className="bg-accent-2-soft text-accent-2 h-10 w-10 shrink-0 text-xs font-bold"
           />
           <div className="min-w-0">
+            <div className="flex items-center gap-1">
             <h4 className="text-text text-sm font-bold wrap-break-word">
               {authorName}
             </h4>
+            <h4 className="text-text text-sm wrap-break-word">
+              shared an achievement.
+            </h4>
+            </div>
             <p className="text-text-muted text-xs">{date}</p>
           </div>
         </div>

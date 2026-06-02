@@ -30,7 +30,7 @@ export function AvatarStack({ names, max = DEFAULT_MAX }: AvatarStackProps) {
         ))}
       </div>
       {extraCount > 0 ? (
-        <span className="text-text-muted bg-surface -ml-2 flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold">
+        <span className="text-text-muted bg-background -ml-2 flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold">
           +{extraCount}
         </span>
       ) : null}
