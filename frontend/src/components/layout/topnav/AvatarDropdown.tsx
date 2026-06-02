@@ -33,7 +33,7 @@ export function AvatarDropdown() {
   return (
     <div className="relative" ref={ref}>
       <button
-        className="border-border bg-background hover:border-primary text-text-muted flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border text-xs font-bold transition"
+        className="border-border bg-background hover:border-primary text-text-muted flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border text-xs font-bold transition select-none"
         type="button"
         aria-haspopup="menu"
         aria-expanded={isOpen}

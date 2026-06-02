@@ -16,7 +16,7 @@ export function AvatarInitials({
 }) {
   return (
     <div
-      className={`flex items-center justify-center rounded-full ${className}`}
+      className={`flex items-center justify-center rounded-full select-none ${className}`}
     >
       {getInitials(name)}
     </div>
