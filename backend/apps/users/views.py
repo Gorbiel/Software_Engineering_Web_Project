@@ -2,18 +2,20 @@ from django.http import JsonResponse
 from django.utils import timezone
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.users.models import User
-from apps.users.permissions import IsGlazedInAdmin, IsSelf
 from apps.users.serializers import UserSerializer
 from apps.users.user_stats import get_user_stats
+from common.permissions import IsGlazedInAdmin, IsSelf
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by("id")
     serializer_class = UserSerializer
-    permission_classes = [IsGlazedInAdmin]
+    # Require authentication first, then check admin rights
+    permission_classes = [IsAuthenticated, IsGlazedInAdmin]
 
     def perform_destroy(self, instance):
         instance.active = False
@@ -40,7 +42,8 @@ class UserViewSet(viewsets.ModelViewSet):
 class ProfileViewSet(
     mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet
 ):
-    permission_classes = [IsSelf]
+    # Only allow the logged-in user to access their own profile
+    permission_classes = [IsAuthenticated, IsSelf]
     serializer_class = UserSerializer
 
     def get_queryset(self):

@@ -16,7 +16,8 @@ class LoginSerializer(serializers.Serializer):
         if user is None:
             raise serializers.ValidationError("Invalid email or password.")
 
-        if not user.active:
+        # Use Django's canonical is_active property
+        if not getattr(user, "is_active", False):
             raise serializers.ValidationError("User account is inactive.")
 
         attrs["user"] = user

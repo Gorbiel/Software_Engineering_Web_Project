@@ -25,6 +25,9 @@ class UserSerializer(serializers.ModelSerializer):
             "deactivation_date",
             "is_staff",
             "is_superuser",
+            # Users should not be allowed to toggle their own active status via
+            # the profile endpoint; admins manage activation.
+            "active",
         ]
 
     def create(self, validated_data):

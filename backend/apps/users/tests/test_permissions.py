@@ -4,7 +4,7 @@ from django.test import TestCase
 from rest_framework.test import APIRequestFactory
 
 from apps.users.models import Admin, User
-from apps.users.permissions import IsGlazedInAdmin
+from common.permissions import IsGlazedInAdmin
 
 
 class IsGlazedInAdminPermissionTests(TestCase):

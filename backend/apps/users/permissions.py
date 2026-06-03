@@ -1,25 +1,12 @@
-from rest_framework.permissions import BasePermission
+"""Backward-compatibility shim.
 
-from apps.users.models import Admin
+Historically other modules imported `IsGlazedInAdmin` and `IsSelf` from
+`apps.users.permissions`. These classes are now implemented in
+`common.permissions`. This module re-exports them so existing imports
+continue to work. You can update imports to `common.permissions` and
+remove this shim in a future release.
+"""
 
+from common.permissions import IsGlazedInAdmin, IsSelf
 
-class IsGlazedInAdmin(BasePermission):
-    message = "Only GlazedIn admins can manage user accounts."
-
-    def has_permission(self, request, view):
-        user = request.user
-
-        if not user or not getattr(user, "is_authenticated", True):
-            return False
-
-        return Admin.objects.filter(user=user).exists()
-
-
-class IsSelf(BasePermission):
-    message = "You can't access another user's data"
-
-    def has_object_permission(self, request, view, obj):
-        user = request.user
-        if not user or not getattr(user, "is_authenticated", True):
-            return False
-        return obj == user
+__all__ = ["IsGlazedInAdmin", "IsSelf"]
