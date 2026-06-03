@@ -73,5 +73,6 @@ class TeamRankApiTests(APITestCase):
             HTTP_AUTHORIZATION=f"Bearer {access}",
         )
 
-        self.assertIn(resp.status_code, [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN])
-
+        self.assertIn(
+            resp.status_code, [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN]
+        )
