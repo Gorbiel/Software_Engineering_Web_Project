@@ -18,7 +18,7 @@ class RankField(serializers.Field):
             try:
                 return TeamMember.rank_value_from_name(data)
             except ValueError as exc:
-                raise serializers.ValidationError(str(exc))
+                raise serializers.ValidationError("Invalid rank name") from exc
 
         raise serializers.ValidationError("Invalid type for rank")
 
