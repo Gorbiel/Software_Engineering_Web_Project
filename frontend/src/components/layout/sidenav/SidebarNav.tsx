@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BarChart3, LayoutGrid, Users, User } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
 import { SidebarUserCard } from "@/components/layout/sidenav/SidebarUserCard";
 
 const navItems: Array<{ href: string; label: string; icon: LucideIcon }> = [
@@ -27,7 +26,6 @@ export function SidebarNav({
   variant?: "desktop" | "mobile";
 }) {
   const pathname = usePathname();
-  const { user } = useAuth();
 
   if (variant === "mobile") {
     return (
@@ -55,7 +53,7 @@ export function SidebarNav({
 
   return (
     <nav className="flex flex-col gap-2">
-      <SidebarUserCard name={user?.name} />
+      <SidebarUserCard />
       {navItems.map((item) => {
         const active = isActivePath(pathname, item.href);
         return (

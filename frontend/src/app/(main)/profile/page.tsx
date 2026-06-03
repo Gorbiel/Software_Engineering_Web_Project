@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useMyProfile } from "@/context/MyProfileContext";
 import { PageShell } from "@/components/layout/PageShell";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileStats } from "@/components/profile/ProfileStats";
@@ -9,39 +10,15 @@ import { ProfileAchievements } from "@/components/profile/ProfileAchievements";
 import { BadgesCard } from "@/components/profile/sidebar/BadgesCard";
 import { LevelProgressCard } from "@/components/profile/sidebar/LevelProgressCard";
 import { type Achievement, fetchAchievements } from "@/utils/achievements";
-import { fetchMyProfile, type UserProfile } from "@/utils/profile";
 
 export default function ProfilePage() {
   const { user } = useAuth();
   const userId = user?.id;
+  const { profile, error: profileError } = useMyProfile();
 
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [achievementsError, setAchievementsError] = useState<string | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [profileError, setProfileError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let active = true;
-
-    fetchMyProfile()
-      .then((data) => {
-        if (active) {
-          setProfile(data);
-        }
-      })
-      .catch((err) => {
-        if (active) {
-          setProfileError(
-            err instanceof Error ? err.message : "Couldn't load profile.",
-          );
-        }
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
 
   useEffect(() => {
     if (userId === undefined) {

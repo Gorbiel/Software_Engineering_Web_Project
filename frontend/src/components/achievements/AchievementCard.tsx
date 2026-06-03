@@ -1,20 +1,22 @@
 import { Heart, MessageSquare } from "lucide-react";
-import { AvatarInitials } from "@/components/misc/AvatarInitials";
+import { Avatar, type AvatarPerson } from "@/components/misc/Avatar";
 import { AvatarStack } from "@/components/misc/AvatarStack";
 
 type AchievementCardProps = {
   authorName: string;
+  authorPhotoUrl?: string | null;
   title: string;
   date: string;
   likes: number;
   comments: number;
-  confirmedBy?: string[];
+  confirmedBy?: AvatarPerson[];
   actions?: React.ReactNode;
   children: React.ReactNode;
 };
 
 export function AchievementCard({
   authorName,
+  authorPhotoUrl,
   title,
   date,
   likes,
@@ -27,8 +29,9 @@ export function AchievementCard({
     <article className="glaze-card flex flex-col gap-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <AvatarInitials
+          <Avatar
             name={authorName}
+            src={authorPhotoUrl}
             className="bg-accent-2-soft text-accent-2 h-10 w-10 shrink-0 text-xs font-bold"
           />
           <div className="min-w-0">
@@ -46,7 +49,7 @@ export function AchievementCard({
         <div className="flex items-center gap-2">
           {confirmedBy.length > 0 ? (
             <>
-              <AvatarStack names={confirmedBy} />
+              <AvatarStack people={confirmedBy} />
               <span className="text-text-muted text-xs font-semibold">
                 {confirmedBy.length === 1
                   ? "1 confirmation"

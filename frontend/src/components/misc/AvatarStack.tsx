@@ -1,4 +1,4 @@
-import { AvatarInitials } from "@/components/misc/AvatarInitials";
+import { Avatar, type AvatarPerson } from "@/components/misc/Avatar";
 
 const DEFAULT_MAX = 3;
 
@@ -10,21 +10,22 @@ function stackAvatarColor(index: number): string {
 }
 
 type AvatarStackProps = {
-  names: string[];
+  people: AvatarPerson[];
   max?: number;
 };
 
-export function AvatarStack({ names, max = DEFAULT_MAX }: AvatarStackProps) {
-  const visible = names.slice(0, max);
-  const extraCount = names.length - visible.length;
+export function AvatarStack({ people, max = DEFAULT_MAX }: AvatarStackProps) {
+  const visible = people.slice(0, max);
+  const extraCount = people.length - visible.length;
 
   return (
     <div className="flex items-center">
       <div className="flex items-center">
-        {visible.map((name, index) => (
-          <AvatarInitials
-            key={`${name}-${index}`}
-            name={name}
+        {visible.map((person, index) => (
+          <Avatar
+            key={`${person.name}-${index}`}
+            name={person.name}
+            src={person.src}
             className={`h-8 w-8 text-xs font-semibold uppercase ${index === 0 ? "" : "-ml-2"} ${stackAvatarColor(index)}`}
           />
         ))}

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AvatarInitials } from "@/components/misc/AvatarInitials";
+import { Avatar } from "@/components/misc/Avatar";
+import { useMyProfile } from "@/context/MyProfileContext";
 import {
   fetchMyProfile,
   removeProfilePicture,
@@ -12,6 +13,7 @@ const ACCEPTED_TYPES = ["image/png", "image/jpeg"];
 const MAX_BYTES = 2 * 1024 * 1024;
 
 export function ProfilePhotoSection() {
+  const { setProfile } = useMyProfile();
   const [name, setName] = useState("");
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
@@ -56,6 +58,7 @@ export function ProfilePhotoSection() {
     try {
       const updated = await updateProfilePicture(file);
       setPhotoUrl(updated.profile_picture);
+      setProfile(updated);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't upload photo.");
     } finally {
@@ -72,6 +75,7 @@ export function ProfilePhotoSection() {
     try {
       const updated = await removeProfilePicture();
       setPhotoUrl(updated.profile_picture);
+      setProfile(updated);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't remove photo.");
     } finally {
@@ -83,18 +87,12 @@ export function ProfilePhotoSection() {
     <section className="glaze-card flex flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
-          {photoUrl ? (
-            <img
-              src={photoUrl}
-              alt="Profile photo"
-              className="bg-background h-20 w-20 rounded-full object-cover"
-            />
-          ) : (
-            <AvatarInitials
-              name={name}
-              className="bg-accent-2-soft text-accent-2 h-20 w-20 text-lg font-bold"
-            />
-          )}
+          <Avatar
+            name={name}
+            src={photoUrl}
+            alt="Profile photo"
+            className="bg-accent-2-soft text-accent-2 h-20 w-20 text-lg font-bold"
+          />
           <div className="flex flex-col gap-1">
             <p className="text-text text-sm font-semibold">Profile photo</p>
             <p className="text-text-muted text-xs">PNG or JPG up to 2MB.</p>
