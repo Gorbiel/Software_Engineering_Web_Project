@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useMyProfile } from "@/context/MyProfileContext";
 import { PageShell } from "@/components/layout/PageShell";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileStats } from "@/components/profile/ProfileStats";
@@ -12,12 +13,12 @@ import { type Achievement, fetchAchievements } from "@/utils/achievements";
 
 export default function ProfilePage() {
   const { user } = useAuth();
-  const displayName = user?.name ?? "Alex Baker";
   const userId = user?.id;
+  const { profile, error: profileError } = useMyProfile();
 
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [achievementsError, setAchievementsError] = useState<string | null>(null);
 
   useEffect(() => {
     if (userId === undefined) {
@@ -34,7 +35,7 @@ export default function ProfilePage() {
       })
       .catch((err) => {
         if (active) {
-          setError(
+          setAchievementsError(
             err instanceof Error ? err.message : "Unable to load achievements.",
           );
         }
@@ -70,9 +71,16 @@ export default function ProfilePage() {
       }
     >
       <ProfileHeader
-        name={displayName}
-        subtitle="Senior Experience Designer • Engineering Team"
+        name={profile?.name ?? ""}
+        subtitle={profile?.job_title ?? undefined}
+        bio={profile?.bio_text ?? undefined}
       />
+
+      {profileError ? (
+        <p className="bg-accent-softer text-accent rounded-2xl px-4 py-3 text-sm font-semibold">
+          {profileError}
+        </p>
+      ) : null}
 
       <ProfileStats
         achievements={achievements.length}
@@ -85,7 +93,7 @@ export default function ProfilePage() {
         currentUserId={userId}
         achievements={achievements}
         isLoading={isLoading}
-        error={error}
+        error={achievementsError}
         onChanged={handleChanged}
         onDeleted={handleDeleted}
       />

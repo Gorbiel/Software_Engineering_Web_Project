@@ -44,7 +44,10 @@ export function AchievementItem({
   const canConfirm =
     currentUserId !== undefined && !isOwner && !alreadyConfirmed;
 
-  const confirmedBy = achievement.confirmations.map((c) => c.user.name);
+  const confirmedBy = achievement.confirmations.map((c) => ({
+    name: c.user.name,
+    src: c.user.profile_picture,
+  }));
 
   function startEditing() {
     setTitle(achievement.title);
@@ -201,6 +204,7 @@ export function AchievementItem({
     <div className="flex flex-col gap-2">
       <AchievementCard
         authorName={achievement.user.name}
+        authorPhotoUrl={achievement.user.profile_picture}
         title={achievement.title}
         date={`Shared ${formatRelativeTime(achievement.creation_date)}`}
         likes={0}

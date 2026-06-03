@@ -1,12 +1,17 @@
-import { AvatarInitials } from "@/components/misc/AvatarInitials";
+"use client";
 
-export function SidebarUserCard({ name }: { name: string | undefined }) {
-  const initialsName = name ?? "Alex Baker";
+import { Avatar } from "@/components/misc/Avatar";
+import { useMyProfile } from "@/context/MyProfileContext";
+
+export function SidebarUserCard() {
+  const { profile } = useMyProfile();
+  const name = profile?.name ?? "";
 
   return (
     <div className="glaze-card mb-5 flex flex-col items-center gap-3 text-center">
-      <AvatarInitials
-        name={initialsName}
+      <Avatar
+        name={name}
+        src={profile?.profile_picture}
         className="bg-background text-accent border-surface h-28 w-28 overflow-hidden border-4 text-2xl font-black"
       />
       <div className="flex flex-col gap-1">

@@ -31,7 +31,7 @@ class AchievementTagSerializer(serializers.ModelSerializer):
 class UserBasicSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "name", "email"]
+        fields = ["id", "name", "email", "profile_picture"]
         read_only_fields = ["id"]
 
 
