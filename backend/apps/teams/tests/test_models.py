@@ -1,7 +1,10 @@
+import pytest
+
 from apps.teams.models import Team, TeamMember
 from apps.users.models import User
 
 
+@pytest.mark.django_db
 def test_rank_enum_and_name_property():
     user = User.objects.create_user(email="u@example.com", name="U", password="pw")
     team = Team.objects.create(name="team-x")
