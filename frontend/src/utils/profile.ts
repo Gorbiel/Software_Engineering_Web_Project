@@ -28,3 +28,19 @@ export function updateMyProfile(
     body: JSON.stringify(input),
   });
 }
+
+export function updateProfilePicture(file: File): Promise<UserProfile> {
+  const form = new FormData();
+  form.append("profile_picture", file);
+  return apiJson<UserProfile>("/auth/me/", {
+    method: "PATCH",
+    body: form,
+  });
+}
+
+export function removeProfilePicture(): Promise<UserProfile> {
+  return apiJson<UserProfile>("/auth/me/", {
+    method: "PATCH",
+    body: JSON.stringify({ profile_picture: null }),
+  });
+}
