@@ -17,4 +17,3 @@ class SearchResultsSetPagination(PageNumberPagination):
     page_size_query_param = "page_size"
     page_size_query_description = "Number of results per page"
     max_page_size = 100
-

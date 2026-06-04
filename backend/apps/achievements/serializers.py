@@ -32,9 +32,9 @@ class AchievementSearchSerializer(serializers.ModelSerializer):
         return {
             "id": obj.user.id,
             "name": obj.user.name,
-            "profile_picture": obj.user.profile_picture.url
-            if obj.user.profile_picture
-            else None,
+            "profile_picture": (
+                obj.user.profile_picture.url if obj.user.profile_picture else None
+            ),
         }
 
     def get_confirmation_count(self, obj):

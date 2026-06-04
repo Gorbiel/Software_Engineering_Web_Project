@@ -84,7 +84,7 @@ class AchievementSearchViewSet(viewsets.ReadOnlyModelViewSet):
                 min_confirmations = int(min_confirmations)
                 queryset = queryset.with_confirmation_count()
                 queryset = queryset.filter(confirmation_count__gte=min_confirmations)
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 pass
 
         # Sorting
