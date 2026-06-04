@@ -1,14 +1,68 @@
 from django.http import Http404
+from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.teams.models import TeamMember
+from apps.teams.models import Team, TeamMember
 from apps.teams.permissions import IsTeamLeaderOrAdmin
 from apps.teams.serializers import (
     TeamMemberRankSerializer,
     TeamMemberResponseSerializer,
+    TeamSerializer,
 )
+from common.pagination import SearchResultsSetPagination
+
+
+class TeamSearchViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Search teams by name.
+
+    Query parameters:
+    - q: Search query (required)
+    - sort_by: 'name', 'creation_date' (default: 'name')
+    - order: 'asc', 'desc' (default: 'asc')
+    - page_size: Number of results per page (default: 20, max: 100)
+    """
+
+    queryset = Team.objects.all()
+    serializer_class = TeamSerializer
+    pagination_class = SearchResultsSetPagination
+
+    SORT_OPTIONS = ["name", "creation_date"]
+    FILTER_OPTIONS = []
+
+    def filters_and_sorting(self, request):
+        """Expose available filters and sorting options for the frontend."""
+        return Response(
+            {
+                "sort_options": self.SORT_OPTIONS,
+                "filter_options": self.FILTER_OPTIONS,
+            }
+        )
+
+    def get_queryset(self):
+        queryset = Team.objects.all()
+        search_query = self.request.query_params.get("q", "").strip()
+
+        if not search_query:
+            return queryset.none()
+
+        # Search across name field
+        queryset = queryset.filter(name__icontains=search_query)
+
+        # Sorting
+        sort_by = self.request.query_params.get("sort_by", "name")
+        if sort_by not in self.SORT_OPTIONS:
+            sort_by = "name"
+
+        order = self.request.query_params.get("order", "asc")
+        if order == "desc":
+            sort_by = f"-{sort_by}"
+
+        queryset = queryset.order_by(sort_by)
+
+        return queryset
 
 
 class TeamMemberRankUpdateView(APIView):
