@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Search } from "lucide-react";
 import { NotificationsDropdown } from "./NotificationsDropdown";
 import { AvatarDropdown } from "./AvatarDropdown";
+import { UserSearch } from "./UserSearch";
 
 export function TopNav() {
   return (
@@ -14,19 +14,7 @@ export function TopNav() {
           >
             GlazedIn
           </Link>
-          <div className="bg-background text-text-muted hidden items-center rounded-full px-4 py-2 transition-all select-none md:flex">
-            <input
-              className="placeholder:text-text-muted w-72 bg-transparent text-sm focus:outline-none"
-              placeholder="Search for a teammate..."
-              type="text"
-            />
-            <button
-              className="text-accent-2 hover:bg-background cursor-pointer rounded-full transition"
-              type="button"
-            >
-              <Search className="h-5 w-5" />
-            </button>
-          </div>
+          <UserSearch />
         </div>
         <div className="flex items-center gap-3">
           <NotificationsDropdown />
