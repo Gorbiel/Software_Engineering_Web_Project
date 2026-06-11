@@ -3,6 +3,24 @@ from rest_framework import serializers
 from apps.users.models import User
 
 
+class UserSearchSerializer(serializers.ModelSerializer):
+    """Serializer for user search results."""
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "name",
+            "email",
+            "job_title",
+            "bio_text",
+            "profile_picture",
+            "creation_date",
+            "active",
+        ]
+        read_only_fields = fields
+
+
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
 
