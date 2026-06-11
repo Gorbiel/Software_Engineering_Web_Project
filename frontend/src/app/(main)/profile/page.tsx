@@ -3,12 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useMyProfile } from "@/context/MyProfileContext";
-import { PageShell } from "@/components/layout/PageShell";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileStats } from "@/components/profile/ProfileStats";
 import { ProfileAchievements } from "@/components/profile/ProfileAchievements";
-import { BadgesCard } from "@/components/profile/sidebar/BadgesCard";
-import { LevelProgressCard } from "@/components/profile/sidebar/LevelProgressCard";
 import { type Achievement, fetchAchievements } from "@/utils/achievements";
 
 export default function ProfilePage() {
@@ -62,14 +59,7 @@ export default function ProfilePage() {
   }, []);
 
   return (
-    <PageShell
-      sidebar={
-        <div className="hidden flex-col gap-6 xl:flex">
-          <BadgesCard />
-          <LevelProgressCard />
-        </div>
-      }
-    >
+    <>
       <ProfileHeader
         name={profile?.name ?? ""}
         subtitle={profile?.job_title ?? undefined}
@@ -97,6 +87,6 @@ export default function ProfilePage() {
         onChanged={handleChanged}
         onDeleted={handleDeleted}
       />
-    </PageShell>
+    </>
   );
 }

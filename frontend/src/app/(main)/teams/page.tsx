@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { PageShell } from "@/components/layout/PageShell";
 import { TeamSelector } from "@/components/teams/TeamSelector";
 import { TeamStructure } from "@/components/teams/TeamStructure";
-import { TopPerformingTeamsCard } from "@/components/teams/sidebar/TopPerformingTeamsCard";
 import type { Team } from "@/components/teams/types";
 
 const teams: Team[] = [
@@ -39,13 +37,13 @@ export default function TeamsPage() {
   const [selectedTeam, setSelectedTeam] = useState<Team>(teams[0]);
 
   return (
-    <PageShell sidebar={<TopPerformingTeamsCard />}>
+    <>
       <TeamSelector
         teams={teams}
         selectedTeam={selectedTeam}
         onSelectTeam={setSelectedTeam}
       />
       <TeamStructure team={selectedTeam} />
-    </PageShell>
+    </>
   );
 }
