@@ -55,3 +55,7 @@ export function searchUsers(
     `/users/search/?${buildQuery(params)}`,
   );
 }
+
+export function fetchUser(id: number | string): Promise<UserSearchResult> {
+  return apiJson<UserSearchResult>(`/users/search/${id}/`);
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import {
   ArrowDown,
   ArrowUp,
@@ -195,14 +196,16 @@ export function UserSearch() {
             <>
               <div className="flex flex-col gap-2">
                 {results.results.map((user) => (
-                  <div
+                  <Link
                     key={user.id}
-                    className="bg-background flex items-center gap-3 rounded-2xl px-3 py-2"
+                    href={`/profile/${user.id}`}
+                    onClick={() => setIsOpen(false)}
+                    className="bg-background flex items-center gap-3 rounded-2xl px-3 py-2 transition"
                   >
                     <Avatar
                       name={user.name}
                       src={user.profile_picture}
-                      className="bg-surface text-accent h-9 w-9 shrink-0 overflow-hidden text-xs font-bold"
+                      className="bg-accent-softer text-accent h-9 w-9 shrink-0 overflow-hidden text-xs font-bold"
                     />
                     <div className="flex min-w-0 flex-col">
                       <span className="text-text truncate text-sm font-semibold">
@@ -214,7 +217,7 @@ export function UserSearch() {
                         </span>
                       ) : null}
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
 

@@ -43,6 +43,9 @@ class UserSearchViewSet(viewsets.ReadOnlyModelViewSet):
         )
 
     def get_queryset(self):
+        if self.action == "retrieve":
+            return User.objects.all()
+
         queryset = User.objects.all()
         search_query = self.request.query_params.get("q", "").strip()
 
