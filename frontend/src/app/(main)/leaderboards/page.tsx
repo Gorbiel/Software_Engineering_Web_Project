@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { PageShell } from "@/components/layout/PageShell";
 import { RankingRow } from "@/components/leaderboards/RankingRow";
 import { RankingPodium } from "@/components/leaderboards/RankingPodium";
-import { RisingStarsCard } from "@/components/leaderboards/sidebar/RisingStarsCard";
 import type { RankingEntry } from "@/components/leaderboards/types";
 
 const globalRanking: {
@@ -55,7 +53,7 @@ export default function LeaderboardsPage() {
   const ranking = rankingType === "global" ? globalRanking : teamRanking;
 
   return (
-    <PageShell sidebar={<RisingStarsCard />}>
+    <>
       <div className="glaze-card flex flex-col gap-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-text text-2xl font-semibold">
@@ -107,6 +105,6 @@ export default function LeaderboardsPage() {
           ))}
         </div>
       </div>
-    </PageShell>
+    </>
   );
 }
