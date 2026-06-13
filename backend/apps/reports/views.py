@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.db.models import Count, ExpressionWrapper, F, IntegerField, Sum
+from django.db.models import Count, ExpressionWrapper, F, IntegerField, Sum, Model, Q
 from django.db.models.functions import TruncDay
 from django.http import JsonResponse
 from rest_framework import status, viewsets
@@ -9,6 +9,7 @@ from rest_framework.response import Response
 
 from apps.achievements.models import Achievement, AchievementConfirmation
 from apps.glazes.models import Glaze
+from apps.tags.models import AchievementTag, Tag
 from apps.teams.models import Team
 from apps.users.models import User
 from apps.users.permissions import IsGlazedInAdmin
@@ -152,6 +153,37 @@ class ReportViewSet(viewsets.ReadOnlyModelViewSet):
             .values("id")[:10]
         )
 
+        report["top_achievement_tags"] = (
+            Tag.objects.annotate(
+                usage_count=Count(
+                    "achievementtag",
+                    filter=Q(
+                        achievementtag__achievement__creation_date__range=(
+                            date_from,
+                            date_to,
+                        )
+                    ),
+                    distinct=True,
+                )
+            )
+            .order_by("-usage_count")
+            .values("tag_text", "usage_count")[:10]
+        )
+
+        report["top_glaze_tags"] = (
+            Tag.objects.annotate(
+                usage_count=Count(
+                    "glazetag",
+                    filter=Q(
+                        glazetag__glaze__creation_date__range=(date_from, date_to)
+                    ),
+                    distinct=True,
+                )
+            )
+            .order_by("-usage_count")
+            .values("tag_text", "usage_count")[:10]
+        )
+
         return JsonResponse(report)
 
     @action(detail=True, methods=["get"])  # detail=True gives you the pk
@@ -290,23 +322,5 @@ class ReportViewSet(viewsets.ReadOnlyModelViewSet):
             .annotate(glaze_count=Count("id"))
             .order_by("-glaze_count")[:5]
         )
-
-        user_teams = (
-            Team.teams.containing_user(user)
-            .with_engagement(date_from, date_to)
-            .with_participation_rate(date_from, date_to)
-            .values(
-                "id",
-                "name",
-                "member_count",
-                "achievements_count",
-                "glazes_sent_count",
-                "glazes_received_count",
-                "confirmations_count",
-                "participation_rate",
-            )
-        )
-
-        report["teams"] = list(user_teams)
 
         return JsonResponse(report)

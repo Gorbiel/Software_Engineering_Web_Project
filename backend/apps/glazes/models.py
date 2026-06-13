@@ -41,6 +41,12 @@ class GlazeQuerySet(models.QuerySet):
         )
         return self.annotate(same_team=Exists(shared_team)).filter(same_team=True)
 
+    def received_by_team(self, team):
+        return self.filter(receiving_user__teammember__team=team)
+
+    def given_by_team(self, team):
+        return self.filter(posting_user__teammember__team=team)
+
 
 class Glaze(models.Model):
     """

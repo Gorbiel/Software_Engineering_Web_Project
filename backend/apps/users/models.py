@@ -13,6 +13,9 @@ class UserQuerySet(models.QuerySet):
     def inactive(self):
         return self.filter(active=False)
 
+    def in_team(self, team):
+        return self.filter(teammember__team=team)
+
 
 class UserManager(BaseUserManager):
     def create_user(self, email, name, password=None, **extra_fields):

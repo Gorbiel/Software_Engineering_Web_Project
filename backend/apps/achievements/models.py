@@ -35,6 +35,9 @@ class AchievementConfirmationQuerySet(models.QuerySet):
     def within_date_range(self, start, end):
         return self.filter(creation_date__gte=start).filter(creation_date__lte=end)
 
+    def by_team(self, team):
+        return self.filter(user__teammember__team=team)
+
 
 class AchievementQuerySet(models.QuerySet):
     def by_user(self, user):
@@ -66,6 +69,9 @@ class AchievementQuerySet(models.QuerySet):
 
     def within_date_range(self, start, end):
         return self.filter(creation_date__gte=start).filter(creation_date__lte=end)
+
+    def by_team(self, team):
+        return self.filter(user__teammember__team=team)
 
 
 class Achievement(models.Model):
