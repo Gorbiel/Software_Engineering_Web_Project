@@ -40,7 +40,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class ProfileViewSet(
     mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet
 ):
-    permission_classes = [IsSelf]
+    permission_classes = [IsSelf, IsGlazedInAdmin]
     serializer_class = UserSerializer
 
     def get_queryset(self):
