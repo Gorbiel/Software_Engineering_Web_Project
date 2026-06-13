@@ -32,6 +32,9 @@ class AchievementConfirmationQuerySet(models.QuerySet):
             )
         )
 
+    def within_date_range(self, start, end):
+        return self.filter(creation_date__gte=start).filter(creation_date__lte=end)
+
 
 class AchievementQuerySet(models.QuerySet):
     def by_user(self, user):
@@ -60,6 +63,9 @@ class AchievementQuerySet(models.QuerySet):
                 .aggregate(models.Sum("rank"))
             )
         )
+
+    def within_date_range(self, start, end):
+        return self.filter(creation_date__gte=start).filter(creation_date__lte=end)
 
 
 class Achievement(models.Model):
