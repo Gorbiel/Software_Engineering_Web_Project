@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Pencil, Trash2 } from "lucide-react";
+import { Check, Pencil, Send, Trash2 } from "lucide-react";
 import { AchievementCard } from "@/components/achievements/AchievementCard";
+import { ConfirmationRequestModal } from "@/components/achievements/ConfirmationRequestModal";
 import {
   type Achievement,
   confirmAchievement,
@@ -29,6 +30,7 @@ export function AchievementItem({
   const [body, setBody] = useState(achievement.body);
   const [isPending, setIsPending] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
+  const [isRequesting, setIsRequesting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isOwner =
@@ -170,6 +172,13 @@ export function AchievementItem({
       <button
         className="hover:text-accent-2 hover:bg-accent-2-soft flex cursor-pointer items-center gap-1 rounded-full px-2 py-1 transition select-none"
         type="button"
+        onClick={() => setIsRequesting(true)}
+      >
+        <Send className="h-4 w-4" />
+      </button>
+      <button
+        className="hover:text-accent-2 hover:bg-accent-2-soft flex cursor-pointer items-center gap-1 rounded-full px-2 py-1 transition select-none"
+        type="button"
         onClick={startEditing}
       >
         <Pencil className="h-4 w-4" />
@@ -219,6 +228,12 @@ export function AchievementItem({
         <p className="bg-accent-softer text-accent rounded-2xl px-4 py-2 text-xs font-semibold">
           {error}
         </p>
+      ) : null}
+      {isRequesting ? (
+        <ConfirmationRequestModal
+          achievementId={achievement.id}
+          onClose={() => setIsRequesting(false)}
+        />
       ) : null}
     </div>
   );

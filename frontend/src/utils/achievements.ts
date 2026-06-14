@@ -98,3 +98,61 @@ export function confirmAchievement(
     },
   );
 }
+
+export type ConfirmationRequest = {
+  id: number;
+  receiving_user: AchievementUser;
+  creation_date: string;
+};
+
+export function requestAchievementConfirmation(
+  id: number,
+  receivingUserId: number | string,
+): Promise<ConfirmationRequest> {
+  return apiJson<ConfirmationRequest>(
+    `/achievements/${id}/confirmations_request/`,
+    {
+      method: "POST",
+      body: JSON.stringify({ receiving_user_id: receivingUserId }),
+    },
+  );
+}
+
+export type IncomingConfirmationRequest = {
+  id: number;
+  achievement_id: number;
+  achievement_title: string;
+  requesting_user: AchievementUser;
+  receiving_user: AchievementUser;
+  creation_date: string;
+};
+
+export function fetchIncomingConfirmationRequests(): Promise<
+  IncomingConfirmationRequest[]
+> {
+  return apiJson<IncomingConfirmationRequest[]>(
+    "/achievements/confirmation-requests/",
+  );
+}
+
+export async function deleteConfirmationRequest(id: number): Promise<void> {
+  const response = await apiFetch(
+    `/achievements/confirmation-requests/${id}/`,
+    { method: "DELETE" },
+  );
+  if (!response.ok) {
+    throw new ApiError("Unable to delete request.", response.status, null);
+  }
+}
+
+export async function clearConfirmationRequests(): Promise<void> {
+  const response = await apiFetch(
+    "/achievements/confirmation-requests/clear/",
+    {
+      method: "DELETE",
+    },
+  );
+  if (!response.ok) {
+    throw new ApiError("Unable to clear requests.", response.status, null);
+  }
+}

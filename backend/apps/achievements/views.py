@@ -142,21 +142,50 @@ class AchievementViewSet(viewsets.ModelViewSet):
     )
     def confirmation_requests(self, request):
         """List confirmation requests addressed to the authenticated user."""
-        queryset = ConfirmationRequest.objects.filter(
-            receiving_user=request.user
-        ).order_by("-creation_date")
+        queryset = (
+            ConfirmationRequest.objects.filter(receiving_user=request.user)
+            .select_related("achievement", "achievement__user")
+            .order_by("-creation_date")
+        )
         serializer = ConfirmationRequestSerializer(queryset, many=True)
         return Response(serializer.data)
+
+    @action(
+        detail=False,
+        methods=["delete"],
+        permission_classes=[IsAuthenticated],
+        url_path="confirmation-requests/clear",
+    )
+    def clear_confirmation_requests(self, request):
+        """Delete all confirmation requests addressed to the authenticated user."""
+        ConfirmationRequest.objects.filter(receiving_user=request.user).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        detail=False,
+        methods=["delete"],
+        permission_classes=[IsAuthenticated],
+        url_path="confirmation-requests/(?P<request_id>[0-9]+)",
+    )
+    def delete_confirmation_request(self, request, request_id=None):
+        """Delete a single confirmation request addressed to the authenticated user."""
+        deleted, _ = ConfirmationRequest.objects.filter(
+            id=request_id, receiving_user=request.user
+        ).delete()
+        if not deleted:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
     def confirmations_request(self, request, pk=None):
         """Request a specific user to confirm this achievement"""
         achievement = self.get_object()
 
-        # Check if user is trying to request confirmation for their own achievement
-        if achievement.user == request.user:
+        # Only the achievement owner can request confirmation for it
+        if achievement.user != request.user:
             return Response(
-                {"detail": "Cannot request confirmation for your own achievement."},
+                {"detail": "You can only request confirmation for your \
+                 own achievement."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useAuth } from "@/context/AuthContext";
 import { AchievementItem } from "@/components/achievements/AchievementItem";
 import { GlazeItem } from "@/components/glazes/GlazeItem";
@@ -12,7 +18,11 @@ type FeedItem =
   | { kind: "achievement"; date: string; achievement: Achievement }
   | { kind: "glaze"; date: string; glaze: Glaze };
 
-export function AchievementFeed() {
+type AchievementFeedProps = {
+  belowInput?: ReactNode;
+};
+
+export function AchievementFeed({ belowInput }: AchievementFeedProps) {
   const { user } = useAuth();
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [glazes, setGlazes] = useState<Glaze[]>([]);
@@ -94,6 +104,8 @@ export function AchievementFeed() {
   return (
     <>
       <AchievementInput onCreated={handleCreated} />
+
+      {belowInput}
 
       {isLoading ? (
         <p className="text-text-muted px-1 text-sm">Loading feed…</p>
