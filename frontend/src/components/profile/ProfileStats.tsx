@@ -3,15 +3,15 @@ import { StatCard } from "./StatCard";
 
 type ProfileStatsProps = {
   achievements: number;
-  shoutoutsGiven: number;
-  shoutoutsReceived: number;
+  glazesGiven: number;
+  glazesReceived: number;
   totalSprinkles: number;
 };
 
 export function ProfileStats({
   achievements,
-  shoutoutsGiven,
-  shoutoutsReceived,
+  glazesGiven,
+  glazesReceived,
   totalSprinkles,
 }: ProfileStatsProps) {
   return (
@@ -20,11 +20,11 @@ export function ProfileStats({
         <span className="text-text text-5xl font-black">{achievements}</span>
       </StatCard>
 
-      <StatCard icon={Megaphone} label="Shout-outs">
+      <StatCard icon={Megaphone} label="Glazes">
         <div className="flex items-center gap-4">
           <div className="flex flex-col items-center">
             <span className="text-text text-2xl font-bold">
-              {shoutoutsGiven}
+              {glazesGiven}
             </span>
             <span className="text-text-muted text-[10px] font-black uppercase">
               Given
@@ -33,7 +33,7 @@ export function ProfileStats({
           <div className="bg-border h-10 w-px" />
           <div className="flex flex-col items-center">
             <span className="text-text text-2xl font-bold">
-              {shoutoutsReceived}
+              {glazesReceived}
             </span>
             <span className="text-text-muted text-[10px] font-black uppercase">
               Recv.

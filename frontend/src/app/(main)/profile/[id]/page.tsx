@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileStats } from "@/components/profile/ProfileStats";
 import { ProfileAchievements } from "@/components/profile/ProfileAchievements";
+import { GlazeModal } from "@/components/profile/GlazeModal";
 import { type Achievement, fetchAchievements } from "@/utils/achievements";
 import { fetchUser, type UserSearchResult } from "@/utils/users";
 
@@ -24,6 +25,13 @@ export default function UserProfilePage() {
   const [achievementsError, setAchievementsError] = useState<string | null>(
     null,
   );
+
+  const [isGlazeOpen, setIsGlazeOpen] = useState(false);
+
+  const isOwnProfile =
+    currentUserId !== undefined && String(currentUserId) === String(profileId);
+  const canGlaze =
+    currentUserId !== undefined && !isOwnProfile && profile !== null;
 
   useEffect(() => {
     if (profileId === undefined) {
@@ -101,7 +109,16 @@ export default function UserProfilePage() {
         bio={profile?.bio_text ?? undefined}
         photoUrl={profile?.profile_picture ?? null}
         editable={false}
+        onGlaze={canGlaze ? () => setIsGlazeOpen(true) : undefined}
       />
+
+      {isGlazeOpen && profile ? (
+        <GlazeModal
+          receivingUserId={profile.id}
+          receivingUserName={profile.name}
+          onClose={() => setIsGlazeOpen(false)}
+        />
+      ) : null}
 
       {profileError ? (
         <p className="bg-accent-softer text-accent rounded-2xl px-4 py-3 text-sm font-semibold">
@@ -111,8 +128,8 @@ export default function UserProfilePage() {
 
       <ProfileStats
         achievements={achievements.length}
-        shoutoutsGiven={128}
-        shoutoutsReceived={84}
+        glazesGiven={128}
+        glazesReceived={84}
         totalSprinkles={4250}
       />
 

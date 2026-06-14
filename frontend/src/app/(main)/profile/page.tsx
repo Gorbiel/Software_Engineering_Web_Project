@@ -74,8 +74,8 @@ export default function ProfilePage() {
 
       <ProfileStats
         achievements={achievements.length}
-        shoutoutsGiven={128}
-        shoutoutsReceived={84}
+        glazesGiven={128}
+        glazesReceived={84}
         totalSprinkles={4250}
       />
 
