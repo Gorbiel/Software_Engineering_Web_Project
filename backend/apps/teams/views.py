@@ -1,9 +1,18 @@
-from django.http import Http404
-from rest_framework import viewsets
+from datetime import datetime, timedelta
+
+from django.db.models import Count, Q, Sum
+from django.db.models.functions import TruncDay
+from django.http import Http404, JsonResponse
+from django.utils import timezone
+from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.achievements.models import Achievement, AchievementConfirmation
+from apps.glazes.models import Glaze
+from apps.tags.models import Tag
 from apps.teams.models import Team, TeamMember
 from apps.teams.permissions import IsTeamLeaderOrAdmin
 from apps.teams.serializers import (
@@ -11,6 +20,7 @@ from apps.teams.serializers import (
     TeamMemberResponseSerializer,
     TeamSerializer,
 )
+from apps.users.models import User
 from common.pagination import SearchResultsSetPagination
 
 
@@ -92,24 +102,6 @@ class TeamMemberRankUpdateView(APIView):
             {"team_id": member.team_id, "user_id": member.user_id, "rank": member.rank}
         )
         return Response(resp.data)
-from datetime import datetime, timedelta
-
-from django.db.models import Count, Q, Sum
-from django.db.models.functions import TruncDay
-from django.http import JsonResponse
-from django.utils import timezone
-from rest_framework import mixins, status, viewsets
-from rest_framework.decorators import action
-from rest_framework.response import Response
-
-from apps.achievements.models import Achievement, AchievementConfirmation
-from apps.glazes.models import Glaze
-from apps.tags.models import Tag
-from apps.teams.models import Team
-from apps.teams.permissions import IsLeaderOfTeam
-from apps.teams.serializers import TeamSerializer
-from apps.users.models import User
-from apps.users.permissions import IsGlazedInAdmin
 
 
 class TeamViewSet(
@@ -117,7 +109,7 @@ class TeamViewSet(
 ):
     queryset = Team.objects.all().order_by("id")
     serializer_class = TeamSerializer
-    permission_classes = [IsLeaderOfTeam, IsGlazedInAdmin]
+    permission_classes = [IsTeamLeaderOrAdmin]
 
     @action(detail=True, methods=["get"])
     def report(self, request, pk=None):
@@ -271,7 +263,7 @@ class TeamViewSet(
         )
 
         report["top_glaze_tags_used_by_team"] = list(
-            Tag.tags.annotate(
+            Tag.objects.annotate(
                 usage_count=Count(
                     "glazetag",
                     filter=Q(
@@ -286,7 +278,7 @@ class TeamViewSet(
         )
 
         report["top_glaze_tags_recieved_by_team"] = list(
-            Tag.tags.annotate(
+            Tag.objects.annotate(
                 usage_count=Count(
                     "glazetag",
                     filter=Q(

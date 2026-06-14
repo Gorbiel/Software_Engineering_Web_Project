@@ -16,6 +16,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.achievements.models import Achievement, AchievementConfirmation
@@ -23,11 +24,12 @@ from apps.glazes.models import Glaze
 from apps.tags.models import Tag
 from apps.teams.models import Team
 from apps.users.models import User
-from apps.users.permissions import IsGlazedInAdmin
+from common.permissions import IsGlazedInAdmin
 
 
 class ReportViewSet(viewsets.ViewSet):
-    permission_classes = [IsGlazedInAdmin]
+    permission_classes = [IsAuthenticated, IsGlazedInAdmin]
+
 
     @action(detail=False, methods=["get"])
     def general(self, request):
