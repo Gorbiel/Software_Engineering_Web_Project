@@ -272,6 +272,11 @@ class ConfirmationRequestTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
-        self.assertTrue(all(item["receiving_user"]["id"] == self.user2.id for item in response.data))
+        self.assertTrue(
+            all(
+                item["receiving_user"]["id"] == self.user2.id
+                for item in response.data
+            )
+        )
         self.assertIn("requesting_user", response.data[0])
         self.assertIn("achievement_id", response.data[0])
