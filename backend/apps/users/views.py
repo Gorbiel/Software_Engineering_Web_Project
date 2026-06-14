@@ -113,7 +113,7 @@ class ProfileViewSet(
     mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet
 ):
     # Only allow the logged-in user to access their own profile
-    permission_classes = [IsAuthenticated, IsSelf]
+    permission_classes = [IsAuthenticated, IsSelf, IsGlazedInAdmin]
     serializer_class = UserSerializer
 
     def get_queryset(self):
