@@ -37,8 +37,7 @@ def get_user_stats(user: User) -> dict:
 
     stats["top_achievement_confirming_users"] = [
         {"user_id": c["user"], "confirmation_count": c["amount_confirmed"]}
-        for c in AchievementConfirmation.confirmations
-        .filter(achievement__user=user)
+        for c in AchievementConfirmation.confirmations.filter(achievement__user=user)
         .with_weighted_score_for_user(user)
         .values("user")
         .annotate(amount_confirmed=Sum("confirmer_rank"))
@@ -47,17 +46,16 @@ def get_user_stats(user: User) -> dict:
 
     stats["top_achievement_reactions"] = [
         {"reaction_id": r["reaction"], "reaction_count": r["reaction_amount"]}
-        for r in AchievementReaction.objects
-        .filter(achievement__user=user)
+        for r in AchievementReaction.objects.filter(achievement__user=user)
         .values("reaction")
         .annotate(reaction_amount=Count("id"))
         .order_by("-reaction_amount")[:3]
     ]
 
     stats["total_confirmations"] = (
-        user_achievements
-        .with_weighted_confirmation_score(user)
-        .aggregate(total=Sum("confirmation_score"))
+        user_achievements.with_weighted_confirmation_score(user).aggregate(
+            total=Sum("confirmation_score")
+        )
     )["total"] or 0
 
     # --- Received glazes ---
@@ -71,16 +69,14 @@ def get_user_stats(user: User) -> dict:
 
     stats["most_glazed_by"] = [
         {"user_id": g["posting_user"], "glaze_count": g["glaze_count"]}
-        for g in received_glazes
-        .values("posting_user")
+        for g in received_glazes.values("posting_user")
         .annotate(glaze_count=Count("id"))
         .order_by("-glaze_count")[:5]
     ]
 
     stats["top_received_glaze_reactions"] = [
         {"reaction_id": r["reaction"], "reaction_count": r["reaction_count"]}
-        for r in GlazeReaction.objects
-        .filter(glaze__receiving_user=user)
+        for r in GlazeReaction.objects.filter(glaze__receiving_user=user)
         .values("reaction")
         .annotate(reaction_count=Count("id"))
         .order_by("-reaction_count")[:5]
@@ -88,8 +84,7 @@ def get_user_stats(user: User) -> dict:
 
     stats["top_received_glaze_tags"] = [
         {"tag_id": r["tag"], "tag_count": r["tag_count"]}
-        for r in GlazeTag.objects
-        .filter(glaze__receiving_user=user)
+        for r in GlazeTag.objects.filter(glaze__receiving_user=user)
         .values("tag")
         .annotate(tag_count=Count("id"))
         .order_by("-tag_count")[:5]
@@ -106,8 +101,7 @@ def get_user_stats(user: User) -> dict:
 
     stats["top_sent_glaze_reactions"] = [
         {"reaction_id": r["reaction"], "reaction_count": r["reaction_count"]}
-        for r in GlazeReaction.objects
-        .filter(glaze__posting_user=user)
+        for r in GlazeReaction.objects.filter(glaze__posting_user=user)
         .values("reaction")
         .annotate(reaction_count=Count("id"))
         .order_by("-reaction_count")[:5]

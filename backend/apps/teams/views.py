@@ -1,14 +1,14 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
+from django.db.models import Count, Q, Sum
 from django.db.models.functions import TruncDay
-from django.db.models import Count, ExpressionWrapper, F, IntegerField, Sum, Q
 from django.http import JsonResponse
 from django.utils import timezone
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from apps.achievements.models import AchievementConfirmation, Achievement
+from apps.achievements.models import Achievement, AchievementConfirmation
 from apps.glazes.models import Glaze
 from apps.tags.models import Tag
 from apps.teams.models import Team
@@ -37,105 +37,128 @@ class TeamViewSet(
             )
 
         try:
-            date_from = datetime.strptime(date_from, "%Y-%m-%d")
-            date_to = datetime.strptime(date_to, "%Y-%m-%d")
+            date_from = timezone.make_aware(datetime.strptime(date_from, "%Y-%m-%d"))
+            date_to = timezone.make_aware(
+                datetime.strptime(date_to, "%Y-%m-%d")
+            ) + timedelta(days=1)
         except ValueError:
             return Response(
                 {"error": "Invalid date format. Use YYYY-MM-DD"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        
+
         report = {}
 
-        achievements_in_period = (
-            Achievement.achievements
-            .by_team(pk)
+        # Clean base — no extra JOINs that inflate counts
+        achievements_base = (
+            Achievement.achievements.by_team(pk)
             .within_date_range(date_from, date_to)
-            .with_confirmation_count()
-            .with_reaction_count()
             .annotate(day=TruncDay("creation_date"))
+        )
+
+        # Annotated version only where confirmation/reaction fields are needed
+        achievements_annotated = (
+            achievements_base.with_confirmation_count().with_reaction_count()
         )
 
         confirmations_in_period = (
-            AchievementConfirmation.confirmations
-            .by_team(pk)
+            AchievementConfirmation.confirmations.filter(
+                achievement__user__teammember__team=pk
+            )  # by_team doesn't exist here
             .within_date_range(date_from, date_to)
             .annotate(day=TruncDay("creation_date"))
-        )
-
-        report["daily_achievement_counts"] = (
-            achievements_in_period.values("day")
-            .annotate(total=Count("id"))
-            .order_by("day")
-        )
-
-        report["daily_achievement_confirmations"] = (
-            achievements_in_period.values("day")
-            .annotate(total=Sum("achievementconfirmation"))
-            .order_by("day")
-        )
-
-        report["daily_achievement_reactions"] = (
-            achievements_in_period.values("day")
-            .annotate(total=Sum("achievementreaction"))
-            .order_by("day")
         )
 
         sent_glazes_in_period = (
-            Glaze.glazes
-            .given_by_team(pk)
+            Glaze.glazes.by_team(pk)
             .within_date_range(date_from, date_to)
-            .with_reaction_count()
             .annotate(day=TruncDay("creation_date"))
         )
 
-        received_glazes_in_period = (
-            Glaze.glazes
-            .received_by_team(pk)
-            .within_date_range(date_from, date_to)
-            .with_reaction_count()
-            .annotate(day=TruncDay("creation_date"))
+        # Achievement counts
+        report["daily_achievement_counts"] = list(
+            achievements_base.values("day").annotate(total=Count("id")).order_by("day")
         )
 
-        users_with_glaze_counts = (User.users
-        .in_team(pk)
-        .annotate(
-            received_glaze_count=Count("receiver", distinct=True),
-            sent_glaze_count=Count("poster", distinct=True),
-        ))
-
-        achievement_users = achievements_in_period.values("day", "user_id")
-
-        confirming_users = confirmations_in_period.values("day", "user_id")
-
-        glaze_users = sent_glazes_in_period.values("day", "user_id")
-
-        report["active_user_daily_count"] = (
-            achievement_users.union(confirming_users, glaze_users)
-            .values("day")
-            .annotate(active_users=Count("user_id"))
+        report["daily_achievement_confirmations"] = list(
+            achievements_annotated.values("day")
+            .annotate(total=Sum("confirmation_count"))
             .order_by("day")
         )
 
-        team = Team.teams.get(pk=pk).with_engagement().with_cross_team_engagement()
+        report["daily_achievement_reactions"] = list(
+            achievements_annotated.values("day")
+            .annotate(total=Sum("reaction_count"))
+            .order_by("day")
+        )
+
+        # Active users per day — merge in Python to avoid union().annotate() error
+        from collections import defaultdict
+
+        achievement_by_day = achievements_base.values("day").annotate(
+            users=Count("user_id", distinct=True)
+        )
+
+        confirmation_by_day = confirmations_in_period.values("day").annotate(
+            users=Count("user_id", distinct=True)
+        )
+
+        glaze_by_day = sent_glazes_in_period.values("day").annotate(
+            users=Count("posting_user_id", distinct=True)
+        )
+
+        daily_totals = defaultdict(int)
+        for row in achievement_by_day:
+            daily_totals[row["day"]] += row["users"]
+        for row in confirmation_by_day:
+            daily_totals[row["day"]] += row["users"]
+        for row in glaze_by_day:
+            daily_totals[row["day"]] += row["users"]
+
+        report["active_user_daily_count"] = [
+            {"day": day, "active_users": count}
+            for day, count in sorted(daily_totals.items())
+        ]
+
+        # Team-level engagement — filter() then annotate, then get()
+        team = (
+            Team.teams.filter(pk=pk)
+            .with_engagement(date_from, date_to)
+            .with_participation_rate(date_from, date_to)
+            .with_cross_team_engagement(date_from, date_to)
+            .get()
+        )
 
         report["achievements_count"] = team.achievements_count
         report["glazes_sent_count"] = team.glazes_sent_count
-        report["glazes_received_count"] = team.glazes_sent_count
+        report["glazes_received_count"] = (
+            team.glazes_received_count
+        )  # was copying glazes_sent_count by mistake
         report["confirmations_count"] = team.confirmations_count
         report["participation_rate"] = team.participation_rate
         report["cross_team_glazes_received"] = team.cross_team_glazes_received
         report["cross_team_glazes_sent"] = team.cross_team_glazes_sent
 
-        report["most_glazed_users"] = users_with_glaze_counts.order_by(
-            "-received_glaze_count"
-        )[:10]
+        # Top users
+        users_with_glaze_counts = User.users.in_team(pk).annotate(
+            received_glaze_count=Count("receiver", distinct=True),
+            sent_glaze_count=Count("poster", distinct=True),
+        )
 
-        report["best_glazing_users"] = users_with_glaze_counts.order_by(
-            "-sent_glaze_count"
-        )[:10]
+        report["most_glazed_users"] = list(
+            users_with_glaze_counts.order_by("-received_glaze_count").values(
+                "id", "name", "email", "received_glaze_count"
+            )[:10]
+        )
 
-        report["top_achievement_tags_used_by_team"] = (
+        report["best_glazing_users"] = list(
+            users_with_glaze_counts.order_by("-sent_glaze_count").values(
+                "id", "name", "email", "sent_glaze_count"
+            )[:10]
+        )
+
+        # Tags
+        report["top_achievement_tags_used_by_team"] = list(
             Tag.objects.annotate(
                 usage_count=Count(
                     "achievementtag",
@@ -144,7 +167,7 @@ class TeamViewSet(
                             date_from,
                             date_to,
                         ),
-                        achievementtag__achievement__user__teammember__team=pk
+                        achievementtag__achievement__user__teammember__team=pk,
                     ),
                     distinct=True,
                 )
@@ -153,13 +176,13 @@ class TeamViewSet(
             .values("tag_text", "usage_count")[:10]
         )
 
-        report["top_glaze_tags_used_by_team"] = (
+        report["top_glaze_tags_used_by_team"] = list(
             Tag.tags.annotate(
                 usage_count=Count(
                     "glazetag",
                     filter=Q(
                         glazetag__glaze__creation_date__range=(date_from, date_to),
-                        glazetag__glaze__posting_user__teammember__team=pk
+                        glazetag__glaze__posting_user__teammember__team=pk,
                     ),
                     distinct=True,
                 )
@@ -168,7 +191,7 @@ class TeamViewSet(
             .values("tag_text", "usage_count")[:10]
         )
 
-        report["top_glaze_tags_recieved_by_team"] = (
+        report["top_glaze_tags_recieved_by_team"] = list(
             Tag.tags.annotate(
                 usage_count=Count(
                     "glazetag",
@@ -182,5 +205,5 @@ class TeamViewSet(
             .order_by("-usage_count")
             .values("tag_text", "usage_count")[:10]
         )
-        
+
         return JsonResponse(report)

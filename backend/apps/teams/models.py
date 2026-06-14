@@ -1,6 +1,6 @@
 from django.core import validators
 from django.db import models
-from django.db.models import Count, ExpressionWrapper, F, FloatField, Q, OuterRef
+from django.db.models import Count, ExpressionWrapper, F, FloatField, OuterRef, Q
 from django.utils import timezone
 
 from apps.users.models import User
@@ -20,63 +20,50 @@ class TeamQuerySet(models.QuerySet):
         # Build date filters if a range is provided
         end = end or timezone.now()
         achievement_filter = Q()
-        glaze_sent_filter  = Q()
-        glaze_recv_filter  = Q()
+        glaze_sent_filter = Q()
+        glaze_recv_filter = Q()
         confirmation_filter = Q()
 
         if start:
-            achievement_filter  &= Q(
+            achievement_filter &= Q(
                 teammember__user__achievement__creation_date__gte=start
             )
-            glaze_sent_filter   &= Q(
-                teammember__user__poster__creation_date__gte=start
-            )
-            glaze_recv_filter   &= Q(
-                teammember__user__receiver__creation_date__gte=start
-            )
+            glaze_sent_filter &= Q(teammember__user__poster__creation_date__gte=start)
+            glaze_recv_filter &= Q(teammember__user__receiver__creation_date__gte=start)
             confirmation_filter &= Q(
                 teammember__user__achievementconfirmation__creation_date__gte=start
             )
         if end:
-            achievement_filter  &= Q(
+            achievement_filter &= Q(
                 teammember__user__achievement__creation_date__lte=end
             )
-            glaze_sent_filter   &= Q(
-                teammember__user__poster__creation_date__lte=end
-            )
-            glaze_recv_filter   &= Q(
-                teammember__user__receiver__creation_date__lte=end
-            )
+            glaze_sent_filter &= Q(teammember__user__poster__creation_date__lte=end)
+            glaze_recv_filter &= Q(teammember__user__receiver__creation_date__lte=end)
             confirmation_filter &= Q(
                 teammember__user__achievementconfirmation__creation_date__lte=end
             )
 
         return self.annotate(
             member_count=Count("teammember__user", distinct=True),
-
             # achievements posted by team members
             achievements_count=Count(
                 "teammember__user__achievement",
                 filter=achievement_filter,
-                distinct=True
+                distinct=True,
             ),
             # glazes sent by team members
             glazes_sent_count=Count(
-                "teammember__user__poster",
-                filter=glaze_sent_filter,
-                distinct=True
+                "teammember__user__poster", filter=glaze_sent_filter, distinct=True
             ),
             # glazes received by team members
             glazes_received_count=Count(
-                "teammember__user__receiver",
-                filter=glaze_recv_filter,
-                distinct=True
+                "teammember__user__receiver", filter=glaze_recv_filter, distinct=True
             ),
             # confirmations given by team members
             confirmations_count=Count(
                 "teammember__user__achievementconfirmation",
                 filter=confirmation_filter,
-                distinct=True
+                distinct=True,
             ),
         )
 
@@ -98,12 +85,12 @@ class TeamQuerySet(models.QuerySet):
             active_members=Count(
                 "teammember__user__achievement__user",
                 filter=achievement_filter,
-                distinct=True
+                distinct=True,
             ),
         ).annotate(
             participation_rate=ExpressionWrapper(
                 F("active_members") * 100.0 / F("member_count"),
-                output_field=FloatField()
+                output_field=FloatField(),
             )
         )
 
