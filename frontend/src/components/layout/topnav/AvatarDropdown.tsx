@@ -2,12 +2,16 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { LogOut, Settings, User } from "lucide-react";
+import { LogOut, Settings, Shield, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useMyProfile } from "@/context/MyProfileContext";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { getInitials } from "@/components/misc/AvatarInitials";
 
 export function AvatarDropdown() {
   const { user, logout } = useAuth();
+  const { profile } = useMyProfile();
+  const isAdmin = useIsAdmin();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -28,18 +32,27 @@ export function AvatarDropdown() {
     await logout();
   }
 
+  const photoUrl = profile?.profile_picture ?? null;
   const initials = user?.name ? getInitials(user.name) : null;
 
   return (
     <div className="relative" ref={ref}>
       <button
-        className="border-border bg-background hover:border-primary text-text-muted flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border text-xs font-bold transition select-none"
+        className="border-border bg-background hover:border-primary text-text-muted flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full border text-xs font-bold transition select-none"
         type="button"
         aria-haspopup="menu"
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
       >
-        {initials}
+        {photoUrl ? (
+          <img
+            src={photoUrl}
+            alt={user?.name ?? "Profile"}
+            className="h-full w-full rounded-full object-cover"
+          />
+        ) : (
+          initials
+        )}
       </button>
       {isOpen ? (
         <div className="glaze-card absolute top-14 right-0 w-48 rounded-3xl p-3">
@@ -52,6 +65,16 @@ export function AvatarDropdown() {
               <User className="h-4 w-4" />
               Profile
             </Link>
+            {isAdmin ? (
+              <Link
+                href="/admin"
+                className="hover:bg-background text-text flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-semibold"
+                onClick={() => setIsOpen(false)}
+              >
+                <Shield className="h-4 w-4" />
+                Admin panel
+              </Link>
+            ) : null}
             <Link
               href="/settings"
               className="hover:bg-background text-text flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-semibold"

@@ -50,7 +50,12 @@ function withAuthHeaders(init: RequestInit): RequestInit {
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
   }
-  if (init.body !== undefined && !headers.has("Content-Type")) {
+
+  if (
+    init.body !== undefined &&
+    !(init.body instanceof FormData) &&
+    !headers.has("Content-Type")
+  ) {
     headers.set("Content-Type", "application/json");
   }
 

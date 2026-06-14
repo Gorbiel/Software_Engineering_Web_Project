@@ -3,6 +3,24 @@ from rest_framework import serializers
 from apps.users.models import User
 
 
+class UserSearchSerializer(serializers.ModelSerializer):
+    """Serializer for user search results."""
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "name",
+            "email",
+            "job_title",
+            "bio_text",
+            "profile_picture",
+            "creation_date",
+            "active",
+        ]
+        read_only_fields = fields
+
+
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
 
@@ -13,6 +31,9 @@ class UserSerializer(serializers.ModelSerializer):
             "name",
             "email",
             "password",
+            "job_title",
+            "bio_text",
+            "profile_picture",
             "creation_date",
             "active",
             "deactivation_date",
@@ -25,6 +46,9 @@ class UserSerializer(serializers.ModelSerializer):
             "deactivation_date",
             "is_staff",
             "is_superuser",
+            # Users should not be allowed to toggle their own active status via
+            # the profile endpoint; admins manage activation.
+            "active",
         ]
 
     def create(self, validated_data):

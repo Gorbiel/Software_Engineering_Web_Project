@@ -1,20 +1,25 @@
+import Link from "next/link";
 import { Heart, MessageSquare } from "lucide-react";
-import { AvatarInitials } from "@/components/misc/AvatarInitials";
+import { Avatar, type AvatarPerson } from "@/components/misc/Avatar";
 import { AvatarStack } from "@/components/misc/AvatarStack";
 
 type AchievementCardProps = {
   authorName: string;
+  authorPhotoUrl?: string | null;
+  authorId?: number | string | null;
   title: string;
   date: string;
   likes: number;
   comments: number;
-  confirmedBy?: string[];
+  confirmedBy?: AvatarPerson[];
   actions?: React.ReactNode;
   children: React.ReactNode;
 };
 
 export function AchievementCard({
   authorName,
+  authorPhotoUrl,
+  authorId,
   title,
   date,
   likes,
@@ -23,22 +28,46 @@ export function AchievementCard({
   actions,
   children,
 }: AchievementCardProps) {
+  const avatar = (
+    <Avatar
+      name={authorName}
+      src={authorPhotoUrl}
+      className="bg-accent-2-soft text-accent-2 h-10 w-10 shrink-0 text-xs font-bold"
+    />
+  );
+  const profileHref =
+    authorId !== undefined && authorId !== null
+      ? `/profile/${authorId}`
+      : null;
+
   return (
     <article className="glaze-card flex flex-col gap-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <AvatarInitials
-            name={authorName}
-            className="bg-accent-2-soft text-accent-2 h-10 w-10 shrink-0 text-xs font-bold"
-          />
+          {profileHref ? (
+            <Link href={profileHref} className="shrink-0 transition hover:opacity-80">
+              {avatar}
+            </Link>
+          ) : (
+            avatar
+          )}
           <div className="min-w-0">
             <div className="flex items-center gap-1">
-            <h4 className="text-text text-sm font-bold wrap-break-word">
-              {authorName}
-            </h4>
-            <h4 className="text-text text-sm wrap-break-word">
-              shared an achievement.
-            </h4>
+              {profileHref ? (
+                <Link
+                  href={profileHref}
+                  className="text-text text-sm font-bold wrap-break-word hover:underline"
+                >
+                  {authorName}
+                </Link>
+              ) : (
+                <h4 className="text-text text-sm font-bold wrap-break-word">
+                  {authorName}
+                </h4>
+              )}
+              <h4 className="text-text text-sm wrap-break-word">
+                shared an achievement.
+              </h4>
             </div>
             <p className="text-text-muted text-xs">{date}</p>
           </div>
@@ -46,7 +75,7 @@ export function AchievementCard({
         <div className="flex items-center gap-2">
           {confirmedBy.length > 0 ? (
             <>
-              <AvatarStack names={confirmedBy} />
+              <AvatarStack people={confirmedBy} />
               <span className="text-text-muted text-xs font-semibold">
                 {confirmedBy.length === 1
                   ? "1 confirmation"

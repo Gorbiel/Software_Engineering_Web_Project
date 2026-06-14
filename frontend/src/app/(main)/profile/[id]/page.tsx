@@ -1,30 +1,65 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { useMyProfile } from "@/context/MyProfileContext";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileStats } from "@/components/profile/ProfileStats";
 import { ProfileAchievements } from "@/components/profile/ProfileAchievements";
 import { type Achievement, fetchAchievements } from "@/utils/achievements";
+import { fetchUser, type UserSearchResult } from "@/utils/users";
 
-export default function ProfilePage() {
+export default function UserProfilePage() {
+  const params = useParams<{ id: string }>();
+  const profileId = params.id;
+
   const { user } = useAuth();
-  const userId = user?.id;
-  const { profile, error: profileError } = useMyProfile();
+  const currentUserId = user?.id;
+
+  const [profile, setProfile] = useState<UserSearchResult | null>(null);
+  const [profileError, setProfileError] = useState<string | null>(null);
 
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [achievementsError, setAchievementsError] = useState<string | null>(null);
+  const [achievementsError, setAchievementsError] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
-    if (userId === undefined) {
+    if (profileId === undefined) {
       return;
     }
 
     let active = true;
 
-    fetchAchievements({ userId })
+    fetchUser(profileId)
+      .then((data) => {
+        if (active) {
+          setProfile(data);
+          setProfileError(null);
+        }
+      })
+      .catch((err) => {
+        if (active) {
+          setProfileError(
+            err instanceof Error ? err.message : "Couldn't load profile.",
+          );
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [profileId]);
+
+  useEffect(() => {
+    if (profileId === undefined) {
+      return;
+    }
+
+    let active = true;
+
+    fetchAchievements({ userId: profileId })
       .then((data) => {
         if (active) {
           setAchievements(data);
@@ -46,7 +81,7 @@ export default function ProfilePage() {
     return () => {
       active = false;
     };
-  }, [userId]);
+  }, [profileId]);
 
   const handleChanged = useCallback((updated: Achievement) => {
     setAchievements((prev) =>
@@ -64,6 +99,8 @@ export default function ProfilePage() {
         name={profile?.name ?? ""}
         subtitle={profile?.job_title ?? undefined}
         bio={profile?.bio_text ?? undefined}
+        photoUrl={profile?.profile_picture ?? null}
+        editable={false}
       />
 
       {profileError ? (
@@ -80,7 +117,8 @@ export default function ProfilePage() {
       />
 
       <ProfileAchievements
-        currentUserId={userId}
+        title="Achievements"
+        currentUserId={currentUserId}
         achievements={achievements}
         isLoading={isLoading}
         error={achievementsError}

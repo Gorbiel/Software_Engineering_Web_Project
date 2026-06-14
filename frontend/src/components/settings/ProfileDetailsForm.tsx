@@ -1,18 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { getAccessToken, saveUser } from "@/utils/auth";
+import { saveUser } from "@/utils/auth";
+import { fetchMyProfile, updateMyProfile } from "@/utils/profile";
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 
 export function ProfileDetailsForm() {
   const { user } = useAuth();
+  const router = useRouter();
 
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
+  const [jobTitle, setJobTitle] = useState("");
+  const [bio, setBio] = useState("");
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Load the fields that aren't kept in the local session (job title, bio).
+  useEffect(() => {
+    let active = true;
+
+    fetchMyProfile()
+      .then((profile) => {
+        if (!active) {
+          return;
+        }
+        setName(profile.name);
+        setEmail(profile.email);
+        setJobTitle(profile.job_title ?? "");
+        setBio(profile.bio_text ?? "");
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
@@ -20,27 +46,12 @@ export function ProfileDetailsForm() {
     setErrorMsg(null);
 
     try {
-      const token = getAccessToken();
-      const res = await fetch("/api/auth/me/", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ name, email }),
+      const updated = await updateMyProfile({
+        name,
+        email,
+        job_title: jobTitle.trim() === "" ? null : jobTitle.trim(),
+        bio_text: bio.trim() === "" ? null : bio.trim(),
       });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        throw new Error(
-          data?.detail ??
-            data?.name?.[0] ??
-            data?.email?.[0] ??
-            "Failed to save.",
-        );
-      }
-
-      const updated = await res.json();
       saveUser({ id: updated.id, name: updated.name, email: updated.email });
       setSaveState("saved");
     } catch (err) {
@@ -50,10 +61,7 @@ export function ProfileDetailsForm() {
   }
 
   function handleCancel() {
-    setName(user?.name ?? "");
-    setEmail(user?.email ?? "");
-    setSaveState("idle");
-    setErrorMsg(null);
+    router.push("/profile");
   }
 
   return (
@@ -100,20 +108,40 @@ export function ProfileDetailsForm() {
         </div>
         <div className="flex flex-col gap-4 sm:flex-row">
           <div className="flex flex-1 flex-col gap-2">
-            <label className="text-text-muted ml-3 text-xs font-semibold">
+            <label
+              htmlFor="job-title"
+              className="text-text-muted ml-3 text-xs font-semibold"
+            >
               Job title
             </label>
             <input
+              id="job-title"
               className="bg-background text-text rounded-2xl px-4 py-2 text-sm focus:outline-none"
               type="text"
+              value={jobTitle}
+              onChange={(e) => {
+                setSaveState("idle");
+                setJobTitle(e.target.value);
+              }}
             />
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <label className="text-text-muted ml-3 text-xs font-semibold">
+          <label
+            htmlFor="bio"
+            className="text-text-muted ml-3 text-xs font-semibold"
+          >
             Bio
           </label>
-          <textarea className="bg-background text-text min-h-28 resize-none rounded-2xl px-3 py-2 text-sm focus:outline-none" />
+          <textarea
+            id="bio"
+            className="bg-background text-text min-h-28 resize-none rounded-2xl px-3 py-2 text-sm focus:outline-none"
+            value={bio}
+            onChange={(e) => {
+              setSaveState("idle");
+              setBio(e.target.value);
+            }}
+          />
         </div>
       </section>
 

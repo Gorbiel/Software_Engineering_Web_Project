@@ -9,6 +9,38 @@ from apps.tags.models import AchievementTag, Tag
 from apps.users.models import User
 
 
+class AchievementSearchSerializer(serializers.ModelSerializer):
+    """Serializer for achievement search results."""
+
+    user = serializers.SerializerMethodField()
+    confirmation_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Achievement
+        fields = [
+            "id",
+            "user",
+            "title",
+            "body",
+            "creation_date",
+            "confirmation_count",
+        ]
+        read_only_fields = fields
+
+    def get_user(self, obj):
+        """Return minimal user info."""
+        return {
+            "id": obj.user.id,
+            "name": obj.user.name,
+            "profile_picture": (
+                obj.user.profile_picture.url if obj.user.profile_picture else None
+            ),
+        }
+
+    def get_confirmation_count(self, obj):
+        return obj.achievementconfirmation_set.count()
+
+
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
@@ -31,7 +63,7 @@ class AchievementTagSerializer(serializers.ModelSerializer):
 class UserBasicSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "name", "email"]
+        fields = ["id", "name", "email", "profile_picture"]
         read_only_fields = ["id"]
 
 

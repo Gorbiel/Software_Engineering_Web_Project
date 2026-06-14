@@ -1,17 +1,29 @@
 from rest_framework.permissions import BasePermission
 
 from apps.teams.models import TeamLeader
+from apps.users.models import Admin
 
 
-class IsLeaderOfTeam(BasePermission):
+class IsTeamLeaderOrAdmin(BasePermission):
+    """Allow access to GlazedIn admins or leaders of the team referenced in the URL.
+
+    This permission expects the view to provide a `team_id` kwarg (e.g. from the
+    URL pattern). If no `team_id` is present it falls back to denying access.
     """
-    Object-level permission — grants access only if the user
-    leads the specific team being accessed.
 
-    The view's object must be a Team instance.
-    """
+    message = "Must be a team leader or GlazedIn admin."
 
-    message = "You must be a leader of this team to perform this action."
+    def has_permission(self, request, view):
+        user = request.user
+        if not user or not getattr(user, "is_authenticated", False):
+            return False
 
-    def has_object_permission(self, request, view, obj):
-        return TeamLeader.objects.filter(user=request.user, team=obj).exists()
+        # Admins always allowed
+        if Admin.objects.filter(user=user).exists():
+            return True
+
+        team_id = view.kwargs.get("team_id")
+        if not team_id:
+            return False
+
+        return TeamLeader.objects.filter(user=user, team_id=team_id).exists()

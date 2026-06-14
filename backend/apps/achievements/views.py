@@ -1,5 +1,6 @@
 import logging
 
+from django.db.models import Q
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -16,11 +17,91 @@ from apps.achievements.permissions import (
 )
 from apps.achievements.serializers import (
     AchievementConfirmationSerializer,
+    AchievementSearchSerializer,
     AchievementSerializer,
     ConfirmationRequestSerializer,
 )
+from common.pagination import SearchResultsSetPagination
 
 logger = logging.getLogger(__name__)
+
+
+class AchievementSearchViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Search achievements (posts) by title, body, or user name.
+
+    Query parameters:
+    - q: Search query (required)
+    - sort_by: 'creation_date', 'confirmation_count', 'title' (default: 'creation_date')
+    - order: 'asc', 'desc' (default: 'desc')
+    - page_size: Number of results per page (default: 20, max: 100)
+    - confirmed: 'true', 'false' (optional, filters by confirmation status)
+    - min_confirmations: Minimum number of confirmations (optional)
+    """
+
+    queryset = Achievement.objects.all().order_by("-creation_date")
+    serializer_class = AchievementSearchSerializer
+    pagination_class = SearchResultsSetPagination
+
+    SORT_OPTIONS = ["creation_date", "title"]
+    FILTER_OPTIONS = ["confirmed", "min_confirmations"]
+
+    @action(detail=False, methods=["get"])
+    def filters_and_sorting(self, request):
+        """Expose available filters and sorting options for the frontend."""
+        return Response(
+            {
+                "sort_options": self.SORT_OPTIONS,
+                "filter_options": self.FILTER_OPTIONS,
+            }
+        )
+
+    def get_queryset(self):
+        queryset = Achievement.objects.all()
+        search_query = self.request.query_params.get("q", "").strip()
+
+        if not search_query:
+            return queryset.none()
+
+        # Search across multiple fields
+        queryset = queryset.filter(
+            Q(title__icontains=search_query)
+            | Q(body__icontains=search_query)
+            | Q(user__name__icontains=search_query)
+        )
+
+        # Filter by confirmation status if provided
+        confirmed = self.request.query_params.get("confirmed")
+        if confirmed == "true":
+            queryset = queryset.confirmed()
+        elif confirmed == "false":
+            queryset = queryset.unconfirmed()
+
+        # Filter by minimum confirmations if provided
+        min_confirmations = self.request.query_params.get("min_confirmations")
+        if min_confirmations:
+            try:
+                min_confirmations = int(min_confirmations)
+                queryset = queryset.with_confirmation_count()
+                queryset = queryset.filter(confirmation_count__gte=min_confirmations)
+            except ValueError, TypeError:
+                pass
+
+        # Sorting
+        sort_by = self.request.query_params.get("sort_by", "creation_date")
+        if sort_by == "confirmation_count":
+            # confirmation_count requires annotation
+            queryset = queryset.with_confirmation_count()
+        if sort_by not in self.SORT_OPTIONS and sort_by != "confirmation_count":
+            sort_by = "creation_date"
+
+        order = self.request.query_params.get("order", "desc")
+        if order == "asc":
+            queryset = queryset.order_by(sort_by)
+        else:
+            queryset = queryset.order_by(f"-{sort_by}")
+
+        return queryset
 
 
 class AchievementViewSet(viewsets.ModelViewSet):

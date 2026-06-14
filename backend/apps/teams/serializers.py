@@ -1,38 +1,59 @@
-# apps/teams/serializers.py
-
 from rest_framework import serializers
 
-from apps.teams.models import Team, TeamLeader, TeamMember
-
-
-class TeamMemberSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField(source="user.id", read_only=True)
-    name = serializers.CharField(source="user.name", read_only=True)
-    email = serializers.EmailField(source="user.email", read_only=True)
-    job_title = serializers.CharField(source="user.job_title", read_only=True)
-
-    class Meta:
-        model = TeamMember
-        fields = ["user_id", "name", "email", "job_title", "rank"]
-
-
-class TeamLeaderSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField(source="user.id", read_only=True)
-    name = serializers.CharField(source="user.name", read_only=True)
-    email = serializers.EmailField(source="user.email", read_only=True)
-
-    class Meta:
-        model = TeamLeader
-        fields = ["user_id", "name", "email"]
+from apps.teams.models import Team, TeamMember
 
 
 class TeamSerializer(serializers.ModelSerializer):
-    members = TeamMemberSerializer(source="teammember_set", many=True, read_only=True)
-    leaders = TeamLeaderSerializer(source="teamleader_set", many=True, read_only=True)
-
-    # annotated fields — present only when queryset includes them
-    member_count = serializers.IntegerField(read_only=True, default=None)
+    """Serializer for Team model."""
 
     class Meta:
         model = Team
-        fields = ["id", "name", "creation_date", "member_count", "leaders", "members"]
+        fields = ["id", "name", "creation_date"]
+        read_only_fields = ["id", "creation_date"]
+
+
+class RankField(serializers.Field):
+    """Accept either an integer rank or a textual rank name and normalize to int."""
+
+    def to_internal_value(self, data):
+        # Accept integer
+        if isinstance(data, int):
+            if 1 <= data <= 100:
+                return data
+            raise serializers.ValidationError("Rank must be between 1 and 100")
+
+        # Accept string name
+        if isinstance(data, str):
+            try:
+                return TeamMember.rank_value_from_name(data)
+            except ValueError as exc:
+                raise serializers.ValidationError("Invalid rank name") from exc
+
+        raise serializers.ValidationError("Invalid type for rank")
+
+    def to_representation(self, value):
+        # Represent as integer
+        return int(value)
+
+
+class TeamMemberRankSerializer(serializers.Serializer):
+    rank = RankField()
+
+
+class TeamMemberResponseSerializer(serializers.Serializer):
+    team_id = serializers.IntegerField()
+    user_id = serializers.IntegerField()
+    rank = serializers.IntegerField()
+    rank_name = serializers.SerializerMethodField()
+
+    def get_rank_name(self, obj):
+        # obj might be a dict passed by the view
+        if isinstance(obj, dict):
+            rank_val = obj.get("rank")
+        else:
+            rank_val = getattr(obj, "rank", None)
+
+        try:
+            return TeamMember.Rank(int(rank_val)).name.lower()
+        except Exception:
+            return "custom"

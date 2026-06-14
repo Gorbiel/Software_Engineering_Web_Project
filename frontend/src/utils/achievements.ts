@@ -4,6 +4,7 @@ export type AchievementUser = {
   id: number | string;
   name: string;
   email: string;
+  profile_picture: string | null;
 };
 
 export type AchievementConfirmation = {
