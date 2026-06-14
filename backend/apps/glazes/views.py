@@ -7,7 +7,7 @@ from apps.glazes.serializers import GlazeSerializer
 
 
 class GlazeViewSet(viewsets.ModelViewSet):
-    queryset = Glaze.objects.all().order_by("-creation_date")
+    queryset = Glaze.glazes.all().order_by("-creation_date")
     serializer_class = GlazeSerializer
     permission_classes = [IsAuthenticated, IsGlazeOwnerOrReadOnly]
 

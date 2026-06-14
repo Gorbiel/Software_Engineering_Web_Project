@@ -8,6 +8,7 @@ type ProfileHeaderProps = {
   bio?: string;
   editable?: boolean;
   photoUrl?: string | null;
+  onGlaze?: () => void;
 };
 
 export function ProfileHeader({
@@ -16,6 +17,7 @@ export function ProfileHeader({
   bio,
   editable = true,
   photoUrl,
+  onGlaze,
 }: ProfileHeaderProps) {
   return (
     <div className="glaze-card relative overflow-hidden">
@@ -44,6 +46,16 @@ export function ProfileHeader({
                 <Pencil className="h-4 w-4" />
                 Edit Profile
               </Link>
+            </div>
+          ) : onGlaze ? (
+            <div>
+              <button
+                type="button"
+                onClick={onGlaze}
+                className="bg-primary text-primary-contrast hover:bg-primary-strong flex cursor-pointer items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition select-none"
+              >
+                Glaze
+              </button>
             </div>
           ) : null}
         </div>
