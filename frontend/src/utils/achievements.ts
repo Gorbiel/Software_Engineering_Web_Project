@@ -98,3 +98,22 @@ export function confirmAchievement(
     },
   );
 }
+
+export type ConfirmationRequest = {
+  id: number;
+  receiving_user: AchievementUser;
+  creation_date: string;
+};
+
+export function requestAchievementConfirmation(
+  id: number,
+  receivingUserId: number | string,
+): Promise<ConfirmationRequest> {
+  return apiJson<ConfirmationRequest>(
+    `/achievements/${id}/confirmations_request/`,
+    {
+      method: "POST",
+      body: JSON.stringify({ receiving_user_id: receivingUserId }),
+    },
+  );
+}

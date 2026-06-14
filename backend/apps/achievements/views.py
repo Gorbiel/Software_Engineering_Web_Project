@@ -153,10 +153,10 @@ class AchievementViewSet(viewsets.ModelViewSet):
         """Request a specific user to confirm this achievement"""
         achievement = self.get_object()
 
-        # Check if user is trying to request confirmation for their own achievement
-        if achievement.user == request.user:
+        # Only the achievement owner can request confirmation for it
+        if achievement.user != request.user:
             return Response(
-                {"detail": "Cannot request confirmation for your own achievement."},
+                {"detail": "You can only request confirmation for your own achievement."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
