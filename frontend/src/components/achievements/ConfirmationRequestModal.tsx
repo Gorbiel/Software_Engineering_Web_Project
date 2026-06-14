@@ -81,8 +81,6 @@ export function ConfirmationRequestModal({
 
   useEffect(() => {
     if (!debouncedQuery) {
-      setResults(null);
-      setIsLoading(false);
       return;
     }
 

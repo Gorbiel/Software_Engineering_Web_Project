@@ -184,7 +184,8 @@ class AchievementViewSet(viewsets.ModelViewSet):
         # Only the achievement owner can request confirmation for it
         if achievement.user != request.user:
             return Response(
-                {"detail": "You can only request confirmation for your own achievement."},
+                {"detail": "You can only request confirmation for your \
+                 own achievement."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
