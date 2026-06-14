@@ -205,6 +205,7 @@ export function AchievementItem({
       <AchievementCard
         authorName={achievement.user.name}
         authorPhotoUrl={achievement.user.profile_picture}
+        authorId={achievement.user.id}
         title={achievement.title}
         date={`Shared ${formatRelativeTime(achievement.creation_date)}`}
         likes={0}

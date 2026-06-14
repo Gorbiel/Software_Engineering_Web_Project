@@ -8,6 +8,7 @@ type ProfileAchievementsProps = {
   error: string | null;
   onChanged: (achievement: Achievement) => void;
   onDeleted: (id: number) => void;
+  title?: string;
 };
 
 export function ProfileAchievements({
@@ -17,10 +18,11 @@ export function ProfileAchievements({
   error,
   onChanged,
   onDeleted,
+  title = "My Achievements",
 }: ProfileAchievementsProps) {
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="text-text text-base font-semibold">My Achievements</h2>
+      <h2 className="text-text text-base font-semibold">{title}</h2>
 
       {isLoading ? (
         <p className="text-text-muted px-1 text-sm">Loading achievements…</p>
