@@ -1,4 +1,4 @@
-import { apiJson } from "@/utils/api";
+import { apiFetch, apiJson, ApiError } from "@/utils/api";
 
 export type GlazeUser = {
   id: number;
@@ -31,4 +31,50 @@ export function createGlaze(input: CreateGlazeInput): Promise<Glaze> {
       body: input.body,
     }),
   });
+}
+
+export type FetchGlazesParams = {
+  sentBy?: number | string;
+  receivedBy?: number | string;
+};
+
+function buildQuery(params: FetchGlazesParams): string {
+  const query = new URLSearchParams();
+  if (params.sentBy !== undefined) {
+    query.set("sent_by", String(params.sentBy));
+  }
+  if (params.receivedBy !== undefined) {
+    query.set("received_by", String(params.receivedBy));
+  }
+  const qs = query.toString();
+  return qs ? `?${qs}` : "";
+}
+
+export function fetchGlazes(params: FetchGlazesParams = {}): Promise<Glaze[]> {
+  return apiJson<Glaze[]>(`/glazes/${buildQuery(params)}`);
+}
+
+export type UpdateGlazeInput = {
+  title: string;
+  body: string;
+};
+
+export function updateGlaze(
+  id: number,
+  input: UpdateGlazeInput,
+): Promise<Glaze> {
+  return apiJson<Glaze>(`/glazes/${id}/`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      title: input.title,
+      body: input.body,
+    }),
+  });
+}
+
+export async function deleteGlaze(id: number): Promise<void> {
+  const response = await apiFetch(`/glazes/${id}/`, { method: "DELETE" });
+  if (!response.ok) {
+    throw new ApiError("Unable to delete glaze.", response.status, null);
+  }
 }

@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createGlaze } from "@/utils/glazes";
+import { type Glaze, createGlaze } from "@/utils/glazes";
 
 type GlazeModalProps = {
   receivingUserId: number | string;
   receivingUserName: string;
   onClose: () => void;
-  onCreated?: () => void;
+  onCreated?: (glaze: Glaze) => void;
 };
 
 export function GlazeModal({
@@ -54,12 +54,12 @@ export function GlazeModal({
     setIsPending(true);
 
     try {
-      await createGlaze({
+      const glaze = await createGlaze({
         receivingUserId,
         title: title.trim(),
         body: body.trim(),
       });
-      onCreated?.();
+      onCreated?.(glaze);
       cleanup();
       onClose();
     } catch (err) {

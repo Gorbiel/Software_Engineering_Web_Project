@@ -6,8 +6,10 @@ import { useAuth } from "@/context/AuthContext";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileStats } from "@/components/profile/ProfileStats";
 import { ProfileAchievements } from "@/components/profile/ProfileAchievements";
+import { ProfileGlazes } from "@/components/profile/ProfileGlazes";
 import { GlazeModal } from "@/components/profile/GlazeModal";
 import { type Achievement, fetchAchievements } from "@/utils/achievements";
+import { type Glaze, fetchGlazes } from "@/utils/glazes";
 import { fetchUser, type UserSearchResult } from "@/utils/users";
 
 export default function UserProfilePage() {
@@ -25,6 +27,11 @@ export default function UserProfilePage() {
   const [achievementsError, setAchievementsError] = useState<string | null>(
     null,
   );
+
+  const [glazes, setGlazes] = useState<Glaze[]>([]);
+  const [glazesLoading, setGlazesLoading] = useState(true);
+  const [glazesError, setGlazesError] = useState<string | null>(null);
+  const [glazesGivenCount, setGlazesGivenCount] = useState(0);
 
   const [isGlazeOpen, setIsGlazeOpen] = useState(false);
 
@@ -91,6 +98,42 @@ export default function UserProfilePage() {
     };
   }, [profileId]);
 
+  useEffect(() => {
+    if (profileId === undefined) {
+      return;
+    }
+
+    let active = true;
+
+    Promise.all([
+      fetchGlazes({ receivedBy: profileId }),
+      fetchGlazes({ sentBy: profileId }),
+    ])
+      .then(([received, sent]) => {
+        if (active) {
+          setGlazes(received);
+          setGlazesGivenCount(sent.length);
+          setGlazesError(null);
+        }
+      })
+      .catch((err) => {
+        if (active) {
+          setGlazesError(
+            err instanceof Error ? err.message : "Unable to load glazes.",
+          );
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setGlazesLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [profileId]);
+
   const handleChanged = useCallback((updated: Achievement) => {
     setAchievements((prev) =>
       prev.map((a) => (a.id === updated.id ? updated : a)),
@@ -99,6 +142,18 @@ export default function UserProfilePage() {
 
   const handleDeleted = useCallback((id: number) => {
     setAchievements((prev) => prev.filter((a) => a.id !== id));
+  }, []);
+
+  const handleGlazeChanged = useCallback((updated: Glaze) => {
+    setGlazes((prev) => prev.map((g) => (g.id === updated.id ? updated : g)));
+  }, []);
+
+  const handleGlazeDeleted = useCallback((id: number) => {
+    setGlazes((prev) => prev.filter((g) => g.id !== id));
+  }, []);
+
+  const handleGlazeCreated = useCallback((created: Glaze) => {
+    setGlazes((prev) => [created, ...prev]);
   }, []);
 
   return (
@@ -117,6 +172,7 @@ export default function UserProfilePage() {
           receivingUserId={profile.id}
           receivingUserName={profile.name}
           onClose={() => setIsGlazeOpen(false)}
+          onCreated={handleGlazeCreated}
         />
       ) : null}
 
@@ -128,8 +184,8 @@ export default function UserProfilePage() {
 
       <ProfileStats
         achievements={achievements.length}
-        glazesGiven={128}
-        glazesReceived={84}
+        glazesGiven={glazesGivenCount}
+        glazesReceived={glazes.length}
         totalSprinkles={4250}
       />
 
@@ -141,6 +197,15 @@ export default function UserProfilePage() {
         error={achievementsError}
         onChanged={handleChanged}
         onDeleted={handleDeleted}
+      />
+
+      <ProfileGlazes
+        currentUserId={currentUserId}
+        glazes={glazes}
+        isLoading={glazesLoading}
+        error={glazesError}
+        onChanged={handleGlazeChanged}
+        onDeleted={handleGlazeDeleted}
       />
     </>
   );
