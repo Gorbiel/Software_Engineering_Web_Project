@@ -80,6 +80,8 @@ class AchievementConfirmationSerializer(serializers.ModelSerializer):
 
 
 class ConfirmationRequestSerializer(serializers.ModelSerializer):
+    achievement_id = serializers.IntegerField(source="achievement.id", read_only=True)
+    requesting_user = UserBasicSerializer(source="achievement.user", read_only=True)
     receiving_user = UserBasicSerializer(read_only=True)
     receiving_user_id = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(),
@@ -90,7 +92,14 @@ class ConfirmationRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ConfirmationRequest
-        fields = ["id", "receiving_user", "receiving_user_id", "creation_date"]
+        fields = [
+            "id",
+            "achievement_id",
+            "requesting_user",
+            "receiving_user",
+            "receiving_user_id",
+            "creation_date",
+        ]
         read_only_fields = ["id", "creation_date"]
 
 
