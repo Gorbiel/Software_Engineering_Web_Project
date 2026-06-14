@@ -1,7 +1,11 @@
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from apps.achievements.models import Achievement, AchievementConfirmation
+from apps.achievements.models import (
+    Achievement,
+    AchievementConfirmation,
+    ConfirmationRequest,
+)
 from apps.users.models import User
 
 
@@ -206,3 +210,68 @@ class AchievementConfirmationTests(APITestCase):
             HTTP_AUTHORIZATION=f"Bearer {token}",
         )
         self.assertEqual(response.data["confirmation_count"], 1)
+
+
+class ConfirmationRequestTests(APITestCase):
+    def setUp(self):
+        self.user1 = User.objects.create_user(
+            email="user1@example.com",
+            name="User One",
+            password="password123",
+        )
+        self.user2 = User.objects.create_user(
+            email="user2@example.com",
+            name="User Two",
+            password="password123",
+        )
+        self.user3 = User.objects.create_user(
+            email="user3@example.com",
+            name="User Three",
+            password="password123",
+        )
+
+        self.achievement1 = Achievement.objects.create(
+            user=self.user1,
+            title="Achievement One",
+            body="Body One",
+        )
+        self.achievement2 = Achievement.objects.create(
+            user=self.user3,
+            title="Achievement Two",
+            body="Body Two",
+        )
+
+        ConfirmationRequest.objects.create(
+            achievement=self.achievement1,
+            receiving_user=self.user2,
+        )
+        ConfirmationRequest.objects.create(
+            achievement=self.achievement2,
+            receiving_user=self.user2,
+        )
+        ConfirmationRequest.objects.create(
+            achievement=self.achievement1,
+            receiving_user=self.user3,
+        )
+
+    def login(self, email="user2@example.com", password="password123"):
+        response = self.client.post(
+            "/api/auth/login/",
+            {"email": email, "password": password},
+            format="json",
+        )
+        return response.data["access"]
+
+    def test_list_only_requests_received_by_logged_user(self):
+        token = self.login(email="user2@example.com")
+
+        response = self.client.get(
+            "/api/achievements/confirmation-requests/",
+            HTTP_AUTHORIZATION=f"Bearer {token}",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+        self.assertTrue(all(item["receiving_user"]["id"] == self.user2.id for item in response.data))
+        self.assertIn("requesting_user", response.data[0])
+        self.assertIn("achievement_id", response.data[0])

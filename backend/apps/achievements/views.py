@@ -134,6 +134,20 @@ class AchievementViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    @action(
+        detail=False,
+        methods=["get"],
+        permission_classes=[IsAuthenticated],
+        url_path="confirmation-requests",
+    )
+    def confirmation_requests(self, request):
+        """List confirmation requests addressed to the authenticated user."""
+        queryset = ConfirmationRequest.objects.filter(
+            receiving_user=request.user
+        ).order_by("-creation_date")
+        serializer = ConfirmationRequestSerializer(queryset, many=True)
+        return Response(serializer.data)
+
     @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
     def confirmations_request(self, request, pk=None):
         """Request a specific user to confirm this achievement"""
