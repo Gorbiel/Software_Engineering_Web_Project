@@ -30,7 +30,6 @@ from common.permissions import IsGlazedInAdmin
 class ReportViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated, IsGlazedInAdmin]
 
-
     @action(detail=False, methods=["get"])
     def general(self, request):
         date_from = request.query_params.get("date_from")
