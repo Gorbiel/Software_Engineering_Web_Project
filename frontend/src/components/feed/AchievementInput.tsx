@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Tag } from "lucide-react";
+import { TitleBodyFields } from "@/components/forms/TitleBodyFields";
 import { type Achievement, createAchievement } from "@/utils/achievements";
 
 type AchievementInputProps = {
@@ -42,20 +43,14 @@ export function AchievementInput({ onCreated }: AchievementInputProps) {
 
   return (
     <div className="glaze-card flex flex-col gap-4">
-      <input
-        className="bg-background placeholder:text-text-muted text-text rounded-2xl px-4 py-3 text-sm font-semibold focus:outline-none"
-        placeholder="Achievement title..."
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
+      <TitleBodyFields
+        title={title}
+        body={body}
+        onTitleChange={setTitle}
+        onBodyChange={setBody}
+        titlePlaceholder="Achievement title..."
+        bodyPlaceholder="Share your latest achievement..."
       />
-      <div className="bg-background h-28 rounded-2xl px-4 py-3">
-        <textarea
-          className="placeholder:text-text-muted h-full w-full resize-none bg-transparent text-sm focus:outline-none"
-          placeholder="Share your latest achievement..."
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-        />
-      </div>
       {error ? (
         <p className="bg-accent-softer text-accent rounded-2xl px-4 py-2 text-xs font-semibold">
           {error}

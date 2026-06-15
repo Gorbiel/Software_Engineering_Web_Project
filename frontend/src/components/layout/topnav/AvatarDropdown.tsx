@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { LogOut, Settings, Shield, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -38,17 +39,19 @@ export function AvatarDropdown() {
   return (
     <div className="relative" ref={ref}>
       <button
-        className="border-border bg-background hover:border-primary text-text-muted flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full border text-xs font-bold transition select-none"
+        className="border-border bg-background hover:border-primary text-text-muted relative flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full border text-xs font-bold transition select-none"
         type="button"
         aria-haspopup="menu"
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
       >
         {photoUrl ? (
-          <img
+          <Image
             src={photoUrl}
             alt={user?.name ?? "Profile"}
-            className="h-full w-full rounded-full object-cover"
+            fill
+            className="rounded-full object-cover"
+            unoptimized
           />
         ) : (
           initials
