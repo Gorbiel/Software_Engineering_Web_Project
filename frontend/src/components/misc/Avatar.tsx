@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { AvatarInitials } from "@/components/misc/AvatarInitials";
 
 export type AvatarPerson = {
@@ -15,11 +16,17 @@ type AvatarProps = {
 export function Avatar({ name, src, className = "", alt }: AvatarProps) {
   if (src) {
     return (
-      <img
-        src={src}
-        alt={alt ?? name}
-        className={`rounded-full object-cover ${className}`}
-      />
+      <span
+        className={`relative inline-block overflow-hidden rounded-full ${className}`}
+      >
+        <Image
+          src={src}
+          alt={alt ?? name}
+          fill
+          className="object-cover"
+          unoptimized
+        />
+      </span>
     );
   }
 

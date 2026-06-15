@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Pencil, Send, Trash2 } from "lucide-react";
+import { Check, Send } from "lucide-react";
 import { AchievementCard } from "@/components/achievements/AchievementCard";
 import { ConfirmationRequestModal } from "@/components/achievements/ConfirmationRequestModal";
+import { EntryEditCard } from "@/components/forms/EntryEditCard";
+import { EditDeleteActions } from "@/components/forms/EditDeleteActions";
+import { useEditableEntry } from "@/hooks/useEditableEntry";
 import {
   type Achievement,
   confirmAchievement,
@@ -25,13 +28,32 @@ export function AchievementItem({
   onChanged,
   onDeleted,
 }: AchievementItemProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [title, setTitle] = useState(achievement.title);
-  const [body, setBody] = useState(achievement.body);
-  const [isPending, setIsPending] = useState(false);
+  const {
+    isEditing,
+    title,
+    body,
+    setTitle,
+    setBody,
+    isPending,
+    error,
+    setError,
+    startEditing,
+    cancelEditing,
+    handleSave,
+    handleDelete,
+  } = useEditableEntry<Achievement>({
+    entityTitle: achievement.title,
+    entityBody: achievement.body,
+    save: (updates) => updateAchievement(achievement.id, updates),
+    onChanged,
+    remove: () => deleteAchievement(achievement.id),
+    onDeleted: () => onDeleted(achievement.id),
+    deleteConfirmMessage: "Delete this achievement? This cannot be undone.",
+    deleteErrorMessage: "Unable to delete achievement.",
+  });
+
   const [isConfirming, setIsConfirming] = useState(false);
   const [isRequesting, setIsRequesting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const isOwner =
     currentUserId !== undefined &&
@@ -50,55 +72,6 @@ export function AchievementItem({
     name: c.user.name,
     src: c.user.profile_picture,
   }));
-
-  function startEditing() {
-    setTitle(achievement.title);
-    setBody(achievement.body);
-    setError(null);
-    setIsEditing(true);
-  }
-
-  async function handleSave() {
-    if (title.trim() === "" || body.trim() === "" || isPending) {
-      return;
-    }
-    setError(null);
-    setIsPending(true);
-
-    try {
-      const updated = await updateAchievement(achievement.id, {
-        title: title.trim(),
-        body: body.trim(),
-      });
-      onChanged(updated);
-      setIsEditing(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to save changes.");
-    } finally {
-      setIsPending(false);
-    }
-  }
-
-  async function handleDelete() {
-    if (isPending) {
-      return;
-    }
-    if (!window.confirm("Delete this achievement? This cannot be undone.")) {
-      return;
-    }
-    setError(null);
-    setIsPending(true);
-
-    try {
-      await deleteAchievement(achievement.id);
-      onDeleted(achievement.id);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Unable to delete achievement.",
-      );
-      setIsPending(false);
-    }
-  }
 
   async function handleConfirm() {
     if (!canConfirm || isConfirming) {
@@ -125,45 +98,18 @@ export function AchievementItem({
 
   if (isEditing) {
     return (
-      <div className="glaze-card flex flex-col gap-4">
-        <input
-          className="bg-background placeholder:text-text-muted text-text rounded-2xl px-4 py-3 text-sm font-semibold focus:outline-none"
-          placeholder="Achievement title..."
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <div className="bg-background h-28 rounded-2xl px-4 py-3">
-          <textarea
-            className="placeholder:text-text-muted h-full w-full resize-none bg-transparent text-sm focus:outline-none"
-            placeholder="Share your latest achievement..."
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-          />
-        </div>
-        {error ? (
-          <p className="bg-accent-softer text-accent rounded-2xl px-4 py-2 text-xs font-semibold">
-            {error}
-          </p>
-        ) : null}
-        <div className="flex items-center justify-end gap-3">
-          <button
-            className="text-text-muted hover:text-text hover:bg-background cursor-pointer rounded-full px-4 py-2 text-sm font-semibold transition select-none"
-            type="button"
-            onClick={() => setIsEditing(false)}
-            disabled={isPending}
-          >
-            Cancel
-          </button>
-          <button
-            className="bg-primary text-primary-contrast hover:bg-primary-strong cursor-pointer rounded-full px-4 py-2 text-sm font-semibold transition select-none disabled:cursor-not-allowed disabled:opacity-60"
-            type="button"
-            onClick={handleSave}
-            disabled={isPending || title.trim() === "" || body.trim() === ""}
-          >
-            {isPending ? "Saving…" : "Save"}
-          </button>
-        </div>
-      </div>
+      <EntryEditCard
+        title={title}
+        body={body}
+        onTitleChange={setTitle}
+        onBodyChange={setBody}
+        titlePlaceholder="Achievement title..."
+        bodyPlaceholder="Share your latest achievement..."
+        error={error}
+        isPending={isPending}
+        onCancel={cancelEditing}
+        onSave={handleSave}
+      />
     );
   }
 
@@ -176,21 +122,11 @@ export function AchievementItem({
       >
         <Send className="h-4 w-4" />
       </button>
-      <button
-        className="hover:text-accent-2 hover:bg-accent-2-soft flex cursor-pointer items-center gap-1 rounded-full px-2 py-1 transition select-none"
-        type="button"
-        onClick={startEditing}
-      >
-        <Pencil className="h-4 w-4" />
-      </button>
-      <button
-        className="hover:text-accent hover:bg-accent-softer flex cursor-pointer items-center gap-1 rounded-full px-2 py-1 transition select-none disabled:cursor-not-allowed disabled:opacity-60"
-        type="button"
-        onClick={handleDelete}
-        disabled={isPending}
-      >
-        <Trash2 className="h-4 w-4" />
-      </button>
+      <EditDeleteActions
+        onEdit={startEditing}
+        onDelete={handleDelete}
+        isPending={isPending}
+      />
     </>
   ) : alreadyConfirmed ? (
     <span className="text-accent-2 flex items-center gap-1 px-2 py-1 font-semibold">
