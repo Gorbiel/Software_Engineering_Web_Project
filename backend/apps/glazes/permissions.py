@@ -12,7 +12,8 @@ class IsGlazeOwnerOrReadOnly(BasePermission):
             return True
 
         # Admins can moderate by deleting any glaze.
-        if request.method == "DELETE" and Admin.objects.filter(user=request.user).exists():
+        if request.method == "DELETE" \
+            and Admin.objects.filter(user=request.user).exists():
             return True
 
         # Allow write operations only for the posting user
