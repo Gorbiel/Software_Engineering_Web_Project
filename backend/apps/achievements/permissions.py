@@ -1,5 +1,7 @@
 from rest_framework.permissions import BasePermission
 
+from apps.users.models import Admin
+
 
 class IsAchievementOwnerOrReadOnly(BasePermission):
     message = "Only the achievement owner can edit or delete this achievement."
@@ -7,6 +9,10 @@ class IsAchievementOwnerOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
         # Allow safe methods (GET, HEAD, OPTIONS)
         if request.method in ["GET", "HEAD", "OPTIONS"]:
+            return True
+
+        # Admins can moderate by deleting any achievement.
+        if request.method == "DELETE" and Admin.objects.filter(user=request.user).exists():
             return True
 
         # Allow write operations only for the achievement owner
