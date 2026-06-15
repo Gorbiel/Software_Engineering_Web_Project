@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from apps.glazes.models import Glaze
+from apps.reactions.serializers import GlazeReactionSerializer
 from apps.tags.models import GlazeTag, Tag
 from apps.users.models import User
 
@@ -31,6 +32,8 @@ class GlazeSerializer(serializers.ModelSerializer):
     receiving_user_id = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(), write_only=True, source="receiving_user"
     )
+    reactions = GlazeReactionSerializer(source="glazereaction_set", many=True, read_only=True)
+    reaction_count = serializers.SerializerMethodField()
     tags = TagSerializer(source="glazetag_set", many=True, read_only=True)
     tag_ids = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True, write_only=True, required=False
@@ -47,10 +50,18 @@ class GlazeSerializer(serializers.ModelSerializer):
             "title",
             "body",
             "creation_date",
+            "reactions",
+            "reaction_count",
             "tags",
             "tag_ids",
         ]
-        read_only_fields = ["id", "creation_date", "posting_user", "tags"]
+        read_only_fields = [
+            "id",
+            "creation_date",
+            "posting_user",
+            "reactions",
+            "tags",
+        ]
 
     def validate(self, data):
         posting_user = data.get("posting_user")
@@ -63,6 +74,9 @@ class GlazeSerializer(serializers.ModelSerializer):
             )
 
         return data
+
+    def get_reaction_count(self, obj):
+        return obj.glazereaction_set.count()
 
     def create(self, validated_data):
         tag_ids = self.initial_data.get("tag_ids", [])

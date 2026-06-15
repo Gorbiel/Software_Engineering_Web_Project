@@ -6,6 +6,7 @@ from apps.achievements.models import (
     AchievementConfirmation,
     ConfirmationRequest,
 )
+from apps.reactions.models import AchievementReaction, Reaction
 from apps.users.models import Admin, User
 
 
@@ -210,6 +211,163 @@ class AchievementConfirmationTests(APITestCase):
             HTTP_AUTHORIZATION=f"Bearer {token}",
         )
         self.assertEqual(response.data["confirmation_count"], 1)
+
+
+class AchievementReactionTests(APITestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(
+            email="owner@example.com",
+            name="Owner",
+            password="password123",
+        )
+        self.reactor = User.objects.create_user(
+            email="reactor@example.com",
+            name="Reactor",
+            password="password123",
+        )
+        self.achievement = Achievement.objects.create(
+            user=self.owner,
+            title="Reactable achievement",
+            body="Needs a heart",
+        )
+
+    def login(self, email="reactor@example.com", password="password123"):
+        response = self.client.post(
+            "/api/auth/login/",
+            {"email": email, "password": password},
+            format="json",
+        )
+        return response.data["access"]
+
+    def test_add_reaction_to_achievement(self):
+        token = self.login()
+
+        response = self.client.post(
+            f"/api/achievements/{self.achievement.id}/reactions/",
+            {"code": "heart", "name": "Heart"},
+            format="json",
+            HTTP_AUTHORIZATION=f"Bearer {token}",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["reaction"]["code"], "heart")
+        self.assertTrue(
+            AchievementReaction.objects.filter(
+                achievement=self.achievement,
+                user=self.reactor,
+                reaction__code="heart",
+            ).exists()
+        )
+
+    def test_adding_same_reaction_twice_is_idempotent(self):
+        token = self.login()
+
+        first_response = self.client.post(
+            f"/api/achievements/{self.achievement.id}/reactions/",
+            {"code": "heart", "name": "Heart"},
+            format="json",
+            HTTP_AUTHORIZATION=f"Bearer {token}",
+        )
+        second_response = self.client.post(
+            f"/api/achievements/{self.achievement.id}/reactions/",
+            {"code": "heart", "name": "Heart"},
+            format="json",
+            HTTP_AUTHORIZATION=f"Bearer {token}",
+        )
+
+        self.assertEqual(first_response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(second_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            AchievementReaction.objects.filter(
+                achievement=self.achievement,
+                user=self.reactor,
+                reaction__code="heart",
+            ).count(),
+            1,
+        )
+
+    def test_rejects_unsupported_reaction(self):
+        token = self.login()
+
+        response = self.client.post(
+            f"/api/achievements/{self.achievement.id}/reactions/",
+            {"code": "rocket", "name": "Rocket"},
+            format="json",
+            HTTP_AUTHORIZATION=f"Bearer {token}",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("code", response.data)
+
+    def test_normalizes_thumbs_up_reaction_code(self):
+        token = self.login()
+
+        response = self.client.post(
+            f"/api/achievements/{self.achievement.id}/reactions/",
+            {"code": "thumbs up"},
+            format="json",
+            HTTP_AUTHORIZATION=f"Bearer {token}",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["reaction"]["code"], "thumbs_up")
+        self.assertEqual(response.data["reaction"]["emoji"], "👍")
+
+    def test_retrieve_achievement_includes_reaction_count(self):
+        token = self.login(email="owner@example.com")
+        reaction = Reaction.objects.create(name="Heart", code="heart")
+        AchievementReaction.objects.create(
+            achievement=self.achievement,
+            user=self.reactor,
+            reaction=reaction,
+        )
+
+        response = self.client.get(
+            f"/api/achievements/{self.achievement.id}/",
+            HTTP_AUTHORIZATION=f"Bearer {token}",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["reaction_count"], 1)
+        self.assertEqual(len(response.data["reactions"]), 1)
+
+    def test_delete_own_achievement_reaction(self):
+        token = self.login()
+        reaction = Reaction.objects.create(name="Heart", code="heart")
+        achievement_reaction = AchievementReaction.objects.create(
+            achievement=self.achievement,
+            user=self.reactor,
+            reaction=reaction,
+        )
+
+        response = self.client.delete(
+            f"/api/achievements/{self.achievement.id}/reactions/{achievement_reaction.id}/",
+            HTTP_AUTHORIZATION=f"Bearer {token}",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(
+            AchievementReaction.objects.filter(id=achievement_reaction.id).exists()
+        )
+
+    def test_cannot_delete_someone_elses_achievement_reaction(self):
+        owner_token = self.login(email="owner@example.com")
+        reaction = Reaction.objects.create(name="Heart", code="heart")
+        achievement_reaction = AchievementReaction.objects.create(
+            achievement=self.achievement,
+            user=self.reactor,
+            reaction=reaction,
+        )
+
+        response = self.client.delete(
+            f"/api/achievements/{self.achievement.id}/reactions/{achievement_reaction.id}/",
+            HTTP_AUTHORIZATION=f"Bearer {owner_token}",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertTrue(
+            AchievementReaction.objects.filter(id=achievement_reaction.id).exists()
+        )
 
 
 class ConfirmationRequestTests(APITestCase):

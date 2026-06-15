@@ -1,9 +1,14 @@
-from rest_framework import viewsets
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from apps.glazes.models import Glaze
 from apps.glazes.permissions import IsGlazeOwnerOrReadOnly
 from apps.glazes.serializers import GlazeSerializer
+from apps.reactions.models import GlazeReaction
+from apps.reactions.serializers import GlazeReactionSerializer
+from apps.reactions.services import resolve_reaction_definition
 
 
 class GlazeViewSet(viewsets.ModelViewSet):
@@ -33,3 +38,55 @@ class GlazeViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(posting_user=self.request.user)
+
+    @action(detail=True, methods=["get", "post"], permission_classes=[IsAuthenticated])
+    def reactions(self, request, pk=None):
+        glaze = self.get_object()
+
+        if request.method == "GET":
+            reactions = glaze.glazereaction_set.select_related(
+                "user", "reaction"
+            ).order_by("-creation_date")
+            serializer = GlazeReactionSerializer(reactions, many=True)
+            return Response(serializer.data)
+
+        reaction = resolve_reaction_definition(
+            reaction_id=request.data.get("reaction_id"),
+            code=request.data.get("code"),
+            name=request.data.get("name"),
+        )
+
+        glaze_reaction = GlazeReaction.objects.filter(
+            glaze=glaze,
+            user=request.user,
+            reaction=reaction,
+        ).first()
+
+        status_code = status.HTTP_200_OK
+        if glaze_reaction is None:
+            glaze_reaction = GlazeReaction.objects.create(
+                glaze=glaze,
+                user=request.user,
+                reaction=reaction,
+            )
+            status_code = status.HTTP_201_CREATED
+
+        serializer = GlazeReactionSerializer(glaze_reaction)
+        return Response(serializer.data, status=status_code)
+
+    @action(
+        detail=True,
+        methods=["delete"],
+        permission_classes=[IsAuthenticated],
+        url_path=r"reactions/(?P<reaction_id>[0-9]+)",
+    )
+    def delete_reaction(self, request, pk=None, reaction_id=None):
+        glaze = self.get_object()
+        deleted, _ = GlazeReaction.objects.filter(
+            id=reaction_id,
+            glaze=glaze,
+            user=request.user,
+        ).delete()
+        if not deleted:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_204_NO_CONTENT)

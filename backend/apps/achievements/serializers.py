@@ -5,6 +5,7 @@ from apps.achievements.models import (
     AchievementConfirmation,
     ConfirmationRequest,
 )
+from apps.reactions.serializers import AchievementReactionSerializer
 from apps.tags.models import AchievementTag, Tag
 from apps.users.models import User
 
@@ -116,6 +117,10 @@ class AchievementSerializer(serializers.ModelSerializer):
         source="achievementconfirmation_set", many=True, read_only=True
     )
     confirmation_count = serializers.SerializerMethodField()
+    reactions = AchievementReactionSerializer(
+        source="achievementreaction_set", many=True, read_only=True
+    )
+    reaction_count = serializers.SerializerMethodField()
     tag_ids = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True, write_only=True, required=False
     )
@@ -132,13 +137,25 @@ class AchievementSerializer(serializers.ModelSerializer):
             "creation_date",
             "confirmations",
             "confirmation_count",
+            "reactions",
+            "reaction_count",
             "tags",
             "tag_ids",
         ]
-        read_only_fields = ["id", "creation_date", "user", "confirmations", "tags"]
+        read_only_fields = [
+            "id",
+            "creation_date",
+            "user",
+            "confirmations",
+            "reactions",
+            "tags",
+        ]
 
     def get_confirmation_count(self, obj):
         return obj.achievementconfirmation_set.count()
+
+    def get_reaction_count(self, obj):
+        return obj.achievementreaction_set.count()
 
     def create(self, validated_data):
         tag_ids = self.initial_data.get("tag_ids", [])

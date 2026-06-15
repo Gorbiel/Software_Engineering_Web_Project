@@ -21,6 +21,9 @@ from apps.achievements.serializers import (
     AchievementSerializer,
     ConfirmationRequestSerializer,
 )
+from apps.reactions.models import AchievementReaction
+from apps.reactions.serializers import AchievementReactionSerializer
+from apps.reactions.services import resolve_reaction_definition
 from common.pagination import SearchResultsSetPagination
 
 logger = logging.getLogger(__name__)
@@ -133,6 +136,58 @@ class AchievementViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    @action(detail=True, methods=["get", "post"], permission_classes=[IsAuthenticated])
+    def reactions(self, request, pk=None):
+        achievement = self.get_object()
+
+        if request.method == "GET":
+            reactions = achievement.achievementreaction_set.select_related(
+                "user", "reaction"
+            ).order_by("-creation_date")
+            serializer = AchievementReactionSerializer(reactions, many=True)
+            return Response(serializer.data)
+
+        reaction = resolve_reaction_definition(
+            reaction_id=request.data.get("reaction_id"),
+            code=request.data.get("code"),
+            name=request.data.get("name"),
+        )
+
+        achievement_reaction = AchievementReaction.objects.filter(
+            achievement=achievement,
+            user=request.user,
+            reaction=reaction,
+        ).first()
+
+        status_code = status.HTTP_200_OK
+        if achievement_reaction is None:
+            achievement_reaction = AchievementReaction.objects.create(
+                achievement=achievement,
+                user=request.user,
+                reaction=reaction,
+            )
+            status_code = status.HTTP_201_CREATED
+
+        serializer = AchievementReactionSerializer(achievement_reaction)
+        return Response(serializer.data, status=status_code)
+
+    @action(
+        detail=True,
+        methods=["delete"],
+        permission_classes=[IsAuthenticated],
+        url_path=r"reactions/(?P<reaction_id>[0-9]+)",
+    )
+    def delete_reaction(self, request, pk=None, reaction_id=None):
+        achievement = self.get_object()
+        deleted, _ = AchievementReaction.objects.filter(
+            id=reaction_id,
+            achievement=achievement,
+            user=request.user,
+        ).delete()
+        if not deleted:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=False,
