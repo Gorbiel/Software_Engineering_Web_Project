@@ -66,6 +66,11 @@ class UserSerializer(serializers.ModelSerializer):
             "rank_name",
         ]
 
+    def validate(self, attrs):
+        if self.instance is None and "password" not in attrs:
+            raise serializers.ValidationError({"password": "This field is required."})
+        return attrs
+
     def create(self, validated_data):
         if "password" not in validated_data:
             raise serializers.ValidationError({"password": "This field is required."})
