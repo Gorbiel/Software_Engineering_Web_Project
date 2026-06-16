@@ -71,28 +71,3 @@ class UserModelTests(TestCase):
 
         with self.assertRaises(IntegrityError):
             Admin.objects.create(user=user)
-
-    def test_rank_enum_and_name_property(self):
-        user = User.objects.create_user(
-            email="user@example.com",
-            name="Test User",
-            password="password123",
-            rank=User.Rank.MID.value,
-        )
-
-        self.assertEqual(user.rank_name, "mid")
-
-        user.rank = 42
-        user.save(update_fields=["rank"])
-
-        self.assertEqual(user.rank_name, "custom")
-
-    def test_rank_value_from_name_and_errors(self):
-        self.assertEqual(User.rank_value_from_name("junior"), User.Rank.JUNIOR.value)
-        self.assertEqual(User.rank_value_from_name("MID"), User.Rank.MID.value)
-
-        with self.assertRaises(ValueError):
-            User.rank_value_from_name(123)
-
-        with self.assertRaises(ValueError):
-            User.rank_value_from_name("unknown-rank")

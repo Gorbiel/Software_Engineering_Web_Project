@@ -12,7 +12,6 @@
   DELETE /{id}
   PATCH  /{id}/activate
   PATCH  /{id}/deactivate
-  PATCH  /{id}/rank
 
 /api/teams/
   GET    /
@@ -22,6 +21,7 @@
   DELETE /{id}
   POST   /{id}/members
   DELETE /{id}/members/{user_id}
+  PATCH  /{id}/members/{user_id}/rank
   POST   /{id}/leaders
   DELETE /{id}/leaders/{user_id}
 

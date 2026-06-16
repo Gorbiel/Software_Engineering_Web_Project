@@ -6,8 +6,6 @@ from apps.users.models import User
 class UserSearchSerializer(serializers.ModelSerializer):
     """Serializer for user search results."""
 
-    rank_name = serializers.CharField(read_only=True)
-
     class Meta:
         model = User
         fields = [
@@ -19,15 +17,12 @@ class UserSearchSerializer(serializers.ModelSerializer):
             "profile_picture",
             "creation_date",
             "active",
-            "rank",
-            "rank_name",
         ]
         read_only_fields = fields
 
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
-    rank_name = serializers.CharField(read_only=True)
 
     class Meta:
         model = User
@@ -44,8 +39,6 @@ class UserSerializer(serializers.ModelSerializer):
             "deactivation_date",
             "is_staff",
             "is_superuser",
-            "rank",
-            "rank_name",
         ]
         read_only_fields = [
             "id",
@@ -56,8 +49,6 @@ class UserSerializer(serializers.ModelSerializer):
             # Users should not be allowed to toggle their own active status via
             # the profile endpoint; admins manage activation.
             "active",
-            "rank",
-            "rank_name",
         ]
 
     def create(self, validated_data):
@@ -76,34 +67,3 @@ class UserSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
-
-
-class RankField(serializers.Field):
-    """Accept either an integer rank or a textual rank name and normalize to int."""
-
-    def to_internal_value(self, data):
-        if isinstance(data, int):
-            if 1 <= data <= 100:
-                return data
-            raise serializers.ValidationError("Rank must be between 1 and 100")
-
-        if isinstance(data, str):
-            try:
-                return User.rank_value_from_name(data)
-            except ValueError as exc:
-                raise serializers.ValidationError("Invalid rank name") from exc
-
-        raise serializers.ValidationError("Invalid type for rank")
-
-    def to_representation(self, value):
-        return int(value)
-
-
-class UserRankSerializer(serializers.Serializer):
-    rank = RankField()
-
-
-class UserRankResponseSerializer(serializers.Serializer):
-    user_id = serializers.IntegerField(source="id")
-    rank = serializers.IntegerField()
-    rank_name = serializers.CharField()
