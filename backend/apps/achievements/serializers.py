@@ -151,6 +151,12 @@ class AchievementSerializer(serializers.ModelSerializer):
             "tags",
         ]
 
+    def validate_tag_ids(self, value):
+        """Validate that no more than 5 tags are provided"""
+        if len(value) > 5:
+            raise serializers.ValidationError("Maximum 5 tags allowed per achievement.")
+        return value
+
     def get_confirmation_count(self, obj):
         return obj.achievementconfirmation_set.count()
 

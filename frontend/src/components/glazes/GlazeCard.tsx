@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Avatar } from "@/components/misc/Avatar";
+import TagBadge from "@/components/tags/TagBadge";
+import { type TagListItem } from "@/utils/tags";
 
 type GlazeCardProps = {
   posterName: string;
@@ -11,6 +13,7 @@ type GlazeCardProps = {
   date: string;
   reactions?: React.ReactNode;
   actions?: React.ReactNode;
+  tags?: TagListItem[];
   children: React.ReactNode;
 };
 
@@ -28,6 +31,7 @@ export function GlazeCard({
   date,
   reactions,
   actions,
+  tags = [],
   children,
 }: GlazeCardProps) {
   const posterHref = profileLink(posterId);
@@ -91,9 +95,16 @@ export function GlazeCard({
           <div className="flex items-center gap-1">{actions}</div>
         ) : null}
       </div>
-      <div className="flex min-w-0 flex-col gap-1">
+      <div className="flex min-w-0 flex-col gap-2">
         <h3 className="text-text text-lg font-bold wrap-break-word">{title}</h3>
         <p className="text-text-muted text-sm wrap-break-word">{children}</p>
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <TagBadge key={tag.id} tag={tag} size="sm" />
+            ))}
+          </div>
+        )}
       </div>
       {reactions ? (
         <div className="text-text-muted flex items-center text-xs">

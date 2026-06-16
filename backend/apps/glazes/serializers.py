@@ -77,6 +77,12 @@ class GlazeSerializer(serializers.ModelSerializer):
 
         return data
 
+    def validate_tag_ids(self, value):
+        """Validate that no more than 5 tags are provided"""
+        if len(value) > 5:
+            raise serializers.ValidationError("Maximum 5 tags allowed per glaze.")
+        return value
+
     def get_reaction_count(self, obj):
         return obj.glazereaction_set.count()
 

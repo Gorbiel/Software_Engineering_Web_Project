@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Avatar, type AvatarPerson } from "@/components/misc/Avatar";
 import { AvatarStack } from "@/components/misc/AvatarStack";
+import TagBadge from "@/components/tags/TagBadge";
+import { type TagListItem } from "@/utils/tags";
 
 type AchievementCardProps = {
   authorName: string;
@@ -11,6 +13,7 @@ type AchievementCardProps = {
   reactions?: React.ReactNode;
   confirmedBy?: AvatarPerson[];
   actions?: React.ReactNode;
+  tags?: TagListItem[];
   children: React.ReactNode;
 };
 
@@ -23,6 +26,7 @@ export function AchievementCard({
   reactions,
   confirmedBy = [],
   actions,
+  tags = [],
   children,
 }: AchievementCardProps) {
   const avatar = (
@@ -86,9 +90,16 @@ export function AchievementCard({
           )}
         </div>
       </div>
-      <div className="flex min-w-0 flex-col gap-1">
+      <div className="flex min-w-0 flex-col gap-2">
         <h3 className="text-text text-lg font-bold wrap-break-word">{title}</h3>
         <p className="text-text-muted text-sm wrap-break-word">{children}</p>
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <TagBadge key={tag.id} tag={tag} size="sm" />
+            ))}
+          </div>
+        )}
       </div>
       <div className="text-text-muted flex items-center justify-between gap-4 text-xs">
         <div className="min-w-0">{reactions}</div>
