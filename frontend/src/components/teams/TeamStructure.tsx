@@ -1,17 +1,46 @@
 import Link from "next/link";
 import { Avatar } from "@/components/misc/Avatar";
 import { TeamMemberCard } from "./TeamMemberCard";
-import type { TeamDetail } from "@/utils/teams";
+import { TeamMemberAdder } from "./TeamMemberAdder";
+import type { TeamDetail, TeamMemberUser } from "@/utils/teams";
 
-export function TeamStructure({ team }: { team: TeamDetail }) {
+type TeamStructureProps = {
+  team: TeamDetail;
+  canManage?: boolean;
+  busy?: boolean;
+  error?: string | null;
+  onAddMember?: (userId: number) => void;
+  onRemoveMember?: (member: TeamMemberUser) => void;
+};
+
+export function TeamStructure({
+  team,
+  canManage = false,
+  busy = false,
+  error = null,
+  onAddMember,
+  onRemoveMember,
+}: TeamStructureProps) {
   const leaderIds = new Set(team.leaders.map((leader) => leader.id));
   const members = team.members.filter((member) => !leaderIds.has(member.id));
 
   return (
     <div className="glaze-card flex flex-col gap-4">
-      <h2 className="text-text text-sm font-semibold">
-        Team Structure: {team.name}
-      </h2>
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-text text-sm font-semibold">
+          Team Structure: {team.name}
+        </h2>
+        {canManage && onAddMember ? (
+          <TeamMemberAdder disabled={busy} onAdd={onAddMember} />
+        ) : null}
+      </div>
+
+      {error ? (
+        <p className="bg-accent-softer text-accent rounded-2xl px-4 py-2 text-xs font-semibold">
+          {error}
+        </p>
+      ) : null}
+
       <div className="flex flex-col gap-4">
         {team.leaders.length > 0 ? (
           <div className="flex flex-col gap-4">
@@ -48,6 +77,12 @@ export function TeamStructure({ team }: { team: TeamDetail }) {
                 role={member.job_title ?? "—"}
                 photoUrl={member.profile_picture}
                 colorIndex={index}
+                onRemove={
+                  canManage && onRemoveMember
+                    ? () => onRemoveMember(member)
+                    : undefined
+                }
+                removeDisabled={busy}
               />
             ))}
           </div>

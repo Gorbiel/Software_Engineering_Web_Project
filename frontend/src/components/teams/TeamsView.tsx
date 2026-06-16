@@ -1,14 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchLedTeams, fetchMyTeams, type TeamDetail } from "@/utils/teams";
+import { useMyProfile } from "@/context/MyProfileContext";
+import {
+  addTeamMember,
+  fetchLedTeams,
+  fetchMyTeams,
+  fetchTeam,
+  removeTeamMember,
+  type TeamDetail,
+  type TeamMemberUser,
+} from "@/utils/teams";
 import { TeamSelector } from "@/components/teams/TeamSelector";
 import { TeamStructure } from "@/components/teams/TeamStructure";
 
 export function TeamsView() {
+  const { profile } = useMyProfile();
+  const currentUserId = profile?.id;
   const [teams, setTeams] = useState<TeamDetail[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [manageError, setManageError] = useState<string | null>(null);
 
   useEffect(() => {
     let ignore = false;
@@ -62,14 +75,66 @@ export function TeamsView() {
 
   const selectedTeam = teams.find((team) => team.id === selectedId) ?? teams[0];
 
+  const canManage =
+    currentUserId !== undefined &&
+    selectedTeam.leaders.some(
+      (leader) => String(leader.id) === String(currentUserId),
+    );
+
+  async function applyTeamUpdate(teamId: number, action: () => Promise<unknown>) {
+    if (busy) return;
+    setBusy(true);
+    setManageError(null);
+    try {
+      await action();
+      const fresh = await fetchTeam(teamId);
+      setTeams((prev) =>
+        prev ? prev.map((team) => (team.id === fresh.id ? fresh : team)) : prev,
+      );
+    } catch (err) {
+      setManageError(
+        err instanceof Error ? err.message : "Something went wrong.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function handleAddMember(userId: number) {
+    applyTeamUpdate(selectedTeam.id, () =>
+      addTeamMember(selectedTeam.id, userId),
+    );
+  }
+
+  function handleRemoveMember(member: TeamMemberUser) {
+    if (
+      !window.confirm(`Remove ${member.name} from ${selectedTeam.name}?`)
+    ) {
+      return;
+    }
+    applyTeamUpdate(selectedTeam.id, () =>
+      removeTeamMember(selectedTeam.id, member.id),
+    );
+  }
+
   return (
     <>
       <TeamSelector
         teams={teams}
         selectedTeam={selectedTeam}
-        onSelectTeam={(team) => setSelectedId(team.id)}
+        onSelectTeam={(team) => {
+          setSelectedId(team.id);
+          setManageError(null);
+        }}
       />
-      <TeamStructure team={selectedTeam} />
+      <TeamStructure
+        team={selectedTeam}
+        canManage={canManage}
+        busy={busy}
+        error={manageError}
+        onAddMember={handleAddMember}
+        onRemoveMember={handleRemoveMember}
+      />
     </>
   );
 }

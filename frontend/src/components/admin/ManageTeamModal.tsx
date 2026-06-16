@@ -2,12 +2,9 @@
 
 import { useState } from "react";
 import { Modal } from "@/components/misc/Modal";
-import {
-  SearchSelect,
-  type SearchOption,
-} from "@/components/reports/SearchSelect";
+import { SearchSelect } from "@/components/reports/SearchSelect";
 import { TeamMemberManageRow } from "@/components/admin/TeamMemberManageRow";
-import { searchUsers } from "@/utils/users";
+import { searchUserOptions } from "@/utils/userSearchOptions";
 import {
   addTeamLeader,
   addTeamMember,
@@ -16,15 +13,6 @@ import {
   removeTeamMember,
   type TeamDetail,
 } from "@/utils/teams";
-
-async function searchUserOptions(query: string): Promise<SearchOption[]> {
-  const data = await searchUsers({ q: query, pageSize: 8, active: true });
-  return data.results.map((user) => ({
-    id: user.id,
-    label: user.name,
-    sublabel: user.email,
-  }));
-}
 
 type ManageTeamModalProps = {
   team: TeamDetail;
