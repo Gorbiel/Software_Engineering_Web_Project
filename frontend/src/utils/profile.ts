@@ -7,6 +7,7 @@ export type UserProfile = {
   job_title: string | null;
   bio_text: string | null;
   profile_picture: string | null;
+  team_id: number | null;
 };
 
 export function fetchMyProfile(): Promise<UserProfile> {
