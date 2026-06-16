@@ -6,7 +6,9 @@ import { AchievementCard } from "@/components/achievements/AchievementCard";
 import { ConfirmationRequestModal } from "@/components/achievements/ConfirmationRequestModal";
 import { EntryEditCard } from "@/components/forms/EntryEditCard";
 import { EditDeleteActions } from "@/components/forms/EditDeleteActions";
+import { DeleteButton } from "@/components/forms/DeleteButton";
 import { useEditableEntry } from "@/hooks/useEditableEntry";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import {
   type Achievement,
   confirmAchievement,
@@ -54,6 +56,8 @@ export function AchievementItem({
 
   const [isConfirming, setIsConfirming] = useState(false);
   const [isRequesting, setIsRequesting] = useState(false);
+
+  const isAdmin = useIsAdmin() === true;
 
   const isOwner =
     currentUserId !== undefined &&
@@ -113,22 +117,7 @@ export function AchievementItem({
     );
   }
 
-  const actions = isOwner ? (
-    <>
-      <button
-        className="hover:text-accent-2 hover:bg-accent-2-soft flex cursor-pointer items-center gap-1 rounded-full px-2 py-1 transition select-none"
-        type="button"
-        onClick={() => setIsRequesting(true)}
-      >
-        <Send className="h-4 w-4" />
-      </button>
-      <EditDeleteActions
-        onEdit={startEditing}
-        onDelete={handleDelete}
-        isPending={isPending}
-      />
-    </>
-  ) : alreadyConfirmed ? (
+  const confirmAction = alreadyConfirmed ? (
     <span className="text-accent-2 flex items-center gap-1 px-2 py-1 font-semibold">
       <Check className="h-4 w-4" />
       Confirmed
@@ -144,6 +133,38 @@ export function AchievementItem({
       {isConfirming ? "Confirming…" : "Confirm"}
     </button>
   ) : null;
+
+  const moderationDelete =
+    !isOwner && isAdmin ? (
+      <DeleteButton onDelete={handleDelete} isPending={isPending} />
+    ) : null;
+
+  let actions: React.ReactNode = null;
+  if (isOwner) {
+    actions = (
+      <>
+        <button
+          className="hover:text-accent-2 hover:bg-accent-2-soft flex cursor-pointer items-center gap-1 rounded-full px-2 py-1 transition select-none"
+          type="button"
+          onClick={() => setIsRequesting(true)}
+        >
+          <Send className="h-4 w-4" />
+        </button>
+        <EditDeleteActions
+          onEdit={startEditing}
+          onDelete={handleDelete}
+          isPending={isPending}
+        />
+      </>
+    );
+  } else if (confirmAction || moderationDelete) {
+    actions = (
+      <>
+        {confirmAction}
+        {moderationDelete}
+      </>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-2">
