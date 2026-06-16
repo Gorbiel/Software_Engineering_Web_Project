@@ -342,4 +342,103 @@ class TeamViewSet(viewsets.ModelViewSet):
             .values("tag_text", "usage_count")[:10]
         )
 
+    @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
+    def compare(self, request):
+        """
+        Compare multiple teams side by side
+        
+        Query parameters:
+        - team_ids: Comma-separated list of team IDs (required, max 5 teams)
+        - date_from: Start date (YYYY-MM-DD, optional)
+        - date_to: End date (YYYY-MM-DD, optional)
+        """
+        team_ids_param = request.query_params.get("team_ids")
+        if not team_ids_param:
+            return Response(
+                {"error": "team_ids parameter is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        try:
+            team_ids = [int(tid.strip()) for tid in team_ids_param.split(",")]
+            if len(team_ids) > 5:
+                return Response(
+                    {"error": "Maximum 5 teams can be compared at once"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        except ValueError:
+            return Response(
+                {"error": "Invalid team_ids format"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        date_from = request.query_params.get("date_from")
+        date_to = request.query_params.get("date_to")
+        
+        # Parse dates if provided
+        if date_from and date_to:
+            try:
+                date_from = timezone.make_aware(datetime.strptime(date_from, "%Y-%m-%d"))
+                date_to = timezone.make_aware(
+                    datetime.strptime(date_to, "%Y-%m-%d")
+                ) + timedelta(days=1)
+            except ValueError:
+                return Response(
+                    {"error": "Invalid date format. Use YYYY-MM-DD"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        else:
+            # Default to last 30 days
+            date_to = timezone.now()
+            date_from = date_to - timedelta(days=30)
+        
+        # Get teams with engagement data
+        teams = (
+            Team.teams.filter(id__in=team_ids)
+            .with_engagement(date_from, date_to)
+            .with_participation_rate(date_from, date_to)
+            .with_cross_team_engagement(date_from, date_to)
+        )
+        
+        comparison_data = []
+        for team in teams:
+            # Get top performers in team
+            top_achievers = list(
+                User.users.in_team(team)
+                .annotate(achievement_count=Count("achievement"))
+                .order_by("-achievement_count")
+                .values("id", "name", "achievement_count")[:3]
+            )
+            
+            top_glaze_receivers = list(
+                User.users.in_team(team)
+                .annotate(glaze_count=Count("receiver"))
+                .order_by("-glaze_count")
+                .values("id", "name", "glaze_count")[:3]
+            )
+            
+            comparison_data.append({
+                "team_id": team.id,
+                "team_name": team.name,
+                "member_count": team.member_count,
+                "metrics": {
+                    "achievements_count": team.achievements_count,
+                    "glazes_sent_count": team.glazes_sent_count,
+                    "glazes_received_count": team.glazes_received_count,
+                    "confirmations_count": team.confirmations_count,
+                    "participation_rate": round(team.participation_rate, 2) if hasattr(team, 'participation_rate') else 0,
+                    "cross_team_glazes_received": team.cross_team_glazes_received,
+                    "cross_team_glazes_sent": team.cross_team_glazes_sent,
+                },
+                "top_performers": {
+                    "top_achievers": top_achievers,
+                    "top_glaze_receivers": top_glaze_receivers,
+                }
+            })
+        
+        return Response({
+            "date_from": date_from.isoformat(),
+            "date_to": date_to.isoformat(),
+            "teams": comparison_data,
+        })
         return JsonResponse(report)
