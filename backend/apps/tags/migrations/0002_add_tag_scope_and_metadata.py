@@ -109,4 +109,5 @@ class Migration(migrations.Migration):
         ),
     ]
 
+
 # Made with Bob

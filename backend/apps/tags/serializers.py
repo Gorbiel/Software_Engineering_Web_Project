@@ -1,14 +1,16 @@
 from rest_framework import serializers
 
 from apps.tags.models import AchievementTag, GlazeTag, Tag
-from apps.teams.models import Team, TeamMember
+from apps.teams.models import TeamMember
 
 
 class TagSerializer(serializers.ModelSerializer):
     """Serializer for Tag model with scope information"""
 
     is_global = serializers.BooleanField(read_only=True)
-    team_name = serializers.CharField(source="team.name", read_only=True, allow_null=True)
+    team_name = serializers.CharField(
+        source="team.name", read_only=True, allow_null=True
+    )
     created_by_name = serializers.CharField(
         source="created_by.name", read_only=True, allow_null=True
     )
@@ -107,5 +109,6 @@ class GlazeTagSerializer(serializers.ModelSerializer):
         model = GlazeTag
         fields = ["id", "tag_id", "tag_details", "added_date"]
         read_only_fields = ["id", "added_date"]
+
 
 # Made with Bob

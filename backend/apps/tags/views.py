@@ -12,7 +12,7 @@ from apps.teams.models import TeamMember
 class TagViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing tags.
-    
+
     Permissions:
     - List/Retrieve: Any authenticated user
     - Create global tag: Superuser only
@@ -47,7 +47,7 @@ class TagViewSet(viewsets.ModelViewSet):
     def search(self, request):
         """
         Search tags by text with optional team filter.
-        
+
         Query params:
         - q: Search query (required)
         - team_id: Filter by team (optional)
@@ -55,7 +55,9 @@ class TagViewSet(viewsets.ModelViewSet):
         """
         query = request.query_params.get("q", "").strip()
         team_id = request.query_params.get("team_id")
-        include_global = request.query_params.get("include_global", "true").lower() == "true"
+        include_global = (
+            request.query_params.get("include_global", "true").lower() == "true"
+        )  # noqa: E501
 
         if not query:
             return Response(
@@ -97,7 +99,7 @@ class TagViewSet(viewsets.ModelViewSet):
     def team_tags(self, request):
         """
         Get tags for a specific team.
-        
+
         Query params:
         - team_id: Team ID (required)
         """
@@ -128,7 +130,7 @@ class TagViewSet(viewsets.ModelViewSet):
     def available_for_team(self, request):
         """
         Get all tags available for a team (global + team-specific).
-        
+
         Query params:
         - team_id: Team ID (required)
         """
@@ -178,5 +180,6 @@ class TagViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN,
             )
         return super().perform_destroy(instance)
+
 
 # Made with Bob
