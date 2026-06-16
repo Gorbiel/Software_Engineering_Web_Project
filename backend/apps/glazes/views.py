@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -9,6 +11,9 @@ from apps.glazes.serializers import GlazeSerializer
 from apps.reactions.models import GlazeReaction
 from apps.reactions.serializers import GlazeReactionSerializer
 from apps.reactions.services import resolve_reaction_definition
+from apps.notifications.services import notify_glaze_received, notify_glaze_reaction
+
+logger = logging.getLogger(__name__)
 
 
 class GlazeViewSet(viewsets.ModelViewSet):
@@ -37,7 +42,12 @@ class GlazeViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        serializer.save(posting_user=self.request.user)
+        glaze = serializer.save(posting_user=self.request.user)
+        # Notify the receiving user about the glaze
+        try:
+            notify_glaze_received(glaze)
+        except Exception:
+            logger.exception("Failed to send glaze notification")
 
     @action(detail=True, methods=["get", "post"], permission_classes=[IsAuthenticated])
     def reactions(self, request, pk=None):
@@ -70,6 +80,11 @@ class GlazeViewSet(viewsets.ModelViewSet):
                 reaction=reaction,
             )
             status_code = status.HTTP_201_CREATED
+            # Notify glaze poster about reaction
+            try:
+                notify_glaze_reaction(glaze, request.user, reaction.name)
+            except Exception:
+                logger.exception("Failed to send glaze reaction notification")
 
         serializer = GlazeReactionSerializer(glaze_reaction)
         return Response(serializer.data, status=status_code)

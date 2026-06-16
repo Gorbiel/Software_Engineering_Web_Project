@@ -24,6 +24,11 @@ from apps.achievements.serializers import (
 from apps.reactions.models import AchievementReaction
 from apps.reactions.serializers import AchievementReactionSerializer
 from apps.reactions.services import resolve_reaction_definition
+from apps.notifications.services import (
+    notify_achievement_confirmed,
+    notify_achievement_reaction,
+    notify_confirmation_request,
+)
 from common.pagination import SearchResultsSetPagination
 
 logger = logging.getLogger(__name__)
@@ -135,7 +140,13 @@ class AchievementViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        achievement = serializer.save(user=self.request.user)
+        # Notify team members about new achievement
+        from apps.notifications.services import notify_achievement_created
+        try:
+            notify_achievement_created(achievement)
+        except Exception:
+            logger.exception("Failed to send achievement creation notifications")
 
     @action(detail=True, methods=["get", "post"], permission_classes=[IsAuthenticated])
     def reactions(self, request, pk=None):
@@ -168,6 +179,11 @@ class AchievementViewSet(viewsets.ModelViewSet):
                 reaction=reaction,
             )
             status_code = status.HTTP_201_CREATED
+            # Notify achievement owner about reaction
+            try:
+                notify_achievement_reaction(achievement, request.user, reaction.name)
+            except Exception:
+                logger.exception("Failed to send reaction notification")
 
         serializer = AchievementReactionSerializer(achievement_reaction)
         return Response(serializer.data, status=status_code)
@@ -252,9 +268,16 @@ class AchievementViewSet(viewsets.ModelViewSet):
             )
 
         try:
+            from apps.users.models import User
+            receiving_user = User.objects.get(id=receiving_user_id)
             confirmation_request = ConfirmationRequest.objects.create(
                 achievement=achievement, receiving_user_id=receiving_user_id
             )
+            # Notify the receiving user
+            try:
+                notify_confirmation_request(achievement, receiving_user)
+            except Exception:
+                logger.exception("Failed to send confirmation request notification")
             serializer = ConfirmationRequestSerializer(confirmation_request)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception:
@@ -287,6 +310,11 @@ class AchievementViewSet(viewsets.ModelViewSet):
                 confirmation = AchievementConfirmation.objects.create(
                     achievement=achievement, user=request.user
                 )
+                # Notify achievement owner about confirmation
+                try:
+                    notify_achievement_confirmed(achievement, request.user)
+                except Exception:
+                    logger.exception("Failed to send confirmation notification")
                 serializer = AchievementConfirmationSerializer(confirmation)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             except Exception:
