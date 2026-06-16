@@ -1,6 +1,5 @@
-from rest_framework.exceptions import ValidationError
-
 from apps.reactions.models import Reaction
+from rest_framework.exceptions import ValidationError
 
 
 ALLOWED_REACTIONS = {
@@ -34,7 +33,7 @@ def list_available_reactions():
 def resolve_reaction_definition(reaction_id=None, code=None, name=None):
 	if reaction_id:
 		try:
-			return Reaction.objects.get(id=reaction_id)
+			reaction = Reaction.objects.get(id=reaction_id)
 		except Reaction.DoesNotExist as exc:
 			raise ValidationError({"reaction_id": "Reaction does not exist."}) from exc
 
@@ -52,7 +51,7 @@ def resolve_reaction_definition(reaction_id=None, code=None, name=None):
 	if allowed_reaction is None:
 		raise ValidationError(
 			{
-				"code": "Unsupported reaction. Allowed values: heart, clap, fire, laugh, thumbs up."
+				"code": "Unsupported reaction."
 			}
 		)
 

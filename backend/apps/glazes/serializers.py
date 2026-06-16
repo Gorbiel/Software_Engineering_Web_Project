@@ -32,7 +32,9 @@ class GlazeSerializer(serializers.ModelSerializer):
     receiving_user_id = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(), write_only=True, source="receiving_user"
     )
-    reactions = GlazeReactionSerializer(source="glazereaction_set", many=True, read_only=True)
+    reactions = GlazeReactionSerializer(
+        source="glazereaction_set", many=True, read_only=True
+    )
     reaction_count = serializers.SerializerMethodField()
     tags = TagSerializer(source="glazetag_set", many=True, read_only=True)
     tag_ids = serializers.PrimaryKeyRelatedField(
