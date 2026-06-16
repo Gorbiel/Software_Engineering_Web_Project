@@ -1,4 +1,5 @@
 from django.test import TestCase
+from rest_framework import serializers
 
 from apps.users.models import User
 from apps.users.serializers import UserSerializer
@@ -31,7 +32,7 @@ class UserSerializerTests(TestCase):
 
         self.assertNotIn("password", data)
 
-    def test_serializer_updates_password_using_set_password(self):
+    def test_serializer_rejects_password_updates(self):
         user = User.objects.create_user(
             email="user@example.com",
             name="Test User",
@@ -45,9 +46,14 @@ class UserSerializerTests(TestCase):
         )
 
         self.assertTrue(serializer.is_valid(), serializer.errors)
-        user = serializer.save()
+        with self.assertRaisesMessage(
+            serializers.ValidationError,
+            "Use the password change endpoint.",
+        ):
+            serializer.save()
 
-        self.assertTrue(user.check_password("newpassword"))
+        user.refresh_from_db()
+        self.assertTrue(user.check_password("oldpassword"))
 
     def test_create_requires_password(self):
         serializer = UserSerializer(
@@ -83,3 +89,4 @@ class UserSerializerTests(TestCase):
         self.assertFalse(user.is_superuser)
         self.assertIsNone(user.deactivation_date)
         self.assertEqual(user.rank, 1)
+        self.assertFalse(user.first_password_changed)
