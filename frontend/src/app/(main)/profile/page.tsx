@@ -7,11 +7,13 @@ import { ProfileStats } from "@/components/profile/ProfileStats";
 import { ProfileAchievements } from "@/components/profile/ProfileAchievements";
 import { ProfileGlazes } from "@/components/profile/ProfileGlazes";
 import { useProfileData } from "@/hooks/useProfileData";
+import { useUserScore } from "@/hooks/useUserScore";
 
 export default function ProfilePage() {
   const { user } = useAuth();
   const userId = user?.id;
   const { profile, error: profileError } = useMyProfile();
+  const totalScore = useUserScore(userId);
 
   const {
     achievements,
@@ -45,7 +47,7 @@ export default function ProfilePage() {
         achievements={achievements.length}
         glazesGiven={glazesGivenCount}
         glazesReceived={glazes.length}
-        totalSprinkles={4250}
+        totalSprinkles={totalScore ?? 0}
       />
 
       <ProfileAchievements

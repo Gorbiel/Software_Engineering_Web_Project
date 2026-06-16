@@ -42,7 +42,7 @@ export function ProfileStats({
         </div>
       </StatCard>
 
-      <StatCard icon={Zap} label="Total Sprinkles">
+      <StatCard icon={Zap} label="Total points">
         <span className="text-primary text-5xl font-black">
           {totalSprinkles}
         </span>
