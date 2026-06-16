@@ -3,6 +3,7 @@ from rest_framework import serializers
 from apps.glazes.models import Glaze
 from apps.reactions.serializers import GlazeReactionSerializer
 from apps.tags.models import GlazeTag, Tag
+from apps.tags.serializers import TagListSerializer
 from apps.users.models import User
 
 
@@ -36,7 +37,7 @@ class GlazeSerializer(serializers.ModelSerializer):
         source="glazereaction_set", many=True, read_only=True
     )
     reaction_count = serializers.SerializerMethodField()
-    tags = TagSerializer(source="glazetag_set", many=True, read_only=True)
+    tags = serializers.SerializerMethodField()
     tag_ids = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True, write_only=True, required=False
     )
@@ -86,27 +87,29 @@ class GlazeSerializer(serializers.ModelSerializer):
     def get_reaction_count(self, obj):
         return obj.glazereaction_set.count()
 
+    def get_tags(self, obj):
+        tags = Tag.objects.filter(glazetag__glaze=obj).order_by("glazetag__added_date")
+        return TagListSerializer(tags, many=True).data
+
     def create(self, validated_data):
-        tag_ids = self.initial_data.get("tag_ids", [])
+        tags = validated_data.pop("tag_ids", [])
         glaze = Glaze.objects.create(**validated_data)
 
-        for tag_id in tag_ids:
-            tag = Tag.objects.get(id=tag_id)
+        for tag in tags:
             GlazeTag.objects.create(glaze=glaze, tag=tag)
 
         return glaze
 
     def update(self, instance, validated_data):
+        tags = validated_data.pop("tag_ids", None)
         instance.title = validated_data.get("title", instance.title)
         instance.body = validated_data.get("body", instance.body)
         instance.save()
 
         # Update tags if provided
-        tag_ids = self.initial_data.get("tag_ids")
-        if tag_ids is not None:
+        if tags is not None:
             instance.glazetag_set.all().delete()
-            for tag_id in tag_ids:
-                tag = Tag.objects.get(id=tag_id)
+            for tag in tags:
                 GlazeTag.objects.create(glaze=instance, tag=tag)
 
         return instance
