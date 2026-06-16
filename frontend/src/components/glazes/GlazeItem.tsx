@@ -3,7 +3,9 @@
 import { GlazeCard } from "@/components/glazes/GlazeCard";
 import { EntryEditCard } from "@/components/forms/EntryEditCard";
 import { EditDeleteActions } from "@/components/forms/EditDeleteActions";
+import { DeleteButton } from "@/components/forms/DeleteButton";
 import { useEditableEntry } from "@/hooks/useEditableEntry";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { type Glaze, deleteGlaze, updateGlaze } from "@/utils/glazes";
 import { formatRelativeTime } from "@/utils/date";
 
@@ -47,6 +49,8 @@ export function GlazeItem({
     currentUserId !== undefined &&
     String(glaze.posting_user.id) === String(currentUserId);
 
+  const isAdmin = useIsAdmin() === true;
+
   if (isEditing) {
     return (
       <EntryEditCard
@@ -70,6 +74,8 @@ export function GlazeItem({
       onDelete={handleDelete}
       isPending={isPending}
     />
+  ) : isAdmin ? (
+    <DeleteButton onDelete={handleDelete} isPending={isPending} />
   ) : null;
 
   return (
