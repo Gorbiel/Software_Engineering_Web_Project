@@ -9,6 +9,7 @@ import { ProfileAchievements } from "@/components/profile/ProfileAchievements";
 import { ProfileGlazes } from "@/components/profile/ProfileGlazes";
 import { GlazeModal } from "@/components/profile/GlazeModal";
 import { useProfileData } from "@/hooks/useProfileData";
+import { useUserScore } from "@/hooks/useUserScore";
 import { fetchUser, type UserSearchResult } from "@/utils/users";
 
 export default function UserProfilePage() {
@@ -21,6 +22,7 @@ export default function UserProfilePage() {
   const [profile, setProfile] = useState<UserSearchResult | null>(null);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [isGlazeOpen, setIsGlazeOpen] = useState(false);
+  const totalScore = useUserScore(profileId);
 
   const {
     achievements,
@@ -99,7 +101,7 @@ export default function UserProfilePage() {
         achievements={achievements.length}
         glazesGiven={glazesGivenCount}
         glazesReceived={glazes.length}
-        totalSprinkles={4250}
+        totalSprinkles={totalScore ?? 0}
       />
 
       <ProfileAchievements

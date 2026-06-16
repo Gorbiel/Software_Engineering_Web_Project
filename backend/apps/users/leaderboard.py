@@ -1,6 +1,6 @@
 from django.db.models import Count, ExpressionWrapper, F, IntegerField, Sum
 from django.db.models.functions import Coalesce
-from rest_framework import viewsets
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -180,6 +180,62 @@ class LeaderboardViewSet(viewsets.ViewSet):
             {
                 "metric": metric,
                 "results": results,
+            }
+        )
+
+    @action(detail=False, methods=["get"])
+    def user_score(self, request):
+        """
+        Get a single user's total score.
+
+        Query parameters:
+        - user_id: Target user (required)
+        """
+        user_id = request.query_params.get("user_id")
+        if not user_id:
+            return Response(
+                {"error": "user_id is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user_data = (
+            User.users.filter(id=user_id)
+            .annotate(
+                achievement_count=Count("achievement", distinct=True),
+                glazes_received_count=Count("receiver", distinct=True),
+                glazes_sent_count=Count("poster", distinct=True),
+                weighted_confirmations=Coalesce(
+                    Sum(
+                        ExpressionWrapper(
+                            F("achievement__achievementconfirmation__user__rank"),
+                            output_field=IntegerField(),
+                        )
+                    ),
+                    0,
+                ),
+            )
+            .annotate(
+                total_score=ExpressionWrapper(
+                    F("achievement_count") * 10
+                    + F("weighted_confirmations") * 2
+                    + F("glazes_received_count") * 5
+                    + F("glazes_sent_count") * 3,
+                    output_field=IntegerField(),
+                )
+            )
+            .first()
+        )
+
+        if user_data is None:
+            return Response(
+                {"error": "User not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        return Response(
+            {
+                "user_id": user_data.id,
+                "total_score": user_data.total_score,
             }
         )
 

@@ -18,14 +18,8 @@ export function SidebarUserCard() {
         <p className="text-text text-base font-semibold">
           {name || "User Name"}
         </p>
-        <p className="text-text-muted text-xs font-semibold">Rank: ---</p>
-      </div>
-      <div className="w-full">
-        <div className="bg-background h-2 w-full rounded-full">
-          <div className="bg-accent h-full w-2/3 rounded-full" />
-        </div>
-        <p className="text-accent mt-2 text-xs font-semibold">
-          Progress to next rank
+        <p className="text-text-muted text-xs font-semibold">
+          {profile?.job_title || "—"}
         </p>
       </div>
     </div>
