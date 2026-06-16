@@ -1,6 +1,6 @@
-from apps.reactions.models import Reaction
 from rest_framework.exceptions import ValidationError
 
+from apps.reactions.models import Reaction
 
 ALLOWED_REACTIONS = {
     "heart": {"name": "Heart", "emoji": "❤️"},
