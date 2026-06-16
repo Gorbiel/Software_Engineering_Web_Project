@@ -161,6 +161,17 @@ class TeamViewSet(viewsets.ModelViewSet):
         teams = Team.objects.filter(teamleader__user=request.user).order_by("name")
         return Response(TeamSerializer(teams, many=True).data)
 
+    @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
+    def mine(self, request):
+        teams = (
+            Team.objects.filter(teammember__user=request.user)
+            .distinct()
+            .order_by("name")
+        )
+        return Response(
+            TeamSerializer(teams, many=True, context={"request": request}).data
+        )
+
     @action(detail=True, methods=["get"])
     def report(self, request, pk=None):
         date_from = request.query_params.get("date_from")
