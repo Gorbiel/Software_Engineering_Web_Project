@@ -17,6 +17,7 @@
   --color-accent-2-softer: #f2f9fc;
   --color-accent-3: #fdd81c;
   --color-accent-3-soft: #fff6ce;
+  --font-nunito: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
 
   --layout-max: 1400px;
   --layout-sidebar-left: 280px;
@@ -49,7 +50,7 @@
 body {
   background: var(--color-bg);
   color: var(--color-text);
-  font-family: var(--font-nunito), "Nunito Sans", system-ui, sans-serif;
+  font-family: var(--font-nunito);
 }
 
 .glaze-card {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   compareTeams,
@@ -8,7 +8,7 @@ import {
   type TeamComparisonData,
 } from "@/utils/teamComparison";
 
-export default function TeamComparePage() {
+function TeamCompareContent() {
   const searchParams = useSearchParams();
   const queryTeamIds = searchParams.get("team_ids") ?? "";
   const [teams, setTeams] = useState<TeamComparisonData[]>([]);
@@ -288,6 +288,20 @@ export default function TeamComparePage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function TeamComparePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="glaze-card text-text-muted p-6 text-sm">
+          Loading comparison...
+        </div>
+      }
+    >
+      <TeamCompareContent />
+    </Suspense>
   );
 }
 
