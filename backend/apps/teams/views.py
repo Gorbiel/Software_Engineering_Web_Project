@@ -68,6 +68,7 @@ class TeamSearchViewSet(viewsets.ReadOnlyModelViewSet):
 
         return queryset
 
+
 class TeamViewSet(
     mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet
 ):
