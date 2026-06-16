@@ -8,6 +8,8 @@ from rest_framework.response import Response
 
 from apps.users.models import User
 from apps.users.serializers import (
+    AdminPasswordChangeSerializer,
+    UserPasswordChangeSerializer,
     UserRankResponseSerializer,
     UserRankSerializer,
     UserSearchSerializer,
@@ -123,6 +125,55 @@ class UserViewSet(viewsets.ModelViewSet):
         user.save(update_fields=["rank"])
 
         return Response(UserRankResponseSerializer(user).data)
+
+    @action(detail=True, methods=["patch"], url_path="password")
+    def password(self, request, pk=None):
+        user = self.get_object()
+        serializer = AdminPasswordChangeSerializer(
+            data=request.data,
+            context={"user": user},
+        )
+        serializer.is_valid(raise_exception=True)
+
+        user.set_password(serializer.validated_data["new_password"])
+        user.first_password_changed = False
+        user.save(
+            update_fields=[
+                "password",
+                "password_last_changed",
+                "first_password_changed",
+            ]
+        )
+
+        return Response({"detail": "Password updated."})
+
+    @action(
+        detail=False,
+        methods=["patch"],
+        permission_classes=[IsAuthenticated],
+        url_path="change-password",
+    )
+    def change_password(self, request):
+        user = request.user
+        serializer = UserPasswordChangeSerializer(
+            data=request.data,
+            context={"user": user},
+        )
+        serializer.is_valid(raise_exception=True)
+
+        user.set_password(
+            serializer.validated_data["new_password"],
+            mark_as_changed=True,
+        )
+        user.save(
+            update_fields=[
+                "password",
+                "password_last_changed",
+                "first_password_changed",
+            ]
+        )
+
+        return Response({"detail": "Password changed."})
 
 
 class ProfileViewSet(
