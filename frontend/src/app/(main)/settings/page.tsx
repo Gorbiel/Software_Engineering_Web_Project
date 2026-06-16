@@ -1,5 +1,6 @@
 import { ProfilePhotoSection } from "@/components/settings/ProfilePhotoSection";
 import { ProfileDetailsForm } from "@/components/settings/ProfileDetailsForm";
+import { ChangePasswordSection } from "@/components/settings/ChangePasswordSection";
 
 export default function SettingsPage() {
   return (
@@ -12,6 +13,7 @@ export default function SettingsPage() {
       </header>
       <ProfilePhotoSection />
       <ProfileDetailsForm />
+      <ChangePasswordSection />
     </div>
   );
 }

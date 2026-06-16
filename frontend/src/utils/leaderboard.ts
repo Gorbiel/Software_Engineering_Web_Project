@@ -117,6 +117,20 @@ export async function getMyPosition(): Promise<MyPositionResponse> {
   return apiJson<MyPositionResponse>("/users/leaderboard/my_position/");
 }
 
+export interface UserScoreResponse {
+  user_id: number;
+  total_score: number;
+}
+
+export async function getUserScore(
+  userId: number | string
+): Promise<UserScoreResponse> {
+  const params = new URLSearchParams({ user_id: String(userId) });
+  return apiJson<UserScoreResponse>(
+    `/users/leaderboard/user_score/?${params.toString()}`
+  );
+}
+
 export function getMetricLabel(metric: string): string {
   const labels: Record<string, string> = {
     total_score: "Total Score",

@@ -23,14 +23,13 @@ const toDaily = (rows: DayTotal[]): DailyValue[] =>
 const activeToDaily = (rows: DayActiveUsers[]): DailyValue[] =>
   rows.map((row) => ({ day: row.day, value: row.active_users }));
 
-function rankRows<T extends { id: number }>(
+function rankRows<T extends { id: number; name: string }>(
   rows: T[],
-  prefix: string,
   value: (row: T) => number | string,
 ): RankingRow[] {
   return rows.map((row) => ({
     key: row.id,
-    label: `${prefix} #${row.id}`,
+    label: row.name,
     value: value(row),
   }));
 }
@@ -79,81 +78,63 @@ export function GeneralReportView() {
               <ReportSection title="Most glazed users">
                 <RankingTable
                   rows={rankRows(
-                    report.most_glazed_users,
-                    "User",
-                    (row) => row.received_glaze_count ?? 0,
+                    report.most_glazed_users,                    (row) => row.received_glaze_count ?? 0,
                   )}
                 />
               </ReportSection>
               <ReportSection title="Top glazers">
                 <RankingTable
                   rows={rankRows(
-                    report.best_glazing_users,
-                    "User",
-                    (row) => row.sent_glaze_count ?? 0,
+                    report.best_glazing_users,                    (row) => row.sent_glaze_count ?? 0,
                   )}
                 />
               </ReportSection>
               <ReportSection title="Teams · most achievements">
                 <RankingTable
                   rows={rankRows(
-                    report.teams_with_most_achivemnents,
-                    "Team",
-                    (row) => row.achievements_count,
+                    report.teams_with_most_achivemnents,                    (row) => row.achievements_count,
                   )}
                 />
               </ReportSection>
               <ReportSection title="Teams · most glazes received">
                 <RankingTable
                   rows={rankRows(
-                    report.teams_with_most_recived_glazes,
-                    "Team",
-                    (row) => row.glazes_received_count,
+                    report.teams_with_most_recived_glazes,                    (row) => row.glazes_received_count,
                   )}
                 />
               </ReportSection>
               <ReportSection title="Teams · most glazes sent">
                 <RankingTable
                   rows={rankRows(
-                    report.teams_with_most_sent_glazes,
-                    "Team",
-                    (row) => row.glazes_sent_count,
+                    report.teams_with_most_sent_glazes,                    (row) => row.glazes_sent_count,
                   )}
                 />
               </ReportSection>
               <ReportSection title="Teams · most confirmations">
                 <RankingTable
                   rows={rankRows(
-                    report.teams_with_most_confirmations,
-                    "Team",
-                    (row) => row.confirmations_count,
+                    report.teams_with_most_confirmations,                    (row) => row.confirmations_count,
                   )}
                 />
               </ReportSection>
               <ReportSection title="Most active teams">
                 <RankingTable
                   rows={rankRows(
-                    report.most_active_teams,
-                    "Team",
-                    (row) => `${Math.round(row.participation_rate ?? 0)}%`,
+                    report.most_active_teams,                    (row) => `${Math.round(row.participation_rate ?? 0)}%`,
                   )}
                 />
               </ReportSection>
               <ReportSection title="Most cross-team teams">
                 <RankingTable
                   rows={rankRows(
-                    report.teams_with_most_cross_team_engagment,
-                    "Team",
-                    (row) => row.cross_team_sum,
+                    report.teams_with_most_cross_team_engagment,                    (row) => row.cross_team_sum,
                   )}
                 />
               </ReportSection>
               <ReportSection title="Likely siloed teams">
                 <RankingTable
                   rows={rankRows(
-                    report.probable_siloed_teams,
-                    "Team",
-                    (row) => row.cross_team_sum,
+                    report.probable_siloed_teams,                    (row) => row.cross_team_sum,
                   )}
                 />
               </ReportSection>
