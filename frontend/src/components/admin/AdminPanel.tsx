@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { AdminCreateUserForm } from "@/components/admin/AdminCreateUserForm";
-import { AdminDeleteUserSection } from "@/components/admin/AdminDeleteUserSection";
+import { AdminManageUsersSection } from "@/components/admin/AdminManageUsersSection";
 
 export function AdminPanel() {
   const isAdmin = useIsAdmin();
@@ -25,11 +25,11 @@ export function AdminPanel() {
       <header className="flex flex-col gap-2">
         <h1 className="text-text text-2xl font-semibold">Admin Panel</h1>
         <p className="text-text-muted text-sm">
-          Create and remove user accounts.
+          Create, manage and remove user accounts.
         </p>
       </header>
       <AdminCreateUserForm />
-      <AdminDeleteUserSection />
+      <AdminManageUsersSection />
     </div>
   );
 }

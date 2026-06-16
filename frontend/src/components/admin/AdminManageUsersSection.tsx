@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { useMyProfile } from "@/context/MyProfileContext";
 import { deleteUser, searchUsers, type AdminUser } from "@/utils/admin";
+import { AdminUserRow } from "@/components/admin/AdminUserRow";
+import { ChangeRankModal } from "@/components/admin/ChangeRankModal";
 
 type SearchResult = { query: string; users: AdminUser[] };
 
-export function AdminDeleteUserSection() {
+export function AdminManageUsersSection() {
   const { profile } = useMyProfile();
   const myId = profile?.id;
 
@@ -16,6 +18,7 @@ export function AdminDeleteUserSection() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [deletedName, setDeletedName] = useState<string | null>(null);
+  const [rankUser, setRankUser] = useState<AdminUser | null>(null);
 
   const trimmed = query.trim();
 
@@ -79,15 +82,30 @@ export function AdminDeleteUserSection() {
     }
   }
 
+  function handleRankUpdated(userId: number | string, rank: number, rankName: string) {
+    setResult((prev) =>
+      prev
+        ? {
+            ...prev,
+            users: prev.users.map((u) =>
+              String(u.id) === String(userId)
+                ? { ...u, rank, rank_name: rankName }
+                : u,
+            ),
+          }
+        : prev,
+    );
+  }
+
   const matches = result && result.query === trimmed ? result.users : null;
 
   return (
     <section className="glaze-card flex flex-col gap-6">
-      <h2 className="text-text text-sm font-semibold">Delete user account</h2>
+      <h2 className="text-text text-sm font-semibold">Manage users</h2>
 
       <div className="flex flex-col gap-2">
         <label
-          htmlFor="delete-user-search"
+          htmlFor="manage-user-search"
           className="text-text-muted ml-3 text-xs font-semibold"
         >
           Search user
@@ -95,7 +113,7 @@ export function AdminDeleteUserSection() {
         <div className="bg-background flex items-center gap-2 rounded-2xl px-4 py-2">
           <Search className="text-text-muted h-4 w-4 shrink-0" />
           <input
-            id="delete-user-search"
+            id="manage-user-search"
             className="text-text w-full bg-transparent text-sm focus:outline-none"
             type="text"
             placeholder="Search by name or e-mail…"
@@ -129,30 +147,26 @@ export function AdminDeleteUserSection() {
             <p className="text-text-muted px-3 py-2 text-sm">No users found.</p>
           ) : (
             matches.map((user) => (
-              <div
+              <AdminUserRow
                 key={user.id}
-                className="bg-background flex items-center justify-between gap-3 rounded-2xl px-4 py-2"
-              >
-                <div className="flex min-w-0 flex-col">
-                  <span className="text-text truncate text-sm font-semibold">
-                    {user.name}
-                  </span>
-                  <span className="text-text-muted truncate text-xs">
-                    {user.email}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleDelete(user)}
-                  disabled={deletingId === String(user.id)}
-                  className="bg-accent text-primary-contrast shrink-0 cursor-pointer rounded-full px-4 py-1.5 text-xs font-semibold transition select-none hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {deletingId === String(user.id) ? "Deleting…" : "Delete"}
-                </button>
-              </div>
+                user={user}
+                isDeleting={deletingId === String(user.id)}
+                onChangeRank={setRankUser}
+                onDelete={handleDelete}
+              />
             ))
           )}
         </div>
+      ) : null}
+
+      {rankUser ? (
+        <ChangeRankModal
+          user={rankUser}
+          onClose={() => setRankUser(null)}
+          onUpdated={(rank, rankName) =>
+            handleRankUpdated(rankUser.id, rank, rankName)
+          }
+        />
       ) : null}
     </section>
   );
