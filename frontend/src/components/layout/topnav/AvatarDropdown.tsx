@@ -1,14 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { BarChart3, LogOut, Settings, Shield, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useMyProfile } from "@/context/MyProfileContext";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useLedTeams } from "@/hooks/useLedTeams";
-import { getInitials } from "@/components/misc/AvatarInitials";
+import { Avatar } from "@/components/misc/Avatar";
 
 export function AvatarDropdown() {
   const { user, logout } = useAuth();
@@ -37,7 +36,7 @@ export function AvatarDropdown() {
   }
 
   const photoUrl = profile?.profile_picture ?? null;
-  const initials = user?.name ? getInitials(user.name) : null;
+  const name = user?.name ?? "Profile";
 
   return (
     <div className="relative" ref={ref}>
@@ -48,17 +47,11 @@ export function AvatarDropdown() {
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
       >
-        {photoUrl ? (
-          <Image
-            src={photoUrl}
-            alt={user?.name ?? "Profile"}
-            fill
-            className="rounded-full object-cover"
-            unoptimized
-          />
-        ) : (
-          initials
-        )}
+        <Avatar
+          name={name}
+          src={photoUrl}
+          className="h-full w-full bg-background text-xs font-bold"
+        />
       </button>
       {isOpen ? (
         <div className="glaze-card absolute top-14 right-0 w-48 rounded-3xl p-3">
