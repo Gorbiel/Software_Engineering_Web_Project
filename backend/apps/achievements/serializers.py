@@ -7,6 +7,7 @@ from apps.achievements.models import (
 )
 from apps.reactions.serializers import AchievementReactionSerializer
 from apps.tags.models import AchievementTag, Tag
+from apps.tags.serializers import TagListSerializer
 from apps.users.models import User
 
 
@@ -124,7 +125,7 @@ class AchievementSerializer(serializers.ModelSerializer):
     tag_ids = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True, write_only=True, required=False
     )
-    tags = TagSerializer(source="achievementtag_set", many=True, read_only=True)
+    tags = serializers.SerializerMethodField()
 
     class Meta:
         model = Achievement
@@ -151,33 +152,43 @@ class AchievementSerializer(serializers.ModelSerializer):
             "tags",
         ]
 
+    def validate_tag_ids(self, value):
+        """Validate that no more than 5 tags are provided"""
+        if len(value) > 5:
+            raise serializers.ValidationError("Maximum 5 tags allowed per achievement.")
+        return value
+
     def get_confirmation_count(self, obj):
         return obj.achievementconfirmation_set.count()
 
     def get_reaction_count(self, obj):
         return obj.achievementreaction_set.count()
 
+    def get_tags(self, obj):
+        tags = Tag.objects.filter(achievementtag__achievement=obj).order_by(
+            "achievementtag__added_date"
+        )
+        return TagListSerializer(tags, many=True).data
+
     def create(self, validated_data):
-        tag_ids = self.initial_data.get("tag_ids", [])
+        tags = validated_data.pop("tag_ids", [])
         achievement = Achievement.objects.create(**validated_data)
 
-        for tag_id in tag_ids:
-            tag = Tag.objects.get(id=tag_id)
+        for tag in tags:
             AchievementTag.objects.create(achievement=achievement, tag=tag)
 
         return achievement
 
     def update(self, instance, validated_data):
+        tags = validated_data.pop("tag_ids", None)
         instance.title = validated_data.get("title", instance.title)
         instance.body = validated_data.get("body", instance.body)
         instance.save()
 
         # Update tags if provided
-        tag_ids = self.initial_data.get("tag_ids")
-        if tag_ids is not None:
+        if tags is not None:
             instance.achievementtag_set.all().delete()
-            for tag_id in tag_ids:
-                tag = Tag.objects.get(id=tag_id)
+            for tag in tags:
                 AchievementTag.objects.create(achievement=instance, tag=tag)
 
         return instance

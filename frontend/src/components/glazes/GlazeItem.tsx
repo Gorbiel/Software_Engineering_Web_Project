@@ -98,6 +98,7 @@ export function GlazeItem({
           />
         }
         actions={actions}
+        tags={glaze.tags}
       >
         {glaze.body}
       </GlazeCard>

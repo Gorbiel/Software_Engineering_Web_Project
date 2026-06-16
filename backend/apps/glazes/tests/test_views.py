@@ -3,7 +3,54 @@ from rest_framework.test import APITestCase
 
 from apps.glazes.models import Glaze
 from apps.reactions.models import GlazeReaction, Reaction
+from apps.tags.models import GlazeTag, Tag
 from apps.users.models import Admin, User
+
+
+class GlazeViewSetTests(APITestCase):
+    def setUp(self):
+        self.sender = User.objects.create_user(
+            email="sender@example.com",
+            name="Sender",
+            password="password123",
+        )
+        self.receiver = User.objects.create_user(
+            email="receiver@example.com",
+            name="Receiver",
+            password="password123",
+        )
+
+    def login(self, email="sender@example.com", password="password123"):
+        response = self.client.post(
+            "/api/auth/login/",
+            {"email": email, "password": password},
+            format="json",
+        )
+        return response.data["access"]
+
+    def test_create_glaze_with_tags(self):
+        token = self.login()
+        tag = Tag.objects.create(tag_text="Helpful", created_by=self.sender)
+
+        response = self.client.post(
+            "/api/glazes/",
+            {
+                "receiving_user_id": self.receiver.id,
+                "title": "Tagged Glaze",
+                "body": "Great work",
+                "tag_ids": [tag.id],
+            },
+            format="json",
+            HTTP_AUTHORIZATION=f"Bearer {token}",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(
+            GlazeTag.objects.filter(
+                glaze_id=response.data["id"],
+                tag=tag,
+            ).exists()
+        )
 
 
 class GlazeReactionTests(APITestCase):

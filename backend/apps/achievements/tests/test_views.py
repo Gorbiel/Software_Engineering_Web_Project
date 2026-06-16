@@ -7,6 +7,7 @@ from apps.achievements.models import (
     ConfirmationRequest,
 )
 from apps.reactions.models import AchievementReaction, Reaction
+from apps.tags.models import AchievementTag, Tag
 from apps.users.models import Admin, User
 
 
@@ -68,6 +69,29 @@ class AchievementViewSetTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data["title"], "New Achievement")
+
+    def test_create_achievement_with_tags(self):
+        token = self.login()
+        tag = Tag.objects.create(tag_text="Backend", created_by=self.user1)
+
+        response = self.client.post(
+            "/api/achievements/",
+            {
+                "title": "Tagged Achievement",
+                "body": "New description",
+                "tag_ids": [tag.id],
+            },
+            format="json",
+            HTTP_AUTHORIZATION=f"Bearer {token}",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(
+            AchievementTag.objects.filter(
+                achievement_id=response.data["id"],
+                tag=tag,
+            ).exists()
+        )
 
     def test_retrieve_achievement(self):
         token = self.login()
