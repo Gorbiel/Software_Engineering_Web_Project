@@ -11,7 +11,7 @@ from django.db.models import (
     Subquery,
     Sum,
 )
-from django.db.models.functions import TruncDay
+from django.db.models.functions import Coalesce, TruncDay
 from django.http import JsonResponse
 from django.utils import timezone
 from rest_framework import status, viewsets
@@ -148,8 +148,8 @@ class ReportViewSet(viewsets.ViewSet):
         )
 
         users_with_glaze_counts = User.objects.annotate(
-            received_glaze_count=Subquery(received_count),
-            sent_glaze_count=Subquery(sent_count),
+            received_glaze_count=Coalesce(Subquery(received_count), 0),
+            sent_glaze_count=Coalesce(Subquery(sent_count), 0),
         )
 
         report["most_glazed_users"] = list(
