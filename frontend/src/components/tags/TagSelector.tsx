@@ -228,7 +228,7 @@ export default function TagSelector({
           !isSearching &&
           searchResults.length === 0 && (
             <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500">
-              No tags found for "{searchQuery}"
+              No tags found for &quot;{searchQuery}&quot;
             </div>
           )}
 

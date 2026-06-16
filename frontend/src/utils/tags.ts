@@ -1,4 +1,4 @@
-import { getBackendURL } from "./proxy";
+import { apiJson } from "./api";
 
 export interface Tag {
   id: number;
@@ -36,51 +36,21 @@ export async function searchTags(
     params.append("team_id", teamId.toString());
   }
 
-  const response = await fetch(
-    `${getBackendURL()}/api/tags/search/?${params.toString()}`,
-    {
-      credentials: "include",
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to search tags");
-  }
-
-  return response.json();
+  return apiJson<TagListItem[]>(`/tags/search/?${params.toString()}`);
 }
 
 /**
  * Get all global tags
  */
 export async function getGlobalTags(): Promise<TagListItem[]> {
-  const response = await fetch(`${getBackendURL()}/api/tags/global_tags/`, {
-    credentials: "include",
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch global tags");
-  }
-
-  return response.json();
+  return apiJson<TagListItem[]>("/tags/global_tags/");
 }
 
 /**
  * Get tags for a specific team
  */
 export async function getTeamTags(teamId: number): Promise<TagListItem[]> {
-  const response = await fetch(
-    `${getBackendURL()}/api/tags/team_tags/?team_id=${teamId}`,
-    {
-      credentials: "include",
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch team tags");
-  }
-
-  return response.json();
+  return apiJson<TagListItem[]>(`/tags/team_tags/?team_id=${teamId}`);
 }
 
 /**
@@ -89,33 +59,14 @@ export async function getTeamTags(teamId: number): Promise<TagListItem[]> {
 export async function getAvailableTagsForTeam(
   teamId: number
 ): Promise<TagListItem[]> {
-  const response = await fetch(
-    `${getBackendURL()}/api/tags/available_for_team/?team_id=${teamId}`,
-    {
-      credentials: "include",
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch available tags");
-  }
-
-  return response.json();
+  return apiJson<TagListItem[]>(`/tags/available_for_team/?team_id=${teamId}`);
 }
 
 /**
  * Get all tags (for current user)
  */
 export async function getAllTags(): Promise<TagListItem[]> {
-  const response = await fetch(`${getBackendURL()}/api/tags/`, {
-    credentials: "include",
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch tags");
-  }
-
-  return response.json();
+  return apiJson<TagListItem[]>("/tags/");
 }
 
 /**
@@ -125,38 +76,22 @@ export async function createTag(
   tagText: string,
   teamId?: number
 ): Promise<Tag> {
-  const response = await fetch(`${getBackendURL()}/api/tags/`, {
+  return apiJson<Tag>("/tags/", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
     body: JSON.stringify({
       tag_text: tagText,
       team: teamId || null,
     }),
   });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.detail || "Failed to create tag");
-  }
-
-  return response.json();
 }
 
 /**
  * Delete a tag
  */
 export async function deleteTag(tagId: number): Promise<void> {
-  const response = await fetch(`${getBackendURL()}/api/tags/${tagId}/`, {
+  await apiJson<null>(`/tags/${tagId}/`, {
     method: "DELETE",
-    credentials: "include",
   });
-
-  if (!response.ok) {
-    throw new Error("Failed to delete tag");
-  }
 }
 
 /**
@@ -176,13 +111,13 @@ export function formatTagScope(tag: TagListItem | Tag): string {
 /**
  * Debounce function for search
  */
-export function debounce<T extends (...args: any[]) => any>(
-  func: T,
+export function debounce<Args extends unknown[]>(
+  func: (...args: Args) => void,
   wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null;
+): (...args: Args) => void {
+  let timeout: ReturnType<typeof setTimeout> | null = null;
 
-  return function executedFunction(...args: Parameters<T>) {
+  return function executedFunction(...args: Args) {
     const later = () => {
       timeout = null;
       func(...args);
