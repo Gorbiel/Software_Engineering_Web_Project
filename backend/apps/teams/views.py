@@ -2,18 +2,24 @@ from datetime import datetime, timedelta
 
 from django.db.models import Count, Q, Sum
 from django.db.models.functions import TruncDay
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.utils import timezone
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from apps.achievements.models import Achievement, AchievementConfirmation
 from apps.glazes.models import Glaze
 from apps.tags.models import Tag
-from apps.teams.models import Team
+from apps.teams.models import Team, TeamMember
 from apps.teams.permissions import IsTeamLeaderOrAdmin
-from apps.teams.serializers import TeamSerializer
+from apps.teams.serializers import (
+    TeamMemberRankSerializer,
+    TeamMemberResponseSerializer,
+    TeamSerializer,
+)
 from apps.users.models import User
 from common.pagination import SearchResultsSetPagination
 
@@ -67,6 +73,35 @@ class TeamSearchViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = queryset.order_by(sort_by)
 
         return queryset
+
+
+class TeamMemberRankUpdateView(APIView):
+    """PATCH /teams/<team_id>/members/<user_id>/rank/
+
+    Allows a team leader or admin to change another member's rank within the
+    specified team.
+    """
+
+    permission_classes = [IsAuthenticated, IsTeamLeaderOrAdmin]
+
+    def get_member(self, team_id, user_id):
+        try:
+            return TeamMember.objects.get(team_id=team_id, user_id=user_id)
+        except TeamMember.DoesNotExist:
+            raise Http404
+
+    def patch(self, request, team_id, user_id):
+        member = self.get_member(team_id, user_id)
+        serializer = TeamMemberRankSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        member.rank = serializer.validated_data["rank"]
+        member.save(update_fields=["rank"])
+
+        resp = TeamMemberResponseSerializer(
+            {"team_id": member.team_id, "user_id": member.user_id, "rank": member.rank}
+        )
+        return Response(resp.data)
 
 
 class TeamViewSet(

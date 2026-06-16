@@ -8,21 +8,24 @@ from apps.users.models import User
 class AchievementConfirmationQuerySet(models.QuerySet):
 
     def with_weighted_score_for_user(self, user):
-        user_id = user.pk if hasattr(user, "pk") else user
-        user_teams = TeamMember.objects.filter(user_id=user_id).values_list(
-            "team_id",
-            flat=True,
+        user_teams = TeamMember.objects.filter(user_id=user).values_list(
+            "team_id", flat=True
         )
-        shared_team_membership = TeamMember.objects.filter(
-            user_id=models.OuterRef("user_id"),
-            team_id__in=user_teams,
+
+        confirmer_avg_rank_in_shared_teams = (
+            TeamMember.objects.filter(
+                user_id=models.OuterRef("user_id"), team_id__in=user_teams
+            )
+            .values("user_id")
+            .annotate(avg_rank=models.Avg("rank"))
+            .values("avg_rank")
         )
 
         return self.annotate(
-            confirmer_rank=models.Case(
+            rank=models.Case(
                 models.When(
-                    models.Exists(shared_team_membership),
-                    then=models.F("user__rank"),
+                    user_id__teammember__team_id__in=user_teams,
+                    then=models.Subquery(confirmer_avg_rank_in_shared_teams[:1]),
                 ),
                 default=models.Value(1),
                 output_field=models.IntegerField(),
@@ -56,18 +59,11 @@ class AchievementQuerySet(models.QuerySet):
         return self.annotate(reaction_count=Count("achievementreaction"))
 
     def with_weighted_confirmation_score(self, user):
-        weighted_confirmations = (
-            AchievementConfirmation.confirmations.with_weighted_score_for_user(user)
-            .filter(achievement_id=models.OuterRef("pk"))
-            .values("achievement_id")
-            .annotate(total=models.Sum("confirmer_rank"))
-            .values("total")
-        )
-
         return self.annotate(
-            confirmation_score=models.Subquery(
-                weighted_confirmations,
-                output_field=models.IntegerField(),
+            confirmation_score=(
+                AchievementConfirmation.confirmations.with_weighted_score_for_user(user)
+                .filter(achievement_id="id")
+                .aggregate(models.Sum("rank"))
             )
         )
 

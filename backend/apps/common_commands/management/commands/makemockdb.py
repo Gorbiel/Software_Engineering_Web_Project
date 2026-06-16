@@ -48,7 +48,6 @@ class Command(BaseCommand):
                 name=name,
                 email=email,
                 password=password,
-                rank=random.randint(1, 100),
             )
             users.append(user)
             if random.random() < 0.1:
@@ -66,7 +65,7 @@ class Command(BaseCommand):
             leader.full_clean()
             leader.save()
             for m in members:
-                member = TeamMember(team=team, user=m)
+                member = TeamMember(team=team, user=m, rank=random.randint(0, 10))
                 member.full_clean()
                 member.save()
 
