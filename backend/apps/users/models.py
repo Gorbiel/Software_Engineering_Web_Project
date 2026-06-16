@@ -7,6 +7,7 @@ from django.contrib.auth.models import (
 )
 from django.core import validators
 from django.db import models
+from django.utils import timezone
 
 
 class UserQuerySet(models.QuerySet):
@@ -46,6 +47,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     creation_date = models.DateTimeField(auto_now_add=True)
     active = models.BooleanField(default=True)
     deactivation_date = models.DateTimeField(default=None, blank=True, null=True)
+    password_last_changed = models.DateTimeField(default=None, blank=True, null=True)
+    first_password_changed = models.BooleanField(default=False)
 
     is_staff = models.BooleanField(default=False)
 
@@ -71,6 +74,13 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
     users = UserQuerySet.as_manager()
+
+    def set_password(self, raw_password, mark_as_changed=False):
+        super().set_password(raw_password)
+        if raw_password is not None:
+            self.password_last_changed = timezone.now()
+        if mark_as_changed:
+            self.first_password_changed = True
 
     @property
     def is_active(self):

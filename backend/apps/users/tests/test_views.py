@@ -177,3 +177,99 @@ class UserViewTests(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_user_can_change_own_password(self):
+        self.authenticate_as(self.normal_user)
+
+        response = self.client.patch(
+            "/api/users/change-password/",
+            {
+                "current_password": "password123",
+                "new_password": "Kiln-Bridge-92471!",
+                "new_password_confirmation": "Kiln-Bridge-92471!",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.normal_user.refresh_from_db()
+        self.assertTrue(self.normal_user.check_password("Kiln-Bridge-92471!"))
+        self.assertIsNotNone(self.normal_user.password_last_changed)
+        self.assertTrue(self.normal_user.first_password_changed)
+
+    def test_user_password_change_requires_matching_confirmation(self):
+        self.authenticate_as(self.normal_user)
+
+        response = self.client.patch(
+            "/api/users/change-password/",
+            {
+                "current_password": "password123",
+                "new_password": "Kiln-Bridge-92471!",
+                "new_password_confirmation": "Different-Bridge-92471!",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.normal_user.refresh_from_db()
+        self.assertTrue(self.normal_user.check_password("password123"))
+        self.assertFalse(self.normal_user.first_password_changed)
+
+    def test_user_password_change_requires_current_password(self):
+        self.authenticate_as(self.normal_user)
+
+        response = self.client.patch(
+            "/api/users/change-password/",
+            {
+                "current_password": "wrongpassword",
+                "new_password": "Kiln-Bridge-92471!",
+                "new_password_confirmation": "Kiln-Bridge-92471!",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.normal_user.refresh_from_db()
+        self.assertTrue(self.normal_user.check_password("password123"))
+
+    def test_admin_can_reset_user_password(self):
+        self.normal_user.set_password("Already-Changed-92471!", mark_as_changed=True)
+        self.normal_user.save(
+            update_fields=[
+                "password",
+                "password_last_changed",
+                "first_password_changed",
+            ]
+        )
+        self.authenticate_as(self.admin_user)
+
+        response = self.client.patch(
+            f"/api/users/{self.normal_user.id}/password/",
+            {
+                "new_password": "Admin-Reset-92471!",
+                "new_password_confirmation": "Admin-Reset-92471!",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.normal_user.refresh_from_db()
+        self.assertTrue(self.normal_user.check_password("Admin-Reset-92471!"))
+        self.assertIsNotNone(self.normal_user.password_last_changed)
+        self.assertFalse(self.normal_user.first_password_changed)
+
+    def test_non_admin_cannot_reset_user_password(self):
+        self.authenticate_as(self.normal_user)
+
+        response = self.client.patch(
+            f"/api/users/{self.admin_user.id}/password/",
+            {
+                "new_password": "Admin-Reset-92471!",
+                "new_password_confirmation": "Admin-Reset-92471!",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.admin_user.refresh_from_db()
+        self.assertTrue(self.admin_user.check_password("password123"))
