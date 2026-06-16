@@ -10,5 +10,4 @@ urlpatterns = [
     path("profile/", include("apps.users.urls")),
     path("reports/", include("apps.reports.urls")),
     path("notifications/", include("apps.notifications.urls")),
-    path("tags/", include("apps.tags.urls")),
 ]

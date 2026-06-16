@@ -185,7 +185,6 @@ export function AchievementItem({
         }
         confirmedBy={confirmedBy}
         actions={actions}
-        tags={achievement.tags}
       >
         {achievement.body}
       </AchievementCard>
