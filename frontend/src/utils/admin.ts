@@ -5,7 +5,23 @@ export type AdminUser = {
   name: string;
   email: string;
   active: boolean;
+  rank: number;
+  rank_name: string;
 };
+
+export type RankPreset = {
+  name: string;
+  value: number;
+  label: string;
+};
+
+export const RANK_PRESETS: RankPreset[] = [
+  { name: "default", value: 1, label: "Default" },
+  { name: "junior", value: 10, label: "Junior" },
+  { name: "mid", value: 50, label: "Mid" },
+  { name: "senior", value: 90, label: "Senior" },
+  { name: "lead", value: 100, label: "Lead" },
+];
 
 export async function checkIsAdmin(): Promise<boolean> {
   const response = await apiFetch("/users/", { method: "GET" });
@@ -46,4 +62,20 @@ export async function deleteUser(id: number | string): Promise<void> {
   if (!response.ok) {
     throw new ApiError("Couldn't delete the account.", response.status, null);
   }
+}
+
+export type RankUpdateResponse = {
+  user_id: number;
+  rank: number;
+  rank_name: string;
+};
+
+export function updateUserRank(
+  id: number | string,
+  rank: number,
+): Promise<RankUpdateResponse> {
+  return apiJson<RankUpdateResponse>(`/users/${id}/rank/`, {
+    method: "PATCH",
+    body: JSON.stringify({ rank }),
+  });
 }
