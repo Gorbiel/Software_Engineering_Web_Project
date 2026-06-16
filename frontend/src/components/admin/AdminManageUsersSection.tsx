@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search } from "lucide-react";
 import { useMyProfile } from "@/context/MyProfileContext";
 import { deleteUser, searchUsers, type AdminUser } from "@/utils/admin";
+import { AdminSearchInput } from "@/components/admin/AdminSearchInput";
 import { AdminUserRow } from "@/components/admin/AdminUserRow";
 import { ChangeRankModal } from "@/components/admin/ChangeRankModal";
 
@@ -103,29 +103,17 @@ export function AdminManageUsersSection() {
     <section className="glaze-card flex flex-col gap-6">
       <h2 className="text-text text-sm font-semibold">Manage users</h2>
 
-      <div className="flex flex-col gap-2">
-        <label
-          htmlFor="manage-user-search"
-          className="text-text-muted ml-3 text-xs font-semibold"
-        >
-          Search user
-        </label>
-        <div className="bg-background flex items-center gap-2 rounded-2xl px-4 py-2">
-          <Search className="text-text-muted h-4 w-4 shrink-0" />
-          <input
-            id="manage-user-search"
-            className="text-text w-full bg-transparent text-sm focus:outline-none"
-            type="text"
-            placeholder="Search by name or e-mail…"
-            value={query}
-            onChange={(e) => {
-              setDeletedName(null);
-              setError(null);
-              setQuery(e.target.value);
-            }}
-          />
-        </div>
-      </div>
+      <AdminSearchInput
+        id="manage-user-search"
+        label="Search user"
+        placeholder="Search by name or e-mail…"
+        value={query}
+        onChange={(value) => {
+          setDeletedName(null);
+          setError(null);
+          setQuery(value);
+        }}
+      />
 
       {error ? (
         <p className="bg-accent-softer text-accent rounded-2xl px-4 py-2 text-xs font-semibold">

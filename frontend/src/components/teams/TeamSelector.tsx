@@ -1,7 +1,7 @@
 "use client";
 
-import { AvatarInitials } from "@/components/misc/AvatarInitials";
-import type { Team } from "./types";
+import { Avatar } from "@/components/misc/Avatar";
+import type { TeamDetail } from "@/utils/teams";
 
 const PREVIEW_COUNT = 3;
 
@@ -13,9 +13,9 @@ function previewAvatarColor(index: number): string {
 }
 
 type TeamSelectorProps = {
-  teams: Team[];
-  selectedTeam: Team;
-  onSelectTeam: (team: Team) => void;
+  teams: TeamDetail[];
+  selectedTeam: TeamDetail;
+  onSelectTeam: (team: TeamDetail) => void;
 };
 
 export function TeamSelector({
@@ -28,11 +28,12 @@ export function TeamSelector({
       <h2 className="text-text text-sm font-semibold">My Teams</h2>
       <div className="flex flex-wrap gap-4">
         {teams.map((team) => {
-          const isSelected = team.name === selectedTeam.name;
+          const isSelected = team.id === selectedTeam.id;
+          const lead = team.leaders[0];
           const extraCount = team.members.length - PREVIEW_COUNT;
           return (
             <button
-              key={team.name}
+              key={team.id}
               type="button"
               onClick={() => onSelectTeam(team)}
               className={`flex w-full min-w-55 flex-none cursor-pointer flex-col gap-3 rounded-3xl border p-4 text-left transition sm:w-[calc(50%-0.5rem)] ${
@@ -43,19 +44,19 @@ export function TeamSelector({
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="bg-surface h-8 w-8 rounded-full" />
                   <div className="text-text font-semibold">{team.name}</div>
                 </div>
               </div>
               <div className="text-text-muted text-xs font-semibold">
-                Team Lead: {team.members[0].name}
+                Team Lead: {lead ? lead.name : "—"}
               </div>
               <div className="flex items-center">
                 <div className="flex items-center">
                   {team.members.slice(0, PREVIEW_COUNT).map((member, index) => (
-                    <AvatarInitials
-                      key={member.name}
+                    <Avatar
+                      key={member.id}
                       name={member.name}
+                      src={member.profile_picture}
                       className={`h-8 w-8 text-xs font-semibold uppercase ${index === 0 ? "" : "-ml-2"} ${previewAvatarColor(index)}`}
                     />
                   ))}

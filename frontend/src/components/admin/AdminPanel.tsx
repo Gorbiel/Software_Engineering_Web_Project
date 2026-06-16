@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { AdminCreateUserForm } from "@/components/admin/AdminCreateUserForm";
 import { AdminManageUsersSection } from "@/components/admin/AdminManageUsersSection";
+import { AdminManageTeamsSection } from "@/components/admin/AdminManageTeamsSection";
 
 export function AdminPanel() {
   const isAdmin = useIsAdmin();
@@ -30,6 +31,7 @@ export function AdminPanel() {
       </header>
       <AdminCreateUserForm />
       <AdminManageUsersSection />
+      <AdminManageTeamsSection />
     </div>
   );
 }

@@ -77,7 +77,7 @@ export function SearchSelect({
 
   return (
     <div className="relative w-full max-w-sm">
-      <div className="border-border bg-surface flex items-center gap-2 rounded-2xl border px-3 py-2">
+      <div className="border-border bg-background flex items-center gap-2 rounded-2xl border px-3 py-2">
         <Search className="text-text-muted h-4 w-4 shrink-0" />
         <input
           type="text"
