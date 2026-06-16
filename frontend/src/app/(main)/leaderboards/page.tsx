@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { RankingRow } from "@/components/leaderboards/RankingRow";
 import { RankingPodium } from "@/components/leaderboards/RankingPodium";
 import type { RankingEntry } from "@/components/leaderboards/types";
@@ -9,11 +9,52 @@ import {
   getTeamLeaderboard,
   getMyPosition,
   getMetricLabel,
+  type MyPositionResponse,
+  type TeamLeaderboardEntry,
   type UserLeaderboardMetric,
+  type UserLeaderboardEntry,
   type TeamLeaderboardMetric,
 } from "@/utils/leaderboard";
 
 type ViewType = "users" | "teams" | "my-position";
+
+const getMetricValue = (
+  entry: UserLeaderboardEntry,
+  metric: UserLeaderboardMetric
+): number => {
+  switch (metric) {
+    case "total_score":
+      return entry.total_score;
+    case "achievements":
+      return entry.achievement_count;
+    case "confirmations":
+      return entry.confirmations_received;
+    case "glazes_received":
+      return entry.glazes_received_count;
+    case "glazes_sent":
+      return entry.glazes_sent_count;
+    default:
+      return entry.total_score;
+  }
+};
+
+const getTeamMetricValue = (
+  entry: TeamLeaderboardEntry,
+  metric: TeamLeaderboardMetric
+): number => {
+  switch (metric) {
+    case "engagement":
+      return entry.engagement_score;
+    case "achievements":
+      return entry.achievements_count;
+    case "glazes":
+      return entry.glazes_sent_count;
+    case "participation":
+      return Math.round(entry.participation_rate);
+    default:
+      return entry.engagement_score;
+  }
+};
 
 export default function LeaderboardsPage() {
   const [viewType, setViewType] = useState<ViewType>("users");
@@ -21,22 +62,13 @@ export default function LeaderboardsPage() {
   const [teamMetric, setTeamMetric] = useState<TeamLeaderboardMetric>("engagement");
   const [userRankings, setUserRankings] = useState<RankingEntry[]>([]);
   const [teamRankings, setTeamRankings] = useState<RankingEntry[]>([]);
-  const [myPosition, setMyPosition] = useState<any>(null);
+  const [myPosition, setMyPosition] = useState<MyPositionResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
-  useEffect(() => {
-    if (viewType === "users") {
-      fetchUserLeaderboard();
-    } else if (viewType === "teams") {
-      fetchTeamLeaderboard();
-    } else {
-      fetchMyPosition();
-    }
-  }, [viewType, userMetric, teamMetric]);
-
-  const fetchUserLeaderboard = async () => {
+  const fetchUserLeaderboard = useCallback(async () => {
     try {
+      await Promise.resolve();
       setLoading(true);
       const response = await getUserLeaderboard(userMetric, undefined, 50);
       
@@ -54,10 +86,11 @@ export default function LeaderboardsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userMetric]);
 
-  const fetchTeamLeaderboard = async () => {
+  const fetchTeamLeaderboard = useCallback(async () => {
     try {
+      await Promise.resolve();
       setLoading(true);
       const response = await getTeamLeaderboard(teamMetric, 20);
       
@@ -75,10 +108,11 @@ export default function LeaderboardsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [teamMetric]);
 
-  const fetchMyPosition = async () => {
+  const fetchMyPosition = useCallback(async () => {
     try {
+      await Promise.resolve();
       setLoading(true);
       const response = await getMyPosition();
       setMyPosition(response);
@@ -88,39 +122,21 @@ export default function LeaderboardsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const getMetricValue = (entry: any, metric: UserLeaderboardMetric): number => {
-    switch (metric) {
-      case "total_score":
-        return entry.total_score;
-      case "achievements":
-        return entry.achievement_count;
-      case "confirmations":
-        return entry.confirmations_received;
-      case "glazes_received":
-        return entry.glazes_received_count;
-      case "glazes_sent":
-        return entry.glazes_sent_count;
-      default:
-        return entry.total_score;
-    }
-  };
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      if (viewType === "users") {
+        void fetchUserLeaderboard();
+      } else if (viewType === "teams") {
+        void fetchTeamLeaderboard();
+      } else {
+        void fetchMyPosition();
+      }
+    }, 0);
 
-  const getTeamMetricValue = (entry: any, metric: TeamLeaderboardMetric): number => {
-    switch (metric) {
-      case "engagement":
-        return entry.engagement_score;
-      case "achievements":
-        return entry.achievements_count;
-      case "glazes":
-        return entry.glazes_sent_count;
-      case "participation":
-        return Math.round(entry.participation_rate);
-      default:
-        return entry.engagement_score;
-    }
-  };
+    return () => window.clearTimeout(timeout);
+  }, [fetchMyPosition, fetchTeamLeaderboard, fetchUserLeaderboard, viewType]);
 
   const currentRankings = viewType === "users" ? userRankings : teamRankings;
   const currentMetric = viewType === "users" ? userMetric : teamMetric;

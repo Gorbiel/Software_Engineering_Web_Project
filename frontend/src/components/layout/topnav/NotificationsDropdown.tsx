@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Bell } from "lucide-react";
 import Link from "next/link";
 import {
@@ -21,9 +21,12 @@ export function NotificationsDropdown() {
   const [loading, setLoading] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async (showLoading = false) => {
     try {
-      setLoading(true);
+      await Promise.resolve();
+      if (showLoading) {
+        setLoading(true);
+      }
       const [unread, count] = await Promise.all([
         getUnreadNotifications(),
         getUnreadCount(),
@@ -33,17 +36,27 @@ export function NotificationsDropdown() {
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
     } finally {
-      setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchNotifications();
+    const timeout = window.setTimeout(() => {
+      void fetchNotifications();
+    }, 0);
     
     // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
-  }, []);
+    const interval = setInterval(() => {
+      void fetchNotifications();
+    }, 30000);
+
+    return () => {
+      window.clearTimeout(timeout);
+      clearInterval(interval);
+    };
+  }, [fetchNotifications]);
 
   useEffect(() => {
     if (!isOpen) return;

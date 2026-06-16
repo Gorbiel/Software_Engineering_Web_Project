@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   compareTeams,
@@ -10,21 +10,17 @@ import {
 
 export default function TeamComparePage() {
   const searchParams = useSearchParams();
+  const queryTeamIds = searchParams.get("team_ids") ?? "";
   const [teams, setTeams] = useState<TeamComparisonData[]>([]);
   const [loading, setLoading] = useState(false);
   const [dateRange, setDateRange] = useState(getDefaultDateRange());
-  const [teamIds, setTeamIds] = useState<string>("");
+  const [teamIds, setTeamIds] = useState<string>(queryTeamIds);
 
-  useEffect(() => {
-    const ids = searchParams.get("team_ids");
-    if (ids) {
-      setTeamIds(ids);
-      fetchComparison(ids);
-    }
-  }, [searchParams]);
-
-  const fetchComparison = async (ids: string) => {
-    const teamIdArray = ids.split(",").map((id) => parseInt(id.trim())).filter((id) => !isNaN(id));
+  const fetchComparison = useCallback(async (ids: string, showLoading = true) => {
+    const teamIdArray = ids
+      .split(",")
+      .map((id) => parseInt(id.trim()))
+      .filter((id) => !isNaN(id));
     
     if (teamIdArray.length < 2 || teamIdArray.length > 5) {
       alert("Please select 2-5 teams to compare");
@@ -32,7 +28,10 @@ export default function TeamComparePage() {
     }
 
     try {
-      setLoading(true);
+      await Promise.resolve();
+      if (showLoading) {
+        setLoading(true);
+      }
       const response = await compareTeams(
         teamIdArray,
         dateRange.from,
@@ -43,9 +42,21 @@ export default function TeamComparePage() {
       console.error("Failed to fetch team comparison:", error);
       alert("Failed to load team comparison");
     } finally {
-      setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
-  };
+  }, [dateRange.from, dateRange.to]);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      if (queryTeamIds) {
+        void fetchComparison(queryTeamIds, false);
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
+  }, [fetchComparison, queryTeamIds]);
 
   const handleCompare = () => {
     if (teamIds) {

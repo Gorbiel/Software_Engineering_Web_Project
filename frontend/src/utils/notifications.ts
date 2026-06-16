@@ -1,4 +1,4 @@
-import { apiJson, apiFetch } from "./api";
+import { apiJson } from "./api";
 
 export interface Notification {
   id: number;
