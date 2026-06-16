@@ -1,6 +1,3 @@
-import enum
-
-from django.core import validators
 from django.db import models
 from django.db.models import Count, ExpressionWrapper, F, FloatField, OuterRef, Q
 from django.utils import timezone
@@ -161,47 +158,8 @@ class TeamLeader(models.Model):
 
 class TeamMember(models.Model):
     """
-    Defines a member of a team and their rank in the team.
-    Ranks shouldn't be compared between teams.
+    Defines a member of a team.
     """
 
     team = models.ForeignKey(Team, on_delete=models.RESTRICT)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    # Rank within a team. 1 is lowest, 100 is highest. Ranks are not comparable
-    # across different teams.
-    rank = models.IntegerField(
-        default=1,
-        validators=[validators.MinValueValidator(1), validators.MaxValueValidator(100)],
-    )
-
-    class Rank(enum.IntEnum):
-        DEFAULT = 1
-        JUNIOR = 10
-        MID = 50
-        SENIOR = 90
-        LEAD = 100
-
-    @property
-    def rank_name(self) -> str:
-        """Return the textual name for the stored numeric rank.
-
-        Falls back to 'custom' for values that are not defined in the Rank enum.
-        """
-        try:
-            return self.Rank(self.rank).name.lower()
-        except ValueError:
-            return "custom"
-
-    @classmethod
-    def rank_value_from_name(cls, name: str) -> int:
-        """Convert a rank name (case-insensitive) to its integer value.
-
-        Raises ValueError if the name is not a known rank.
-        """
-        if not isinstance(name, str):
-            raise ValueError("rank name must be a string")
-        try:
-            return cls.Rank[name.strip().upper()].value
-        except KeyError:
-            raise ValueError(f"Unknown rank name: {name}")

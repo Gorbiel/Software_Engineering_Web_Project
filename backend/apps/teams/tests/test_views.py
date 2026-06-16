@@ -1,78 +1,186 @@
 from rest_framework import status
 from rest_framework.test import APITestCase
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.teams.models import Team, TeamLeader, TeamMember
-from apps.users.models import User
+from apps.users.models import Admin, User
 
 
-class TeamRankApiTests(APITestCase):
+class TeamManagementViewTests(APITestCase):
     def setUp(self):
-        # leader who will perform rank updates
-        self.leader = User.objects.create_user(
-            email="leader@example.com", name="Leader", password="password123"
+        self.admin_user = User.objects.create_user(
+            email="admin@example.com",
+            name="Admin User",
+            password="password123",
         )
-        # regular member whose rank will be changed
-        self.member = User.objects.create_user(
-            email="member@example.com", name="Member", password="password123"
+        Admin.objects.create(user=self.admin_user)
+
+        self.leader_user = User.objects.create_user(
+            email="leader@example.com",
+            name="Leader User",
+            password="password123",
         )
-        # other user without privileges
-        self.other = User.objects.create_user(
-            email="other@example.com", name="Other", password="password123"
+        self.other_leader_user = User.objects.create_user(
+            email="other-leader@example.com",
+            name="Other Leader User",
+            password="password123",
+        )
+        self.member_user = User.objects.create_user(
+            email="member@example.com",
+            name="Member User",
+            password="password123",
+        )
+        self.normal_user = User.objects.create_user(
+            email="normal@example.com",
+            name="Normal User",
+            password="password123",
         )
 
-        self.team = Team.objects.create(name="team-api")
-        TeamLeader.objects.create(team=self.team, user=self.leader)
-        TeamMember.objects.create(team=self.team, user=self.member, rank=1)
+        self.team = Team.objects.create(name="Managed Team")
+        self.other_team = Team.objects.create(name="Other Team")
+        TeamLeader.objects.create(team=self.team, user=self.leader_user)
+        TeamLeader.objects.create(team=self.other_team, user=self.other_leader_user)
 
-    def login_and_get_access(self, user):
-        resp = self.client.post(
-            "/api/auth/login/",
-            {"email": user.email, "password": "password123"},
+    def authenticate_as(self, user):
+        refresh = RefreshToken.for_user(user)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {refresh.access_token}")
+
+    def test_admin_can_list_all_teams(self):
+        self.authenticate_as(self.admin_user)
+
+        response = self.client.get("/api/teams/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+
+    def test_leader_lists_only_led_teams(self):
+        self.authenticate_as(self.leader_user)
+
+        response = self.client.get("/api/teams/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["id"], self.team.id)
+
+    def test_non_leader_cannot_list_teams(self):
+        self.authenticate_as(self.normal_user)
+
+        response = self.client.get("/api/teams/")
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admin_can_create_team(self):
+        self.authenticate_as(self.admin_user)
+
+        response = self.client.post(
+            "/api/teams/",
+            {"name": "New Team"},
             format="json",
         )
-        assert resp.status_code == status.HTTP_200_OK
-        return resp.data["access"]
 
-    def test_leader_can_update_rank_by_name(self):
-        access = self.login_and_get_access(self.leader)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(Team.objects.filter(name="New Team").exists())
 
-        url = f"/api/teams/{self.team.id}/members/{self.member.id}/rank/"
-        resp = self.client.patch(
-            url,
-            {"rank": "senior"},
+    def test_leader_cannot_create_team(self):
+        self.authenticate_as(self.leader_user)
+
+        response = self.client.post(
+            "/api/teams/",
+            {"name": "New Team"},
             format="json",
-            HTTP_AUTHORIZATION=f"Bearer {access}",
         )
 
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(resp.data["rank_name"], "senior")
-        self.assertEqual(resp.data["rank"], TeamMember.Rank.SENIOR.value)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_leader_can_update_rank_by_number(self):
-        access = self.login_and_get_access(self.leader)
+    def test_leader_can_update_own_team(self):
+        self.authenticate_as(self.leader_user)
 
-        url = f"/api/teams/{self.team.id}/members/{self.member.id}/rank/"
-        resp = self.client.patch(
-            url,
-            {"rank": 10},
+        response = self.client.patch(
+            f"/api/teams/{self.team.id}/",
+            {"name": "Renamed Team"},
             format="json",
-            HTTP_AUTHORIZATION=f"Bearer {access}",
         )
 
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(resp.data["rank_name"], "junior")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.team.refresh_from_db()
+        self.assertEqual(self.team.name, "Renamed Team")
 
-    def test_non_leader_cannot_update(self):
-        access = self.login_and_get_access(self.other)
+    def test_leader_cannot_update_other_team(self):
+        self.authenticate_as(self.leader_user)
 
-        url = f"/api/teams/{self.team.id}/members/{self.member.id}/rank/"
-        resp = self.client.patch(
-            url,
-            {"rank": "mid"},
+        response = self.client.patch(
+            f"/api/teams/{self.other_team.id}/",
+            {"name": "Renamed Team"},
             format="json",
-            HTTP_AUTHORIZATION=f"Bearer {access}",
         )
 
-        self.assertIn(
-            resp.status_code, [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN]
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_leader_can_add_member_to_own_team(self):
+        self.authenticate_as(self.leader_user)
+
+        response = self.client.post(
+            f"/api/teams/{self.team.id}/members/",
+            {"user_id": self.member_user.id},
+            format="json",
         )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(
+            TeamMember.objects.filter(
+                team=self.team,
+                user=self.member_user,
+            ).exists()
+        )
+
+    def test_leader_cannot_add_member_to_other_team(self):
+        self.authenticate_as(self.leader_user)
+
+        response = self.client.post(
+            f"/api/teams/{self.other_team.id}/members/",
+            {"user_id": self.member_user.id},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admin_can_add_leader_to_any_team(self):
+        self.authenticate_as(self.admin_user)
+
+        response = self.client.post(
+            f"/api/teams/{self.team.id}/leaders/",
+            {"user_id": self.normal_user.id},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(
+            TeamLeader.objects.filter(
+                team=self.team,
+                user=self.normal_user,
+            ).exists()
+        )
+
+    def test_leader_can_remove_member_from_own_team(self):
+        TeamMember.objects.create(team=self.team, user=self.member_user)
+        self.authenticate_as(self.leader_user)
+
+        response = self.client.delete(
+            f"/api/teams/{self.team.id}/members/{self.member_user.id}/",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(
+            TeamMember.objects.filter(
+                team=self.team,
+                user=self.member_user,
+            ).exists()
+        )
+
+    def test_legacy_team_route_still_works(self):
+        self.authenticate_as(self.leader_user)
+
+        response = self.client.get(f"/api/teams/team/{self.team.id}/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["id"], self.team.id)
