@@ -1,6 +1,5 @@
 import { apiFetch, apiJson, ApiError } from "@/utils/api";
 import { type ReactionEntry } from "@/utils/reactions";
-import { type TagListItem } from "@/utils/tags";
 
 export type AchievementUser = {
   id: number | string;
@@ -24,7 +23,6 @@ export type Achievement = {
   confirmation_count: number;
   confirmations: AchievementConfirmation[];
   reactions: ReactionEntry[];
-  tags: TagListItem[];
 };
 
 export type FetchAchievementsParams = {
@@ -35,7 +33,6 @@ export type FetchAchievementsParams = {
 export type CreateAchievementInput = {
   title: string;
   body: string;
-  tag_ids?: number[];
 };
 
 function buildQuery(params: FetchAchievementsParams): string {
@@ -64,7 +61,6 @@ export function createAchievement(
     body: JSON.stringify({
       title: input.title,
       body: input.body,
-      tag_ids: input.tag_ids || [],
     }),
   });
 }
@@ -72,7 +68,6 @@ export function createAchievement(
 export type UpdateAchievementInput = {
   title: string;
   body: string;
-  tag_ids?: number[];
 };
 
 export function updateAchievement(
@@ -84,7 +79,6 @@ export function updateAchievement(
     body: JSON.stringify({
       title: input.title,
       body: input.body,
-      tag_ids: input.tag_ids,
     }),
   });
 }

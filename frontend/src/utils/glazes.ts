@@ -1,6 +1,5 @@
 import { apiFetch, apiJson, ApiError } from "@/utils/api";
 import { type ReactionEntry } from "@/utils/reactions";
-import { type TagListItem } from "@/utils/tags";
 
 export type GlazeUser = {
   id: number;
@@ -17,14 +16,12 @@ export type Glaze = {
   body: string;
   creation_date: string;
   reactions: ReactionEntry[];
-  tags: TagListItem[];
 };
 
 export type CreateGlazeInput = {
   receivingUserId: number | string;
   title: string;
   body: string;
-  tag_ids?: number[];
 };
 
 export function createGlaze(input: CreateGlazeInput): Promise<Glaze> {
@@ -34,7 +31,6 @@ export function createGlaze(input: CreateGlazeInput): Promise<Glaze> {
       receiving_user_id: Number(input.receivingUserId),
       title: input.title,
       body: input.body,
-      tag_ids: input.tag_ids || [],
     }),
   });
 }
@@ -63,7 +59,6 @@ export function fetchGlazes(params: FetchGlazesParams = {}): Promise<Glaze[]> {
 export type UpdateGlazeInput = {
   title: string;
   body: string;
-  tag_ids?: number[];
 };
 
 export function updateGlaze(
@@ -75,7 +70,6 @@ export function updateGlaze(
     body: JSON.stringify({
       title: input.title,
       body: input.body,
-      tag_ids: input.tag_ids,
     }),
   });
 }

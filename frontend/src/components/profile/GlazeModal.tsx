@@ -1,13 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Tag } from "lucide-react";
 import { Modal } from "@/components/misc/Modal";
 import { TitleBodyFields } from "@/components/forms/TitleBodyFields";
 import { type Glaze, createGlaze } from "@/utils/glazes";
-import TagSelector from "@/components/tags/TagSelector";
-import { type TagListItem } from "@/utils/tags";
-import { useMyProfile } from "@/context/MyProfileContext";
 
 type GlazeModalProps = {
   receivingUserId: number | string;
@@ -24,19 +20,14 @@ export function GlazeModal({
 }: GlazeModalProps) {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [selectedTags, setSelectedTags] = useState<TagListItem[]>([]);
-  const [showTagSelector, setShowTagSelector] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
-  const { profile } = useMyProfile();
 
   const canSubmit = title.trim() !== "" && body.trim() !== "" && !isPending;
 
   function cleanup() {
     setTitle("");
     setBody("");
-    setSelectedTags([]);
-    setShowTagSelector(false);
     setError(null);
     setIsPending(false);
   }
@@ -58,7 +49,6 @@ export function GlazeModal({
         receivingUserId,
         title: title.trim(),
         body: body.trim(),
-        tag_ids: selectedTags.map((tag) => tag.id),
       });
       onCreated?.(glaze);
       cleanup();
@@ -88,34 +78,6 @@ export function GlazeModal({
         bodyPlaceholder={`Tell everyone why ${receivingUserName} deserves a glaze...`}
         autoFocus
       />
-
-      <div className="flex items-center gap-2">
-        <button
-          className={`cursor-pointer rounded-full p-2 transition ${
-            showTagSelector
-              ? "bg-accent-2-soft text-accent-2"
-              : "text-accent-2 hover:bg-accent-2-soft"
-          }`}
-          type="button"
-          onClick={() => setShowTagSelector(!showTagSelector)}
-          disabled={isPending}
-          title={showTagSelector ? "Hide tags" : "Add tags"}
-        >
-          <Tag className="h-5 w-5" />
-        </button>
-        <span className="text-sm text-gray-600">
-          {showTagSelector ? "Hide tags" : "Add tags"}
-        </span>
-      </div>
-
-      {showTagSelector && (
-        <TagSelector
-          selectedTags={selectedTags}
-          onTagsChange={setSelectedTags}
-          teamId={profile?.team_id ?? undefined}
-          disabled={isPending}
-        />
-      )}
 
       {error ? (
         <p className="bg-accent-softer text-accent rounded-2xl px-4 py-2 text-xs font-semibold">
