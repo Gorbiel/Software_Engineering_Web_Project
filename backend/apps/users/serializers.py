@@ -1,3 +1,5 @@
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
 from apps.users.models import User
@@ -26,7 +28,7 @@ class UserSearchSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=True)
+    password = serializers.CharField(write_only=True, required=False)
     rank_name = serializers.CharField(read_only=True)
 
     class Meta:
@@ -42,6 +44,8 @@ class UserSerializer(serializers.ModelSerializer):
             "creation_date",
             "active",
             "deactivation_date",
+            "password_last_changed",
+            "first_password_changed",
             "is_staff",
             "is_superuser",
             "rank",
@@ -51,6 +55,8 @@ class UserSerializer(serializers.ModelSerializer):
             "id",
             "creation_date",
             "deactivation_date",
+            "password_last_changed",
+            "first_password_changed",
             "is_staff",
             "is_superuser",
             # Users should not be allowed to toggle their own active status via
@@ -67,15 +73,70 @@ class UserSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         password = validated_data.pop("password", None)
+        if password is not None:
+            raise serializers.ValidationError(
+                {"password": "Use the password change endpoint."}
+            )
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
-        if password is not None:
-            instance.set_password(password)
-
         instance.save()
         return instance
+
+
+class PasswordConfirmationSerializer(serializers.Serializer):
+    new_password = serializers.CharField(write_only=True)
+    new_password_confirmation = serializers.CharField(write_only=True)
+
+    default_error_messages = {
+        "password_mismatch": "The two password fields didn't match.",
+    }
+
+    def validate(self, attrs):
+        new_password = attrs["new_password"]
+
+        if new_password != attrs["new_password_confirmation"]:
+            raise serializers.ValidationError(
+                {"new_password_confirmation": self.error_messages["password_mismatch"]}
+            )
+
+        self.validate_password(new_password)
+        return attrs
+
+    def validate_password(self, password):
+        try:
+            validate_password(password, user=self.context.get("user"))
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError({"new_password": list(exc.messages)})
+
+
+class UserPasswordChangeSerializer(PasswordConfirmationSerializer):
+    current_password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        user = self.context["user"]
+
+        if not user.check_password(attrs["current_password"]):
+            raise serializers.ValidationError(
+                {"current_password": "Current password is incorrect."}
+            )
+
+        if user.check_password(attrs["new_password"]):
+            raise serializers.ValidationError(
+                {
+                    "new_password": (
+                        "New password must be different from current password."
+                    )
+                }
+            )
+
+        return attrs
+
+
+class AdminPasswordChangeSerializer(PasswordConfirmationSerializer):
+    pass
 
 
 class RankField(serializers.Field):

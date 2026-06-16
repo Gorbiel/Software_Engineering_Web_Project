@@ -14,6 +14,27 @@ class UserModelTests(TestCase):
 
         self.assertNotEqual(user.password, "password123")
         self.assertTrue(user.check_password("password123"))
+        self.assertIsNotNone(user.password_last_changed)
+        self.assertFalse(user.first_password_changed)
+
+    def test_set_password_can_mark_first_password_changed(self):
+        user = User.objects.create_user(
+            email="user@example.com",
+            name="Test User",
+            password="password123",
+        )
+
+        user.set_password("ChangedPassword123!", mark_as_changed=True)
+        user.save(
+            update_fields=[
+                "password",
+                "password_last_changed",
+                "first_password_changed",
+            ]
+        )
+
+        self.assertTrue(user.check_password("ChangedPassword123!"))
+        self.assertTrue(user.first_password_changed)
 
     def test_create_superuser_sets_flags(self):
         user = User.objects.create_superuser(
