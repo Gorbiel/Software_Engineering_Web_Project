@@ -8,15 +8,47 @@ export type GeneralReport = {
   daily_achievement_confirmations: DayTotal[];
   daily_achievement_reactions: DayTotal[];
   active_user_daily_count: DayActiveUsers[];
-  most_glazed_users: { id: number; received_glaze_count: number | null }[];
-  best_glazing_users: { id: number; sent_glaze_count: number | null }[];
-  teams_with_most_achivemnents: { id: number; achievements_count: number }[];
-  teams_with_most_recived_glazes: { id: number; glazes_received_count: number }[];
-  teams_with_most_sent_glazes: { id: number; glazes_sent_count: number }[];
-  teams_with_most_confirmations: { id: number; confirmations_count: number }[];
-  most_active_teams: { id: number; participation_rate: number | null }[];
-  teams_with_most_cross_team_engagment: { id: number; cross_team_sum: number }[];
-  probable_siloed_teams: { id: number; cross_team_sum: number }[];
+  most_glazed_users: {
+    id: number;
+    name: string;
+    received_glaze_count: number | null;
+  }[];
+  best_glazing_users: {
+    id: number;
+    name: string;
+    sent_glaze_count: number | null;
+  }[];
+  teams_with_most_achivemnents: {
+    id: number;
+    name: string;
+    achievements_count: number;
+  }[];
+  teams_with_most_recived_glazes: {
+    id: number;
+    name: string;
+    glazes_received_count: number;
+  }[];
+  teams_with_most_sent_glazes: {
+    id: number;
+    name: string;
+    glazes_sent_count: number;
+  }[];
+  teams_with_most_confirmations: {
+    id: number;
+    name: string;
+    confirmations_count: number;
+  }[];
+  most_active_teams: {
+    id: number;
+    name: string;
+    participation_rate: number | null;
+  }[];
+  teams_with_most_cross_team_engagment: {
+    id: number;
+    name: string;
+    cross_team_sum: number;
+  }[];
+  probable_siloed_teams: { id: number; name: string; cross_team_sum: number }[];
   top_achievement_tags: { tag_text: string; usage_count: number }[];
   top_glaze_tags: { tag_text: string; usage_count: number }[];
 };

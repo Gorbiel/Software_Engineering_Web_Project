@@ -154,13 +154,13 @@ class ReportViewSet(viewsets.ViewSet):
 
         report["most_glazed_users"] = list(
             users_with_glaze_counts.order_by("-received_glaze_count").values(
-                "id", "received_glaze_count"
+                "id", "name", "received_glaze_count"
             )[:10]
         )
 
         report["best_glazing_users"] = list(
             users_with_glaze_counts.order_by("-sent_glaze_count").values(
-                "id", "sent_glaze_count"
+                "id", "name", "sent_glaze_count"
             )[:10]
         )
 
@@ -172,31 +172,31 @@ class ReportViewSet(viewsets.ViewSet):
 
         report["teams_with_most_achivemnents"] = list(
             teams_with_engagement_data.order_by("-achievements_count").values(
-                "id", "achievements_count"
+                "id", "name", "achievements_count"
             )[:10]
         )
 
         report["teams_with_most_recived_glazes"] = list(
             teams_with_engagement_data.order_by("-glazes_received_count").values(
-                "id", "glazes_received_count"
+                "id", "name", "glazes_received_count"
             )[:10]
         )
 
         report["teams_with_most_sent_glazes"] = list(
             teams_with_engagement_data.order_by("-glazes_sent_count").values(
-                "id", "glazes_sent_count"
+                "id", "name", "glazes_sent_count"
             )[:10]
         )
 
         report["teams_with_most_confirmations"] = list(
             teams_with_engagement_data.order_by("-confirmations_count").values(
-                "id", "confirmations_count"
+                "id", "name", "confirmations_count"
             )[:10]
         )
 
         report["most_active_teams"] = list(
             teams_with_engagement_data.order_by("-participation_rate").values(
-                "id", "participation_rate"
+                "id", "name", "participation_rate"
             )
         )
 
@@ -208,7 +208,7 @@ class ReportViewSet(viewsets.ViewSet):
                 )
             )
             .order_by("-cross_team_sum")
-            .values("id", "cross_team_sum")[:10]
+            .values("id", "name", "cross_team_sum")[:10]
         )
 
         report["probable_siloed_teams"] = list(
@@ -219,7 +219,7 @@ class ReportViewSet(viewsets.ViewSet):
                 )
             )
             .order_by("cross_team_sum")
-            .values("id", "cross_team_sum")[:10]
+            .values("id", "name", "cross_team_sum")[:10]
         )
 
         report["top_achievement_tags"] = list(
