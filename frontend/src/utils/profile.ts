@@ -44,3 +44,22 @@ export function removeProfilePicture(): Promise<UserProfile> {
     body: JSON.stringify({ profile_picture: null }),
   });
 }
+
+export type ChangePasswordInput = {
+  currentPassword: string;
+  newPassword: string;
+  newPasswordConfirmation: string;
+};
+
+export function changePassword(
+  input: ChangePasswordInput,
+): Promise<{ detail: string }> {
+  return apiJson<{ detail: string }>("/users/change-password/", {
+    method: "PATCH",
+    body: JSON.stringify({
+      current_password: input.currentPassword,
+      new_password: input.newPassword,
+      new_password_confirmation: input.newPasswordConfirmation,
+    }),
+  });
+}

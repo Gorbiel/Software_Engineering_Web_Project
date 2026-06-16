@@ -2,10 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useMyProfile } from "@/context/MyProfileContext";
-import { deleteUser, searchUsers, type AdminUser } from "@/utils/admin";
+import {
+  deleteUser,
+  resetUserPassword,
+  searchUsers,
+  type AdminUser,
+} from "@/utils/admin";
 import { AdminSearchInput } from "@/components/admin/AdminSearchInput";
 import { AdminUserRow } from "@/components/admin/AdminUserRow";
 import { ChangeRankModal } from "@/components/admin/ChangeRankModal";
+import { PasswordModal } from "@/components/settings/PasswordModal";
 
 type SearchResult = { query: string; users: AdminUser[] };
 
@@ -19,6 +25,7 @@ export function AdminManageUsersSection() {
   const [error, setError] = useState<string | null>(null);
   const [deletedName, setDeletedName] = useState<string | null>(null);
   const [rankUser, setRankUser] = useState<AdminUser | null>(null);
+  const [passwordUser, setPasswordUser] = useState<AdminUser | null>(null);
 
   const trimmed = query.trim();
 
@@ -140,6 +147,7 @@ export function AdminManageUsersSection() {
                 user={user}
                 isDeleting={deletingId === String(user.id)}
                 onChangeRank={setRankUser}
+                onResetPassword={setPasswordUser}
                 onDelete={handleDelete}
               />
             ))
@@ -153,6 +161,21 @@ export function AdminManageUsersSection() {
           onClose={() => setRankUser(null)}
           onUpdated={(rank, rankName) =>
             handleRankUpdated(rankUser.id, rank, rankName)
+          }
+        />
+      ) : null}
+
+      {passwordUser ? (
+        <PasswordModal
+          title={`Reset password — ${passwordUser.name}`}
+          requireCurrent={false}
+          submitLabel="Reset password"
+          onClose={() => setPasswordUser(null)}
+          onSubmit={(values) =>
+            resetUserPassword(passwordUser.id, {
+              newPassword: values.newPassword,
+              newPasswordConfirmation: values.newPasswordConfirmation,
+            })
           }
         />
       ) : null}
