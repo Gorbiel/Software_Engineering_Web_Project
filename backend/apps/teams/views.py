@@ -4,18 +4,20 @@ from django.db.models import Count, Q, Sum
 from django.db.models.functions import TruncDay
 from django.http import JsonResponse
 from django.utils import timezone
-from rest_framework import mixins, status, viewsets
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.achievements.models import Achievement, AchievementConfirmation
 from apps.glazes.models import Glaze
 from apps.tags.models import Tag
-from apps.teams.models import Team
-from apps.teams.permissions import IsTeamLeaderOrAdmin
-from apps.teams.serializers import TeamSerializer
+from apps.teams.models import Team, TeamLeader, TeamMember
+from apps.teams.permissions import IsTeamLeaderOrAdmin, is_glazedin_admin
+from apps.teams.serializers import TeamSerializer, TeamUserMutationSerializer
 from apps.users.models import User
 from common.pagination import SearchResultsSetPagination
+from common.permissions import IsGlazedInAdmin
 
 
 class TeamSearchViewSet(viewsets.ReadOnlyModelViewSet):
@@ -36,6 +38,7 @@ class TeamSearchViewSet(viewsets.ReadOnlyModelViewSet):
     SORT_OPTIONS = ["name", "creation_date"]
     FILTER_OPTIONS = []
 
+    @action(detail=False, methods=["get"])
     def filters_and_sorting(self, request):
         """Expose available filters and sorting options for the frontend."""
         return Response(
@@ -68,12 +71,90 @@ class TeamSearchViewSet(viewsets.ReadOnlyModelViewSet):
 
         return queryset
 
-class TeamViewSet(
-    mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet
-):
+
+class TeamViewSet(viewsets.ModelViewSet):
     queryset = Team.objects.all().order_by("id")
     serializer_class = TeamSerializer
-    permission_classes = [IsTeamLeaderOrAdmin]
+    permission_classes = [IsAuthenticated, IsTeamLeaderOrAdmin]
+
+    def get_permissions(self):
+        if self.action == "create":
+            return [IsAuthenticated(), IsGlazedInAdmin()]
+        return super().get_permissions()
+
+    def get_queryset(self):
+        queryset = Team.teams.all().order_by("id")
+        user = self.request.user
+
+        if is_glazedin_admin(user):
+            return queryset
+
+        return queryset.led_by(user).distinct()
+
+    def perform_destroy(self, instance):
+        TeamMember.objects.filter(team=instance).delete()
+        TeamLeader.objects.filter(team=instance).delete()
+        instance.delete()
+
+    @action(detail=True, methods=["post"], url_path="members")
+    def add_member(self, request, pk=None):
+        team = self.get_object()
+        serializer = TeamUserMutationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        _, created = TeamMember.objects.get_or_create(
+            team=team,
+            user=serializer.user,
+        )
+
+        response_status = status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        return Response(self.get_serializer(team).data, status=response_status)
+
+    @action(detail=True, methods=["delete"], url_path=r"members/(?P<user_id>[^/.]+)")
+    def remove_member(self, request, pk=None, user_id=None):
+        team = self.get_object()
+        deleted_count, _ = TeamMember.objects.filter(
+            team=team,
+            user_id=user_id,
+        ).delete()
+
+        if not deleted_count:
+            return Response(
+                {"detail": "User is not a member of this team."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["post"], url_path="leaders")
+    def add_leader(self, request, pk=None):
+        team = self.get_object()
+        serializer = TeamUserMutationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        _, created = TeamLeader.objects.get_or_create(
+            team=team,
+            user=serializer.user,
+        )
+
+        response_status = status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        return Response(self.get_serializer(team).data, status=response_status)
+
+    @action(detail=True, methods=["delete"], url_path=r"leaders/(?P<user_id>[^/.]+)")
+    def remove_leader(self, request, pk=None, user_id=None):
+        team = self.get_object()
+        deleted_count, _ = TeamLeader.objects.filter(
+            team=team,
+            user_id=user_id,
+        ).delete()
+
+        if not deleted_count:
+            return Response(
+                {"detail": "User is not a leader of this team."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["get"])
     def report(self, request, pk=None):
