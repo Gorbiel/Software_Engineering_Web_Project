@@ -12,8 +12,9 @@ class IsAchievementOwnerOrReadOnly(BasePermission):
             return True
 
         # Admins can moderate by deleting any achievement.
-        if request.method == "DELETE" and Admin.objects.filter(user=request.user).exists():
-            return True
+        if request.method == "DELETE":
+            if Admin.objects.filter(user=request.user).exists():
+                return True
 
         # Allow write operations only for the achievement owner
         return obj.user == request.user
