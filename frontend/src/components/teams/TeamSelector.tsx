@@ -1,6 +1,6 @@
 "use client";
 
-import { AvatarInitials } from "@/components/misc/AvatarInitials";
+import { Avatar } from "@/components/misc/Avatar";
 import type { TeamDetail } from "@/utils/teams";
 
 const PREVIEW_COUNT = 3;
@@ -44,7 +44,6 @@ export function TeamSelector({
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="bg-surface h-8 w-8 rounded-full" />
                   <div className="text-text font-semibold">{team.name}</div>
                 </div>
               </div>
@@ -54,9 +53,10 @@ export function TeamSelector({
               <div className="flex items-center">
                 <div className="flex items-center">
                   {team.members.slice(0, PREVIEW_COUNT).map((member, index) => (
-                    <AvatarInitials
+                    <Avatar
                       key={member.id}
                       name={member.name}
+                      src={member.profile_picture}
                       className={`h-8 w-8 text-xs font-semibold uppercase ${index === 0 ? "" : "-ml-2"} ${previewAvatarColor(index)}`}
                     />
                   ))}

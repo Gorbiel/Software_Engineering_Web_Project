@@ -1,4 +1,5 @@
-import { AvatarInitials } from "@/components/misc/AvatarInitials";
+import Link from "next/link";
+import { Avatar } from "@/components/misc/Avatar";
 
 function avatarColorClass(colorIndex: number): string {
   const mod = colorIndex % 3;
@@ -8,26 +9,34 @@ function avatarColorClass(colorIndex: number): string {
 }
 
 type TeamMemberCardProps = {
+  id: number | string;
   name: string;
   role: string;
+  photoUrl?: string | null;
   colorIndex: number;
 };
 
 export function TeamMemberCard({
+  id,
   name,
   role,
+  photoUrl,
   colorIndex,
 }: TeamMemberCardProps) {
   return (
-    <div className="bg-background flex w-full min-w-55 flex-none items-center gap-3 rounded-3xl p-4 sm:w-[calc(50%-0.5rem)]">
-      <AvatarInitials
+    <Link
+      href={`/profile/${id}`}
+      className="bg-background hover:border-border flex w-full min-w-55 flex-none items-center gap-3 rounded-3xl border border-transparent p-4 transition sm:w-[calc(50%-0.5rem)]"
+    >
+      <Avatar
         name={name}
+        src={photoUrl}
         className={`text-md h-10 w-10 font-semibold uppercase ${avatarColorClass(colorIndex)}`}
       />
       <div>
         <div className="text-text text-sm font-semibold">{name}</div>
         <div className="text-text-muted mt-1 text-xs font-semibold">{role}</div>
       </div>
-    </div>
+    </Link>
   );
 }

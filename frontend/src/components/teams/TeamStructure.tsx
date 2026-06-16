@@ -1,4 +1,5 @@
-import { AvatarInitials } from "@/components/misc/AvatarInitials";
+import Link from "next/link";
+import { Avatar } from "@/components/misc/Avatar";
 import { TeamMemberCard } from "./TeamMemberCard";
 import type { TeamDetail } from "@/utils/teams";
 
@@ -15,12 +16,14 @@ export function TeamStructure({ team }: { team: TeamDetail }) {
         {team.leaders.length > 0 ? (
           <div className="flex flex-col gap-4">
             {team.leaders.map((lead) => (
-              <div
+              <Link
                 key={lead.id}
-                className="bg-background flex items-center gap-4 rounded-3xl p-4"
+                href={`/profile/${lead.id}`}
+                className="bg-background hover:border-border flex items-center gap-4 rounded-3xl border border-transparent p-4 transition"
               >
-                <AvatarInitials
+                <Avatar
                   name={lead.name}
+                  src={lead.profile_picture}
                   className="text-accent bg-accent-soft h-12 w-12 text-lg font-semibold uppercase"
                 />
                 <div className="flex-1">
@@ -31,7 +34,7 @@ export function TeamStructure({ team }: { team: TeamDetail }) {
                     Team Lead
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         ) : null}
@@ -40,8 +43,10 @@ export function TeamStructure({ team }: { team: TeamDetail }) {
             {members.map((member, index) => (
               <TeamMemberCard
                 key={member.id}
+                id={member.id}
                 name={member.name}
                 role={member.job_title ?? "—"}
+                photoUrl={member.profile_picture}
                 colorIndex={index}
               />
             ))}
