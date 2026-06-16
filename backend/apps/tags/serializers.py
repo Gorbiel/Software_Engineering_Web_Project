@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from apps.tags.models import AchievementTag, GlazeTag, Tag
-from apps.teams.models import TeamMember
+from apps.teams.models import TeamLeader
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -47,9 +47,7 @@ class TagSerializer(serializers.ModelSerializer):
             if not user:
                 raise serializers.ValidationError("Authentication required.")
 
-            is_team_leader = TeamMember.objects.filter(
-                user=user, team=team, role="leader"
-            ).exists()
+            is_team_leader = TeamLeader.objects.filter(user=user, team=team).exists()
 
             if not is_team_leader and not user.is_superuser:
                 raise serializers.ValidationError(

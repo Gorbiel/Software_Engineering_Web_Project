@@ -17,6 +17,8 @@ class TagQuerySet(models.QuerySet):
 
     def available_for_team(self, team):
         """Return all tags available for a team (global + team-specific)"""
+        if isinstance(team, models.QuerySet) or isinstance(team, (list, tuple, set)):
+            return self.filter(models.Q(team__isnull=True) | models.Q(team_id__in=team))
         return self.filter(models.Q(team__isnull=True) | models.Q(team=team))
 
     def search(self, query):

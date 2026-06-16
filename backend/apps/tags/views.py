@@ -1,6 +1,7 @@
 from django.db import models
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -161,24 +162,18 @@ class TagViewSet(viewsets.ModelViewSet):
         """Set created_by to current user"""
         serializer.save(created_by=self.request.user)
 
-    def perform_update(self, instance):
+    def perform_update(self, serializer):
         """Only creator or superuser can update"""
         user = self.request.user
-        if instance.created_by != user and not user.is_superuser:
-            return Response(
-                {"error": "You can only update tags you created"},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-        return super().perform_update(instance)
+        if serializer.instance.created_by != user and not user.is_superuser:
+            raise PermissionDenied("You can only update tags you created")
+        return super().perform_update(serializer)
 
     def perform_destroy(self, instance):
         """Only creator or superuser can delete"""
         user = self.request.user
         if instance.created_by != user and not user.is_superuser:
-            return Response(
-                {"error": "You can only delete tags you created"},
-                status=status.HTTP_403_FORBIDDEN,
-            )
+            raise PermissionDenied("You can only delete tags you created")
         return super().perform_destroy(instance)
 
 
