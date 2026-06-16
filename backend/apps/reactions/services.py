@@ -31,32 +31,28 @@ def list_available_reactions():
 
 
 def resolve_reaction_definition(reaction_id=None, code=None, name=None):
-	if reaction_id:
-		try:
-			reaction = Reaction.objects.get(id=reaction_id)
-		except Reaction.DoesNotExist as exc:
-			raise ValidationError({"reaction_id": "Reaction does not exist."}) from exc
+    if reaction_id:
+        try:
+            reaction = Reaction.objects.get(id=reaction_id)
+        except Reaction.DoesNotExist as exc:
+            raise ValidationError({"reaction_id": "Reaction does not exist."}) from exc
 
-		reaction_code = normalize_reaction_code(reaction.code)
-		if reaction_code not in ALLOWED_REACTIONS:
-			raise ValidationError({"reaction_id": "Reaction is not allowed."})
+        reaction_code = normalize_reaction_code(reaction.code)
+        if reaction_code not in ALLOWED_REACTIONS:
+            raise ValidationError({"reaction_id": "Reaction is not allowed."})
 
-		return reaction
+        return reaction
 
-	if not code:
-		raise ValidationError({"detail": "reaction_id or code is required."})
+    if not code:
+        raise ValidationError({"detail": "reaction_id or code is required."})
 
-	normalized_code = normalize_reaction_code(code)
-	allowed_reaction = get_allowed_reaction_metadata(normalized_code)
-	if allowed_reaction is None:
-		raise ValidationError(
-			{
-				"code": "Unsupported reaction."
-			}
-		)
+    normalized_code = normalize_reaction_code(code)
+    allowed_reaction = get_allowed_reaction_metadata(normalized_code)
+    if allowed_reaction is None:
+        raise ValidationError({"code": "Unsupported reaction."})
 
-	reaction, _ = Reaction.objects.get_or_create(
-		code=normalized_code,
-		defaults={"name": allowed_reaction["name"]},
-	)
-	return reaction
+    reaction, _ = Reaction.objects.get_or_create(
+        code=normalized_code,
+        defaults={"name": allowed_reaction["name"]},
+    )
+    return reaction
