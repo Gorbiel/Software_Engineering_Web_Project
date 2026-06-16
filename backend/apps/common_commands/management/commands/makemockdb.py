@@ -1,7 +1,7 @@
 import csv
 from pathlib import Path
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
 from apps.achievements.models import (
@@ -12,6 +12,7 @@ from apps.achievements.models import (
 from apps.glazes.models import Glaze
 from apps.notifications.models import Notification
 from apps.reactions.models import AchievementReaction, GlazeReaction, Reaction
+from apps.reactions.services import ALLOWED_REACTIONS
 from apps.tags.models import AchievementTag, GlazeTag, Tag
 from apps.teams.models import Team, TeamLeader, TeamMember
 from apps.users.models import Admin, User
@@ -139,6 +140,10 @@ class Command(BaseCommand):
                     tag.save(update_fields=["created_by"])
                 tags[tag.tag_text] = tag
             elif row["kind"] == "reaction":
+                if row["code"] not in ALLOWED_REACTIONS:
+                    raise CommandError(
+                        f"Unsupported reaction code in mock data: {row['code']}"
+                    )
                 reaction, _ = Reaction.objects.get_or_create(
                     code=row["code"],
                     defaults={"name": row["name"]},
