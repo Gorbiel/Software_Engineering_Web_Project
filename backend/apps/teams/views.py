@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Q
 from django.db.models.functions import TruncDay
 from django.utils import timezone
 from rest_framework import status, viewsets
@@ -202,11 +202,6 @@ class TeamViewSet(viewsets.ModelViewSet):
             .annotate(day=TruncDay("creation_date"))
         )
 
-        # Annotated version only where confirmation/reaction fields are needed
-        achievements_annotated = (
-            achievements_base.with_confirmation_count().with_reaction_count()
-        )
-
         confirmations_in_period = (
             AchievementConfirmation.confirmations.filter(
                 achievement__user__teammember__team=pk
@@ -216,7 +211,7 @@ class TeamViewSet(viewsets.ModelViewSet):
         )
 
         sent_glazes_in_period = (
-            Glaze.glazes.by_team(pk)
+            Glaze.glazes.given_by_team(pk)
             .within_date_range(date_from, date_to)
             .annotate(day=TruncDay("creation_date"))
         )
@@ -227,14 +222,14 @@ class TeamViewSet(viewsets.ModelViewSet):
         )
 
         report["daily_achievement_confirmations"] = list(
-            achievements_annotated.values("day")
-            .annotate(total=Sum("confirmation_count"))
+            achievements_base.values("day")
+            .annotate(total=Count("achievementconfirmation"))
             .order_by("day")
         )
 
         report["daily_achievement_reactions"] = list(
-            achievements_annotated.values("day")
-            .annotate(total=Sum("reaction_count"))
+            achievements_base.values("day")
+            .annotate(total=Count("achievementreaction"))
             .order_by("day")
         )
 
@@ -351,6 +346,8 @@ class TeamViewSet(viewsets.ModelViewSet):
             .order_by("-usage_count")
             .values("tag_text", "usage_count")[:10]
         )
+
+        return Response(report)
 
     @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
     def compare(self, request):
