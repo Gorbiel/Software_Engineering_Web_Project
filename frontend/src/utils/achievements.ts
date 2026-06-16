@@ -1,4 +1,5 @@
 import { apiFetch, apiJson, ApiError } from "@/utils/api";
+import { type ReactionEntry } from "@/utils/reactions";
 
 export type AchievementUser = {
   id: number | string;
@@ -21,6 +22,7 @@ export type Achievement = {
   creation_date: string;
   confirmation_count: number;
   confirmations: AchievementConfirmation[];
+  reactions: ReactionEntry[];
 };
 
 export type FetchAchievementsParams = {
