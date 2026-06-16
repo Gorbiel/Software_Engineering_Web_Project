@@ -4,6 +4,7 @@ type AdminUserRowProps = {
   user: AdminUser;
   isDeleting: boolean;
   onChangeRank: (user: AdminUser) => void;
+  onResetPassword: (user: AdminUser) => void;
   onDelete: (user: AdminUser) => void;
 };
 
@@ -11,6 +12,7 @@ export function AdminUserRow({
   user,
   isDeleting,
   onChangeRank,
+  onResetPassword,
   onDelete,
 }: AdminUserRowProps) {
   return (
@@ -31,6 +33,13 @@ export function AdminUserRow({
           className="bg-accent-2 text-primary-contrast cursor-pointer rounded-full px-4 py-1.5 text-xs font-semibold transition select-none hover:opacity-90"
         >
           Change rank
+        </button>
+        <button
+          type="button"
+          onClick={() => onResetPassword(user)}
+          className="bg-accent-3 text-primary cursor-pointer rounded-full px-4 py-1.5 text-xs font-semibold transition select-none hover:opacity-90"
+        >
+          Reset password
         </button>
         <button
           type="button"

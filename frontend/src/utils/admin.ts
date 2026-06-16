@@ -79,3 +79,21 @@ export function updateUserRank(
     body: JSON.stringify({ rank }),
   });
 }
+
+export type ResetPasswordInput = {
+  newPassword: string;
+  newPasswordConfirmation: string;
+};
+
+export function resetUserPassword(
+  id: number | string,
+  input: ResetPasswordInput,
+): Promise<{ detail: string }> {
+  return apiJson<{ detail: string }>(`/users/${id}/password/`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      new_password: input.newPassword,
+      new_password_confirmation: input.newPasswordConfirmation,
+    }),
+  });
+}
