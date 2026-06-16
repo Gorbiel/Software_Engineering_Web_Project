@@ -21,14 +21,14 @@ from apps.achievements.serializers import (
     AchievementSerializer,
     ConfirmationRequestSerializer,
 )
-from apps.reactions.models import AchievementReaction
-from apps.reactions.serializers import AchievementReactionSerializer
-from apps.reactions.services import resolve_reaction_definition
 from apps.notifications.services import (
     notify_achievement_confirmed,
     notify_achievement_reaction,
     notify_confirmation_request,
 )
+from apps.reactions.models import AchievementReaction
+from apps.reactions.serializers import AchievementReactionSerializer
+from apps.reactions.services import resolve_reaction_definition
 from common.pagination import SearchResultsSetPagination
 
 logger = logging.getLogger(__name__)
@@ -143,6 +143,7 @@ class AchievementViewSet(viewsets.ModelViewSet):
         achievement = serializer.save(user=self.request.user)
         # Notify team members about new achievement
         from apps.notifications.services import notify_achievement_created
+
         try:
             notify_achievement_created(achievement)
         except Exception:
@@ -269,6 +270,7 @@ class AchievementViewSet(viewsets.ModelViewSet):
 
         try:
             from apps.users.models import User
+
             receiving_user = User.objects.get(id=receiving_user_id)
             confirmation_request = ConfirmationRequest.objects.create(
                 achievement=achievement, receiving_user_id=receiving_user_id

@@ -8,10 +8,10 @@ from rest_framework.response import Response
 from apps.glazes.models import Glaze
 from apps.glazes.permissions import IsGlazeOwnerOrReadOnly
 from apps.glazes.serializers import GlazeSerializer
+from apps.notifications.services import notify_glaze_reaction, notify_glaze_received
 from apps.reactions.models import GlazeReaction
 from apps.reactions.serializers import GlazeReactionSerializer
 from apps.reactions.services import resolve_reaction_definition
-from apps.notifications.services import notify_glaze_received, notify_glaze_reaction
 
 logger = logging.getLogger(__name__)
 
