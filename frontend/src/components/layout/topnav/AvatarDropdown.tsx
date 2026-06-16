@@ -3,16 +3,19 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { LogOut, Settings, Shield, User } from "lucide-react";
+import { BarChart3, LogOut, Settings, Shield, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useMyProfile } from "@/context/MyProfileContext";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { useLedTeams } from "@/hooks/useLedTeams";
 import { getInitials } from "@/components/misc/AvatarInitials";
 
 export function AvatarDropdown() {
   const { user, logout } = useAuth();
   const { profile } = useMyProfile();
   const isAdmin = useIsAdmin();
+  const ledTeams = useLedTeams();
+  const showReports = isAdmin === true || (ledTeams?.length ?? 0) > 0;
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -68,6 +71,16 @@ export function AvatarDropdown() {
               <User className="h-4 w-4" />
               Profile
             </Link>
+            {showReports ? (
+              <Link
+                href="/reports"
+                className="hover:bg-background text-text flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-semibold"
+                onClick={() => setIsOpen(false)}
+              >
+                <BarChart3 className="h-4 w-4" />
+                Reports
+              </Link>
+            ) : null}
             {isAdmin ? (
               <Link
                 href="/admin"

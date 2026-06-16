@@ -26,3 +26,10 @@ export function formatRelativeTime(iso: string): string {
 
   return "just now";
 }
+
+export function formatDay(iso: string): string {
+  return new Date(iso).toLocaleDateString("en", {
+    month: "short",
+    day: "numeric",
+  });
+}
