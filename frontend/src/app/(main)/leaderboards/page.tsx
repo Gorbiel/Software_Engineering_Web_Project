@@ -1,110 +1,318 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { RankingRow } from "@/components/leaderboards/RankingRow";
 import { RankingPodium } from "@/components/leaderboards/RankingPodium";
 import type { RankingEntry } from "@/components/leaderboards/types";
+import {
+  getUserLeaderboard,
+  getTeamLeaderboard,
+  getMyPosition,
+  getMetricLabel,
+  type MyPositionResponse,
+  type TeamLeaderboardEntry,
+  type UserLeaderboardMetric,
+  type UserLeaderboardEntry,
+  type TeamLeaderboardMetric,
+} from "@/utils/leaderboard";
 
-const globalRanking: {
-  top: RankingEntry[];
-  user: RankingEntry;
-  after: RankingEntry[];
-} = {
-  top: [
-    { rank: 1, name: "James C.", sprinkles: 6410, trend: "up" },
-    { rank: 2, name: "Sarah L.", sprinkles: 5820, trend: "down" },
-    { rank: 3, name: "Maya R.", sprinkles: 5450, trend: "up" },
-    { rank: 4, name: "David Wilson", sprinkles: 4900, trend: "up" },
-    { rank: 5, name: "Elena Hayes", sprinkles: 4820, trend: "neutral" },
-  ],
-  user: { rank: 12, name: "Alex Baker (You)", sprinkles: 4250, trend: "down" },
-  after: [
-    { rank: 13, name: "Tom Parker", sprinkles: 4190, trend: "down" },
-    { rank: 14, name: "Lara Singh", sprinkles: 4120, trend: "neutral" },
-  ],
+type ViewType = "users" | "teams" | "my-position";
+
+const getMetricValue = (
+  entry: UserLeaderboardEntry,
+  metric: UserLeaderboardMetric
+): number => {
+  switch (metric) {
+    case "total_score":
+      return entry.total_score;
+    case "achievements":
+      return entry.achievement_count;
+    case "confirmations":
+      return entry.confirmations_received;
+    case "glazes_received":
+      return entry.glazes_received_count;
+    case "glazes_sent":
+      return entry.glazes_sent_count;
+    default:
+      return entry.total_score;
+  }
 };
 
-const teamRanking: {
-  top: RankingEntry[];
-  user: RankingEntry;
-  after: RankingEntry[];
-} = {
-  top: [
-    { rank: 1, name: "Priya Shah", sprinkles: 3210, trend: "up" },
-    { rank: 2, name: "Leo Novak", sprinkles: 2950, trend: "down" },
-    { rank: 3, name: "Nina Walsh", sprinkles: 2840, trend: "up" },
-    { rank: 4, name: "Omar Said", sprinkles: 2720, trend: "neutral" },
-    { rank: 5, name: "Hana Kim", sprinkles: 2650, trend: "up" },
-  ],
-  user: {
-    rank: 12,
-    name: "Alex Baker (You)",
-    sprinkles: 2100,
-    trend: "up",
-  },
-  after: [
-    { rank: 13, name: "Luis Ortega", sprinkles: 2050, trend: "neutral" },
-    { rank: 14, name: "Rita Gomes", sprinkles: 1980, trend: "down" },
-  ],
+const getTeamMetricValue = (
+  entry: TeamLeaderboardEntry,
+  metric: TeamLeaderboardMetric
+): number => {
+  switch (metric) {
+    case "engagement":
+      return entry.engagement_score;
+    case "achievements":
+      return entry.achievements_count;
+    case "glazes":
+      return entry.glazes_sent_count;
+    case "participation":
+      return Math.round(entry.participation_rate);
+    default:
+      return entry.engagement_score;
+  }
 };
 
 export default function LeaderboardsPage() {
-  const [rankingType, setRankingType] = useState<"global" | "team">("global");
-  const ranking = rankingType === "global" ? globalRanking : teamRanking;
+  const [viewType, setViewType] = useState<ViewType>("users");
+  const [userMetric, setUserMetric] = useState<UserLeaderboardMetric>("total_score");
+  const [teamMetric, setTeamMetric] = useState<TeamLeaderboardMetric>("engagement");
+  const [userRankings, setUserRankings] = useState<RankingEntry[]>([]);
+  const [teamRankings, setTeamRankings] = useState<RankingEntry[]>([]);
+  const [myPosition, setMyPosition] = useState<MyPositionResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+
+  const fetchUserLeaderboard = useCallback(async () => {
+    try {
+      await Promise.resolve();
+      setLoading(true);
+      const response = await getUserLeaderboard(userMetric, undefined, 50);
+      
+      const rankings: RankingEntry[] = response.results.map((entry) => ({
+        rank: entry.rank,
+        name: entry.name,
+        sprinkles: getMetricValue(entry, userMetric),
+        trend: "neutral" as const,
+        userId: entry.user_id,
+      }));
+      
+      setUserRankings(rankings);
+    } catch (error) {
+      console.error("Failed to fetch user leaderboard:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [userMetric]);
+
+  const fetchTeamLeaderboard = useCallback(async () => {
+    try {
+      await Promise.resolve();
+      setLoading(true);
+      const response = await getTeamLeaderboard(teamMetric, 20);
+      
+      const rankings: RankingEntry[] = response.results.map((entry) => ({
+        rank: entry.rank,
+        name: entry.name,
+        sprinkles: getTeamMetricValue(entry, teamMetric),
+        trend: "neutral" as const,
+        teamId: entry.team_id,
+      }));
+      
+      setTeamRankings(rankings);
+    } catch (error) {
+      console.error("Failed to fetch team leaderboard:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [teamMetric]);
+
+  const fetchMyPosition = useCallback(async () => {
+    try {
+      await Promise.resolve();
+      setLoading(true);
+      const response = await getMyPosition();
+      setMyPosition(response);
+      setCurrentUserId(response.user_id);
+    } catch (error) {
+      console.error("Failed to fetch my position:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      if (viewType === "users") {
+        void fetchUserLeaderboard();
+      } else if (viewType === "teams") {
+        void fetchTeamLeaderboard();
+      } else {
+        void fetchMyPosition();
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
+  }, [fetchMyPosition, fetchTeamLeaderboard, fetchUserLeaderboard, viewType]);
+
+  const currentRankings = viewType === "users" ? userRankings : teamRankings;
+  const currentMetric = viewType === "users" ? userMetric : teamMetric;
 
   return (
     <>
       <div className="glaze-card flex flex-col gap-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-text text-2xl font-semibold">
-            Hall of Sprinkles
+            Leaderboards
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <button
               type="button"
-              onClick={() => setRankingType("global")}
+              onClick={() => setViewType("users")}
               className={`cursor-pointer rounded-full px-4 py-2 text-xs font-semibold transition select-none ${
-                rankingType === "global"
+                viewType === "users"
                   ? "bg-primary text-primary-contrast hover:opacity-90"
                   : "bg-background border-border text-text-muted hover:border-border border"
               }`}
             >
-              Global Rankings
+              Users
             </button>
             <button
               type="button"
-              onClick={() => setRankingType("team")}
+              onClick={() => setViewType("teams")}
               className={`cursor-pointer rounded-full px-4 py-2 text-xs font-semibold transition select-none ${
-                rankingType === "team"
+                viewType === "teams"
                   ? "bg-primary text-primary-contrast hover:opacity-90"
                   : "bg-background border-border text-text-muted hover:border-border border"
               }`}
             >
-              Team Rankings
+              Teams
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewType("my-position")}
+              className={`cursor-pointer rounded-full px-4 py-2 text-xs font-semibold transition select-none ${
+                viewType === "my-position"
+                  ? "bg-primary text-primary-contrast hover:opacity-90"
+                  : "bg-background border-border text-text-muted hover:border-border border"
+              }`}
+            >
+              My Position
             </button>
           </div>
         </div>
-        <RankingPodium top3={ranking.top.slice(0, 3)} />
-      </div>
-      <div className="glaze-card flex flex-col gap-4">
-        <div className="text-text-muted flex items-center gap-3 text-xs font-semibold">
-          <span className="flex-1">Rank & User</span>
-          <span className="w-16 text-center">Trend</span>
-          <span className="w-20 text-right">Sprinkles</span>
-        </div>
-        <div className="flex flex-col gap-3">
-          {ranking.top.slice(3).map((entry) => (
-            <RankingRow key={entry.rank} entry={entry} />
-          ))}
-          <div className="bg-background text-text-muted flex h-10 items-center justify-center rounded-2xl">
-            ...
+
+        {viewType !== "my-position" && (
+          <div className="flex gap-2 flex-wrap">
+            <span className="text-text-muted text-xs font-semibold self-center">
+              Metric:
+            </span>
+            {viewType === "users" ? (
+              <>
+                {(["total_score", "achievements", "confirmations", "glazes_received", "glazes_sent"] as UserLeaderboardMetric[]).map((metric) => (
+                  <button
+                    key={metric}
+                    type="button"
+                    onClick={() => setUserMetric(metric)}
+                    className={`cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition select-none ${
+                      userMetric === metric
+                        ? "bg-accent text-accent-contrast"
+                        : "bg-background border-border text-text-muted hover:border-accent border"
+                    }`}
+                  >
+                    {getMetricLabel(metric)}
+                  </button>
+                ))}
+              </>
+            ) : (
+              <>
+                {(["engagement", "achievements", "glazes", "participation"] as TeamLeaderboardMetric[]).map((metric) => (
+                  <button
+                    key={metric}
+                    type="button"
+                    onClick={() => setTeamMetric(metric)}
+                    className={`cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition select-none ${
+                      teamMetric === metric
+                        ? "bg-accent text-accent-contrast"
+                        : "bg-background border-border text-text-muted hover:border-accent border"
+                    }`}
+                  >
+                    {getMetricLabel(metric)}
+                  </button>
+                ))}
+              </>
+            )}
           </div>
-          <RankingRow entry={ranking.user} highlight />
-          {ranking.after.map((entry) => (
-            <RankingRow key={entry.rank} entry={entry} />
-          ))}
-        </div>
+        )}
+
+        {viewType !== "my-position" && currentRankings.length > 0 && (
+          <RankingPodium top3={currentRankings.slice(0, 3)} />
+        )}
       </div>
+
+      {viewType === "my-position" && myPosition ? (
+        <div className="glaze-card flex flex-col gap-4">
+          <div className="text-text text-xl font-semibold">Your Rankings</div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-background rounded-2xl p-4">
+              <div className="text-text-muted text-xs font-semibold mb-2">Total Score</div>
+              <div className="text-text text-3xl font-bold">#{myPosition.positions.total_score.rank}</div>
+              <div className="text-accent text-sm font-semibold mt-1">
+                {myPosition.positions.total_score.score} points
+              </div>
+            </div>
+            <div className="bg-background rounded-2xl p-4">
+              <div className="text-text-muted text-xs font-semibold mb-2">Achievements</div>
+              <div className="text-text text-3xl font-bold">#{myPosition.positions.achievements.rank}</div>
+              <div className="text-accent text-sm font-semibold mt-1">
+                {myPosition.positions.achievements.count} achievements
+              </div>
+            </div>
+            <div className="bg-background rounded-2xl p-4">
+              <div className="text-text-muted text-xs font-semibold mb-2">Glazes Received</div>
+              <div className="text-text text-3xl font-bold">#{myPosition.positions.glazes_received.rank}</div>
+              <div className="text-accent text-sm font-semibold mt-1">
+                {myPosition.positions.glazes_received.count} glazes
+              </div>
+            </div>
+          </div>
+          <div className="text-text text-lg font-semibold mt-4">Your Stats</div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="bg-background rounded-xl p-3">
+              <div className="text-text-muted text-xs">Achievements</div>
+              <div className="text-text text-xl font-bold">{myPosition.metrics.achievement_count}</div>
+            </div>
+            <div className="bg-background rounded-xl p-3">
+              <div className="text-text-muted text-xs">Confirmations</div>
+              <div className="text-text text-xl font-bold">{myPosition.metrics.confirmations_received}</div>
+            </div>
+            <div className="bg-background rounded-xl p-3">
+              <div className="text-text-muted text-xs">Glazes Received</div>
+              <div className="text-text text-xl font-bold">{myPosition.metrics.glazes_received_count}</div>
+            </div>
+            <div className="bg-background rounded-xl p-3">
+              <div className="text-text-muted text-xs">Glazes Sent</div>
+              <div className="text-text text-xl font-bold">{myPosition.metrics.glazes_sent_count}</div>
+            </div>
+            <div className="bg-background rounded-xl p-3">
+              <div className="text-text-muted text-xs">Weighted Confirmations</div>
+              <div className="text-text text-xl font-bold">{myPosition.metrics.weighted_confirmations}</div>
+            </div>
+            <div className="bg-background rounded-xl p-3">
+              <div className="text-text-muted text-xs">Total Score</div>
+              <div className="text-text text-xl font-bold">{myPosition.metrics.total_score}</div>
+            </div>
+          </div>
+        </div>
+      ) : viewType !== "my-position" && (
+        <div className="glaze-card flex flex-col gap-4">
+          <div className="text-text-muted flex items-center gap-3 text-xs font-semibold">
+            <span className="flex-1">Rank & {viewType === "users" ? "User" : "Team"}</span>
+            <span className="w-16 text-center">Trend</span>
+            <span className="w-20 text-right">{getMetricLabel(currentMetric)}</span>
+          </div>
+          {loading ? (
+            <div className="text-text-muted text-center py-8">Loading...</div>
+          ) : currentRankings.length === 0 ? (
+            <div className="text-text-muted text-center py-8">No data available</div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {currentRankings.slice(3).map((entry) => (
+                <RankingRow 
+                  key={`${entry.rank}-${entry.name}`} 
+                  entry={entry}
+                  highlight={viewType === "users" && entry.userId === currentUserId}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </>
   );
 }
+
+// Made with Bob

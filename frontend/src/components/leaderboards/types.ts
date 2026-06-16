@@ -5,4 +5,6 @@ export type RankingEntry = {
   name: string;
   sprinkles: number;
   trend: Trend;
+  userId?: number;
+  teamId?: number;
 };

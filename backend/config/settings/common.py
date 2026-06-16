@@ -30,7 +30,7 @@ INSTALLED_APPS = [
     "apps.tags",
     "apps.reactions",
     "apps.common_commands",
-    # "apps.notifications",
+    "apps.notifications",
     # "apps.reports",
 ]
 
