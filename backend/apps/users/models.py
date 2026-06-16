@@ -1,8 +1,11 @@
+import enum
+
 from django.contrib.auth.models import (
     AbstractBaseUser,
     BaseUserManager,
     PermissionsMixin,
 )
+from django.core import validators
 from django.db import models
 
 
@@ -51,6 +54,17 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     job_title = models.CharField(max_length=128, default=None, blank=True, null=True)
     bio_text = models.TextField(default=None, blank=True, null=True)
+    rank = models.IntegerField(
+        default=1,
+        validators=[validators.MinValueValidator(1), validators.MaxValueValidator(100)],
+    )
+
+    class Rank(enum.IntEnum):
+        DEFAULT = 1
+        JUNIOR = 10
+        MID = 50
+        SENIOR = 90
+        LEAD = 100
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["name"]
@@ -61,6 +75,24 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def is_active(self):
         return self.active
+
+    @property
+    def rank_name(self) -> str:
+        """Return the textual name for the stored numeric rank."""
+        try:
+            return self.Rank(self.rank).name.lower()
+        except ValueError:
+            return "custom"
+
+    @classmethod
+    def rank_value_from_name(cls, name: str) -> int:
+        """Convert a rank name (case-insensitive) to its integer value."""
+        if not isinstance(name, str):
+            raise ValueError("rank name must be a string")
+        try:
+            return cls.Rank[name.strip().upper()].value
+        except KeyError:
+            raise ValueError(f"Unknown rank name: {name}")
 
     class Meta:
         constraints = [

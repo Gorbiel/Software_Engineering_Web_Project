@@ -7,7 +7,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.users.models import User
-from apps.users.serializers import UserSearchSerializer, UserSerializer
+from apps.users.serializers import (
+    UserRankResponseSerializer,
+    UserRankSerializer,
+    UserSearchSerializer,
+    UserSerializer,
+)
 from apps.users.user_stats import get_user_stats
 from common.pagination import SearchResultsSetPagination
 from common.permissions import IsGlazedInAdmin, IsSelf
@@ -107,6 +112,17 @@ class UserViewSet(viewsets.ModelViewSet):
         user.deactivation_date = timezone.now()
         user.save(update_fields=["active", "deactivation_date"])
         return Response(self.get_serializer(user).data)
+
+    @action(detail=True, methods=["patch"])
+    def rank(self, request, pk=None):
+        user = self.get_object()
+        serializer = UserRankSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user.rank = serializer.validated_data["rank"]
+        user.save(update_fields=["rank"])
+
+        return Response(UserRankResponseSerializer(user).data)
 
 
 class ProfileViewSet(

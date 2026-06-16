@@ -71,6 +71,7 @@ class UserSerializerTests(TestCase):
                 "deactivation_date": "2026-01-01T00:00:00Z",
                 "is_staff": True,
                 "is_superuser": True,
+                "rank": 90,
             }
         )
 
@@ -81,3 +82,4 @@ class UserSerializerTests(TestCase):
         self.assertFalse(user.is_staff)
         self.assertFalse(user.is_superuser)
         self.assertIsNone(user.deactivation_date)
+        self.assertEqual(user.rank, 1)
