@@ -26,17 +26,9 @@ class TagViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-        Return tags available to the current user:
-        - All global tags
-        - Tags from user's teams
+        Return global tags available to every authenticated user.
         """
-        user = self.request.user
-
-        # Get user's teams
-        user_teams = TeamMember.objects.filter(user=user).values_list("team", flat=True)
-
-        # Return global tags + user's team tags
-        return Tag.tags.available_for_team(user_teams).distinct()
+        return Tag.tags.global_tags().distinct()
 
     def get_serializer_class(self):
         """Use lightweight serializer for list action"""

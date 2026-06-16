@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from apps.tags.models import AchievementTag, GlazeTag, Tag
-from apps.teams.models import TeamLeader
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -11,6 +10,7 @@ class TagSerializer(serializers.ModelSerializer):
     team_name = serializers.CharField(
         source="team.name", read_only=True, allow_null=True
     )
+    scope = serializers.SerializerMethodField()
     created_by_name = serializers.CharField(
         source="created_by.name", read_only=True, allow_null=True
     )
@@ -23,6 +23,7 @@ class TagSerializer(serializers.ModelSerializer):
             "team",
             "team_name",
             "is_global",
+            "scope",
             "created_by",
             "created_by_name",
             "creation_date",
@@ -36,25 +37,19 @@ class TagSerializer(serializers.ModelSerializer):
 
         team = data.get("team")
 
-        # If creating a global tag, user must be superuser
         if team is None:
-            if not user or not user.is_superuser:
-                raise serializers.ValidationError(
-                    "Only superusers can create global tags."
-                )
-        else:
-            # If creating a team-specific tag, user must be team leader
             if not user:
                 raise serializers.ValidationError("Authentication required.")
-
-            is_team_leader = TeamLeader.objects.filter(user=user, team=team).exists()
-
-            if not is_team_leader and not user.is_superuser:
-                raise serializers.ValidationError(
-                    "Only team leaders can create team-specific tags."
-                )
+        else:
+            raise serializers.ValidationError("Tags are global and cannot be scoped.")
 
         return data
+
+    def get_scope(self, obj):
+        """Return scope description"""
+        if obj.is_global:
+            return "Global"
+        return f"Team: {obj.team.name}" if obj.team else "Unknown"
 
     def create(self, validated_data):
         """Set created_by to current user"""

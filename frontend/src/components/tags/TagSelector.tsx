@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
+  createTag,
   debounce,
   formatTagScope,
   getTagBadgeColor,
@@ -16,6 +17,7 @@ interface TagSelectorProps {
   maxTags?: number;
   placeholder?: string;
   disabled?: boolean;
+  canCreate?: boolean;
 }
 
 export default function TagSelector({
@@ -25,12 +27,14 @@ export default function TagSelector({
   maxTags = 5,
   placeholder = "Search tags...",
   disabled = false,
+  canCreate = true,
 }: TagSelectorProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<TagListItem[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -114,6 +118,43 @@ export default function TagSelector({
   };
 
   const isMaxTagsReached = selectedTags.length >= maxTags;
+  const trimmedQuery = searchQuery.trim();
+  const hasExactMatch = searchResults.some(
+    (tag) => tag.tag_text.toLowerCase() === trimmedQuery.toLowerCase()
+  );
+  const showCreateAction =
+    showDropdown &&
+    trimmedQuery.length >= 2 &&
+    !isSearching &&
+    !isMaxTagsReached &&
+    !hasExactMatch;
+
+  async function handleCreateTag() {
+    if (!canCreate) {
+      setError("You cannot create new tags here.");
+      return;
+    }
+
+    if (trimmedQuery.length < 2 || selectedTags.length >= maxTags) {
+      return;
+    }
+
+    setIsCreating(true);
+    setError(null);
+
+    try {
+      const tag = await createTag(trimmedQuery);
+      onTagsChange([...selectedTags, tag]);
+      setSearchQuery("");
+      setSearchResults([]);
+      setShowDropdown(false);
+      inputRef.current?.focus();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create tag");
+    } finally {
+      setIsCreating(false);
+    }
+  }
 
   return (
     <div className="w-full">
@@ -222,11 +263,30 @@ export default function TagSelector({
           </div>
         )}
 
+        {showCreateAction && (
+          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3">
+            <button
+              type="button"
+              onClick={handleCreateTag}
+              disabled={disabled || isCreating}
+              className="w-full rounded-lg bg-blue-50 px-4 py-2 text-left text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isCreating ? "Creating..." : `Create tag "${trimmedQuery}"`}
+            </button>
+            {!canCreate && (
+              <p className="mt-2 text-xs text-gray-500">
+                You cannot create new tags here.
+              </p>
+            )}
+          </div>
+        )}
+
         {/* No results message */}
         {showDropdown &&
           searchQuery.trim().length >= 2 &&
           !isSearching &&
-          searchResults.length === 0 && (
+          searchResults.length === 0 &&
+          !showCreateAction && (
             <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500">
               No tags found for &quot;{searchQuery}&quot;
             </div>
@@ -242,8 +302,8 @@ export default function TagSelector({
 
       {/* Help text */}
       <p className="mt-2 text-sm text-gray-500">
-        Search and select up to {maxTags} tags. Global tags are available to all
-        users, team tags are specific to your team.
+        Search and select up to {maxTags} tags. Tags are global and available to
+        all users.
       </p>
     </div>
   );

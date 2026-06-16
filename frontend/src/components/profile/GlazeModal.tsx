@@ -7,7 +7,6 @@ import { TitleBodyFields } from "@/components/forms/TitleBodyFields";
 import { type Glaze, createGlaze } from "@/utils/glazes";
 import TagSelector from "@/components/tags/TagSelector";
 import { type TagListItem } from "@/utils/tags";
-import { useMyProfile } from "@/context/MyProfileContext";
 
 type GlazeModalProps = {
   receivingUserId: number | string;
@@ -28,7 +27,6 @@ export function GlazeModal({
   const [showTagSelector, setShowTagSelector] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
-  const { profile } = useMyProfile();
 
   const canSubmit = title.trim() !== "" && body.trim() !== "" && !isPending;
 
@@ -112,7 +110,6 @@ export function GlazeModal({
         <TagSelector
           selectedTags={selectedTags}
           onTagsChange={setSelectedTags}
-          teamId={profile?.team_id ?? undefined}
           disabled={isPending}
         />
       )}
