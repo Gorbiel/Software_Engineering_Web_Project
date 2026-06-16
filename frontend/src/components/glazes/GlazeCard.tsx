@@ -9,6 +9,7 @@ type GlazeCardProps = {
   receiverId?: number | string | null;
   title: string;
   date: string;
+  reactions?: React.ReactNode;
   actions?: React.ReactNode;
   children: React.ReactNode;
 };
@@ -25,6 +26,7 @@ export function GlazeCard({
   receiverId,
   title,
   date,
+  reactions,
   actions,
   children,
 }: GlazeCardProps) {
@@ -93,6 +95,11 @@ export function GlazeCard({
         <h3 className="text-text text-lg font-bold wrap-break-word">{title}</h3>
         <p className="text-text-muted text-sm wrap-break-word">{children}</p>
       </div>
+      {reactions ? (
+        <div className="text-text-muted flex items-center text-xs">
+          {reactions}
+        </div>
+      ) : null}
     </article>
   );
 }

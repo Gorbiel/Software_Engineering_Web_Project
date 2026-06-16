@@ -1,6 +1,7 @@
 "use client";
 
 import { GlazeCard } from "@/components/glazes/GlazeCard";
+import { ReactionBar } from "@/components/reactions/ReactionBar";
 import { EntryEditCard } from "@/components/forms/EntryEditCard";
 import { EditDeleteActions } from "@/components/forms/EditDeleteActions";
 import { useEditableEntry } from "@/hooks/useEditableEntry";
@@ -82,6 +83,14 @@ export function GlazeItem({
         receiverId={glaze.receiving_user.id}
         title={glaze.title}
         date={`Glazed ${formatRelativeTime(glaze.creation_date)}`}
+        reactions={
+          <ReactionBar
+            target="glazes"
+            entityId={glaze.id}
+            initialReactions={glaze.reactions ?? []}
+            currentUserId={currentUserId}
+          />
+        }
         actions={actions}
       >
         {glaze.body}

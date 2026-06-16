@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, Send } from "lucide-react";
 import { AchievementCard } from "@/components/achievements/AchievementCard";
 import { ConfirmationRequestModal } from "@/components/achievements/ConfirmationRequestModal";
+import { ReactionBar } from "@/components/reactions/ReactionBar";
 import { EntryEditCard } from "@/components/forms/EntryEditCard";
 import { EditDeleteActions } from "@/components/forms/EditDeleteActions";
 import { useEditableEntry } from "@/hooks/useEditableEntry";
@@ -153,8 +154,14 @@ export function AchievementItem({
         authorId={achievement.user.id}
         title={achievement.title}
         date={`Shared ${formatRelativeTime(achievement.creation_date)}`}
-        likes={0}
-        comments={0}
+        reactions={
+          <ReactionBar
+            target="achievements"
+            entityId={achievement.id}
+            initialReactions={achievement.reactions ?? []}
+            currentUserId={currentUserId}
+          />
+        }
         confirmedBy={confirmedBy}
         actions={actions}
       >

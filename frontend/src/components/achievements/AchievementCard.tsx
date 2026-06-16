@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Heart, MessageSquare } from "lucide-react";
 import { Avatar, type AvatarPerson } from "@/components/misc/Avatar";
 import { AvatarStack } from "@/components/misc/AvatarStack";
 
@@ -9,8 +8,7 @@ type AchievementCardProps = {
   authorId?: number | string | null;
   title: string;
   date: string;
-  likes: number;
-  comments: number;
+  reactions?: React.ReactNode;
   confirmedBy?: AvatarPerson[];
   actions?: React.ReactNode;
   children: React.ReactNode;
@@ -22,8 +20,7 @@ export function AchievementCard({
   authorId,
   title,
   date,
-  likes,
-  comments,
+  reactions,
   confirmedBy = [],
   actions,
   children,
@@ -94,24 +91,9 @@ export function AchievementCard({
         <p className="text-text-muted text-sm wrap-break-word">{children}</p>
       </div>
       <div className="text-text-muted flex items-center justify-between gap-4 text-xs">
-        <div className="flex items-center gap-4">
-          <button
-            className="hover:text-accent flex cursor-pointer items-center gap-1 transition-colors select-none"
-            type="button"
-          >
-            <Heart className="h-4 w-4" />
-            <span className="font-bold">{likes}</span>
-          </button>
-          <button
-            className="hover:text-accent-2 flex cursor-pointer items-center gap-1 transition-colors select-none"
-            type="button"
-          >
-            <MessageSquare className="h-4 w-4" />
-            <span className="font-bold">{comments}</span>
-          </button>
-        </div>
+        <div className="min-w-0">{reactions}</div>
         {actions ? (
-          <div className="flex items-center gap-1">{actions}</div>
+          <div className="flex shrink-0 items-center gap-1">{actions}</div>
         ) : null}
       </div>
     </article>

@@ -1,4 +1,5 @@
 import { apiFetch, apiJson, ApiError } from "@/utils/api";
+import { type ReactionEntry } from "@/utils/reactions";
 
 export type GlazeUser = {
   id: number;
@@ -14,6 +15,7 @@ export type Glaze = {
   title: string;
   body: string;
   creation_date: string;
+  reactions: ReactionEntry[];
 };
 
 export type CreateGlazeInput = {
