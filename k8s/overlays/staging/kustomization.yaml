@@ -6,9 +6,9 @@ resources:
 
 images:
   - name: ghcr.io/gorbiel/software_engineering_web_project/backend
-    newTag: staging
+    newTag: 131b850
   - name: ghcr.io/gorbiel/software_engineering_web_project/frontend
-    newTag: staging
+    newTag: 131b850
 
 patches:
   - target:
