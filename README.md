@@ -161,7 +161,7 @@ The CI pipeline runs checks for changed areas of the codebase:
 
 ## Deployment Notes
 
-Container images are published to GitHub Container Registry from the `main` and `dev` branches. The repository also includes Kubernetes and Argo CD configuration for deployment-oriented workflows.
+Container images are published to GitHub Container Registry from the `prod` and `dev` branches. The publish workflow also writes the short commit SHA back to the matching Kustomize overlay so Argo CD sees an immutable image tag change and rolls the deployment. The repository also includes Kubernetes and Argo CD configuration for deployment-oriented workflows.
 
 ## License
 
