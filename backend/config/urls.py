@@ -25,6 +25,10 @@ urlpatterns = [
     path("api/", include("apps.api_urls")),
 ]
 
-if settings.DEBUG:
-    # Serve uploaded media (e.g. profile pictures) at /media/ in development.
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+if settings.DEBUG or getattr(settings, "SERVE_MEDIA_FILES", False):
+    # Serve uploaded media in development and in small deployments that opt in.
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT,
+        insecure=not settings.DEBUG,
+    )
