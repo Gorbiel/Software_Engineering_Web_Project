@@ -62,6 +62,12 @@ CSRF_TRUSTED_ORIGINS = os.getenv(
     "https://glazedin.click,https://www.glazedin.click",
 ).split(",")
 
+SERVE_MEDIA_FILES = os.getenv("SERVE_MEDIA_FILES", "false").lower() in {
+    "1",
+    "true",
+    "yes",
+}
+
 # JWT Token Settings - Production Overrides
 # These are stricter than development for security
 
