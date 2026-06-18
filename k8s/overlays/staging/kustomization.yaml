@@ -102,3 +102,21 @@ patches:
         value:
           name: CORS_ALLOWED_ORIGINS
           value: "https://staging.glazedin.click"
+
+  - target:
+      kind: Deployment
+      name: backend
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: CSRF_TRUSTED_ORIGINS
+          value: "https://staging.glazedin.click"
+
+  - target:
+      kind: Deployment
+      name: frontend
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0/value
+        value: https://api.staging.glazedin.click
