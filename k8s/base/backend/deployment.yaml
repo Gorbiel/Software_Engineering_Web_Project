@@ -19,6 +19,10 @@ spec:
           ports:
             - containerPort: 8000
 
+          volumeMounts:
+            - name: backend-media
+              mountPath: /app/media
+
           envFrom:
             - secretRef:
                 name: postgres-secret
@@ -32,3 +36,8 @@ spec:
                 secretKeyRef:
                   name: django-secret
                   key: SECRET_KEY
+
+      volumes:
+        - name: backend-media
+          persistentVolumeClaim:
+            claimName: backend-media
