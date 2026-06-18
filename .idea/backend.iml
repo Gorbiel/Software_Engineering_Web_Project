@@ -17,6 +17,7 @@
       <sourceFolder url="file://$MODULE_DIR$/backend" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/backend/.venv" />
       <excludeFolder url="file://$MODULE_DIR$/backend/backend.egg-info" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/media" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.14 (GlazedIn)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

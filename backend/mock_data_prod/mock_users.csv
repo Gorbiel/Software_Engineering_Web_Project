@@ -1,0 +1,65 @@
+name,email,password,job_title,bio_text,rank,is_admin,active
+Toto Wolff,toto.wolff@f1.test,password123,Mercedes Team Principal,"Runs the Mercedes race team with a focus on standards, accountability, and long championship cycles.",100,false,true
+George Russell,george.russell@f1.test,password123,Mercedes F1 Driver,"Precise qualifier and race leader trusted to turn setup detail into consistent front-running weekends.",94,false,true
+Kimi Antonelli,kimi.antonelli@f1.test,password123,Mercedes F1 Driver,"Rapid young Mercedes driver learning to convert junior-series speed into polished Grand Prix execution.",88,false,true
+Marcus Dudley,marcus.dudley@f1.test,password123,George Russell Race Engineer,"Coordinates Russell's run plans, radio priorities, and setup feedback across every session.",86,false,true
+Peter Bonnington,peter.bonnington@f1.test,password123,Mercedes Senior Race Engineer,"Veteran Mercedes engineer guiding driver feedback loops and high-pressure race operations.",91,false,true
+Frederic Vasseur,frederic.vasseur@f1.test,password123,Ferrari Team Principal,"Leads Ferrari with calm operational discipline and clear accountability across Maranello and the pit wall.",100,false,true
+Charles Leclerc,charles.leclerc@f1.test,password123,Ferrari F1 Driver,"Elite qualifier and Ferrari race winner known for sharp feedback and relentless single-lap commitment.",96,false,true
+Lewis Hamilton,lewis.hamilton@f1.test,password123,Ferrari F1 Driver,"Seven-time world champion bringing racecraft, tyre feel, and title-winning standards to Ferrari.",100,false,true
+Bryan Bozzi,bryan.bozzi@f1.test,password123,Charles Leclerc Race Engineer,"Turns Leclerc's detailed cockpit feedback into short-run setup decisions and qualifying execution.",88,false,true
+Riccardo Adami,riccardo.adami@f1.test,password123,Lewis Hamilton Race Engineer,"Manages Hamilton's Ferrari radio, strategy context, and race weekend engineering rhythm.",88,false,true
+Andrea Stella,andrea.stella@f1.test,password123,McLaren Team Principal,"Built McLaren into a front-running operation through technical clarity and measured race execution.",100,false,true
+Lando Norris,lando.norris@f1.test,password123,McLaren F1 Driver,"Reigning champion-level McLaren leader with elite race pace, tyre management, and late-stint control.",98,false,true
+Oscar Piastri,oscar.piastri@f1.test,password123,McLaren F1 Driver,"Composed Grand Prix winner known for clean execution, strong adaptation, and low-error weekends.",96,false,true
+Will Joseph,will.joseph@f1.test,password123,Lando Norris Race Engineer,"Keeps Norris' race plan direct, calm, and actionable from garage preparation to chequered flag.",88,false,true
+Tom Stallard,tom.stallard@f1.test,password123,Oscar Piastri Race Engineer,"Guides Piastri through detailed run plans, tyre targets, and race-by-race development goals.",88,false,true
+Laurent Mekies,laurent.mekies@f1.test,password123,Red Bull Racing Team Principal,"Leads Red Bull Racing through the new power unit era with engineering depth and race-team discipline.",100,false,true
+Max Verstappen,max.verstappen@f1.test,password123,Red Bull Racing F1 Driver,"Multiple world champion with benchmark racecraft, ruthless consistency, and exceptional wet-weather control.",100,false,true
+Isack Hadjar,isack.hadjar@f1.test,password123,Red Bull Racing F1 Driver,"Aggressive and analytical Red Bull rookie adapting quickly to front-team expectations.",82,false,true
+Gianpiero Lambiase,gianpiero.lambiase@f1.test,password123,Max Verstappen Race Engineer,"Direct race engineer trusted to filter pressure into concise calls for Verstappen.",92,false,true
+Simon Rennie,simon.rennie@f1.test,password123,Red Bull Senior Race Engineer,"Experienced Red Bull engineer supporting driver integration, simulator correlation, and weekend operations.",86,false,true
+Flavio Briatore,flavio.briatore@f1.test,password123,Alpine Team Principal,"Senior Alpine leader focused on competitiveness, commercial urgency, and decisive race-team standards.",98,false,true
+Pierre Gasly,pierre.gasly@f1.test,password123,Alpine F1 Driver,"Leads Alpine on track with experience, race resilience, and strong development feedback.",89,false,true
+Franco Colapinto,franco.colapinto@f1.test,password123,Alpine F1 Driver,"Full-time Alpine driver bringing Argentine momentum, clean adaptation, and growing race maturity.",82,false,true
+David Sanchez,david.sanchez@f1.test,password123,Alpine Executive Technical Director,"Owns Alpine's technical direction and car development priorities in the Mercedes power unit era.",90,false,true
+Ciaron Pilbeam,ciaron.pilbeam@f1.test,password123,Alpine Performance Engineer,"Connects trackside data, race pace, and driver comments into practical setup decisions.",84,false,true
+Alan Permane,alan.permane@f1.test,password123,Racing Bulls Team Principal,"Runs Racing Bulls with decades of race operations knowledge and a sharp eye for young-driver growth.",96,false,true
+Liam Lawson,liam.lawson@f1.test,password123,Racing Bulls F1 Driver,"Combative Racing Bulls driver with strong race instincts and a direct development style.",82,false,true
+Arvid Lindblad,arvid.lindblad@f1.test,password123,Racing Bulls F1 Driver,"Rookie Racing Bulls driver building Grand Prix mileage with methodical feedback and speed.",78,false,true
+Pierre Hamelin,pierre.hamelin@f1.test,password123,Liam Lawson Race Engineer,"Supports Lawson with clear session goals, tyre targets, and live race context.",82,false,true
+Guillaume Dezoteux,guillaume.dezoteux@f1.test,password123,Racing Bulls Head of Vehicle Performance,"Coordinates Racing Bulls vehicle performance work across simulator, setup, and trackside analysis.",84,false,true
+Ayao Komatsu,ayao.komatsu@f1.test,password123,Haas Team Principal,"Leads Haas with hands-on engineering discipline, compact operations, and direct driver communication.",96,false,true
+Esteban Ocon,esteban.ocon@f1.test,password123,Haas F1 Driver,"Experienced Haas driver known for race toughness, technical feedback, and opportunistic points finishes.",88,false,true
+Oliver Bearman,oliver.bearman@f1.test,password123,Haas F1 Driver,"Young Haas driver with Ferrari academy polish, fast learning, and strong qualifying potential.",81,false,true
+Laura Mueller,laura.mueller@f1.test,password123,Haas Race Engineer,"Runs detailed Haas session plans and translates driver comments into clear setup priorities.",83,false,true
+Mark Slade,mark.slade@f1.test,password123,Haas Senior Race Engineer,"Veteran race engineer adding structure, racecraft context, and calm pit wall judgement.",84,false,true
+James Vowles,james.vowles@f1.test,password123,Williams Team Principal,"Rebuilt Williams around process, transparent standards, and long-term technical growth.",98,false,true
+Carlos Sainz,carlos.sainz@f1.test,password123,Williams F1 Driver,"Race-winning Williams leader with strong strategy instincts and mature car-development feedback.",93,false,true
+Alexander Albon,alexander.albon@f1.test,password123,Williams F1 Driver,"Consistent Williams scorer trusted for race management, tyre care, and clear technical direction.",90,false,true
+Gaetan Jego,gaetan.jego@f1.test,password123,Williams Race Engineer,"Guides Williams run plans with a focus on balance, traffic management, and execution.",84,false,true
+Jose Manuel Lopez,jose.lopez@f1.test,password123,Williams Trackside Engineer,"Supports Williams trackside analysis, data review, and cross-garage correlation.",82,false,true
+Jonathan Wheatley,jonathan.wheatley@f1.test,password123,Audi Team Principal,"Guides Audi's works-team launch with elite sporting operations experience and procedural discipline.",98,false,true
+Nico Hulkenberg,nico.hulkenberg@f1.test,password123,Audi F1 Driver,"Experienced Audi driver valued for qualifying speed, technical clarity, and development patience.",86,false,true
+Gabriel Bortoleto,gabriel.bortoleto@f1.test,password123,Audi F1 Driver,"Young Audi driver bringing junior-title pedigree, measured feedback, and long-term works-team potential.",80,false,true
+Xevi Pujolar,xevi.pujolar@f1.test,password123,Audi Trackside Engineering Director,"Connects Audi's trackside engineering, driver feedback, and works-power-unit learning loop.",86,false,true
+Beat Zehnder,beat.zehnder@f1.test,password123,Audi Sporting Director,"Long-serving Hinwil operator guarding sporting process, logistics, and team continuity.",87,false,true
+Andy Cowell,andy.cowell@f1.test,password123,Aston Martin Team Principal,"Leads Aston Martin with power-unit expertise and a deep focus on technical integration.",98,false,true
+Fernando Alonso,fernando.alonso@f1.test,password123,Aston Martin F1 Driver,"Two-time world champion whose race intelligence and feedback still shape every Aston Martin weekend.",97,false,true
+Lance Stroll,lance.stroll@f1.test,password123,Aston Martin F1 Driver,"Experienced Aston Martin driver helping correlate Honda integration with raceable balance targets.",84,false,true
+Andrew Vizard,andrew.vizard@f1.test,password123,Fernando Alonso Race Engineer,"Works with Alonso on run priorities, tyre windows, and high-detail balance feedback.",84,false,true
+Ben Michell,ben.michell@f1.test,password123,Lance Stroll Race Engineer,"Manages Stroll's session structure, radio context, and setup execution.",83,false,true
+Graeme Lowdon,graeme.lowdon@f1.test,password123,Cadillac Team Principal,"Builds Cadillac's first F1 season around experienced drivers, disciplined operations, and measured goals.",97,false,true
+Sergio Perez,sergio.perez@f1.test,password123,Cadillac F1 Driver,"Veteran Cadillac driver bringing tyre craft, sponsor presence, and hard-earned race management.",89,false,true
+Valtteri Bottas,valtteri.bottas@f1.test,password123,Cadillac F1 Driver,"Experienced Cadillac driver offering calm feedback, qualifying speed, and Mercedes-era technical knowledge.",88,false,true
+Nick Chester,nick.chester@f1.test,password123,Cadillac Technical Director,"Shapes Cadillac's launch car programme and early-season development priorities.",89,false,true
+Mario Andretti,mario.andretti@f1.test,password123,Cadillac Board Advisor,"World champion and Cadillac ambassador connecting American racing heritage with the new F1 entry.",95,false,true
+Mohammed Ben Sulayem,mohammed.ben-sulayem@f1.test,password123,FIA President,"Oversees FIA governance, safety priorities, and the sporting framework around Formula 1.",100,true,true
+Stefano Domenicali,stefano.domenicali@f1.test,password123,Formula 1 President and CEO,"Leads Formula 1's commercial direction, calendar strategy, and global growth.",100,true,true
+Nikolas Tombazis,nikolas.tombazis@f1.test,password123,FIA Single-Seater Director,"Guides single-seater technical regulation work and the transition into the 2026 rules era.",97,true,true
+Herbie Blash,herbie.blash@f1.test,password123,FIA Senior Advisor,"Veteran race-control advisor bringing decades of sporting judgement and paddock context.",92,false,true
+Sebastian Vettel,sebastian.vettel@f1.test,password123,F1 World Champion and Mentor,"Four-time world champion focused on mentoring, sustainability, and thoughtful driver development.",96,false,true
+Mika Hakkinen,mika.hakkinen@f1.test,password123,F1 World Champion and Mentor,"Two-time world champion offering calm advice on pressure, precision, and championship resilience.",94,false,true
+Jenson Button,jenson.button@f1.test,password123,F1 World Champion and Broadcaster,"World champion and analyst with a sharp eye for tyre management and driver confidence.",92,false,true
+Susie Wolff,susie.wolff@f1.test,password123,F1 Academy Managing Director,"Leads F1 Academy and champions the next generation of racing talent.",92,false,true
+Alain Prost,alain.prost@f1.test,password123,F1 World Champion and Advisor,"Four-time world champion known for strategic thinking, political judgement, and race intelligence.",95,false,true
