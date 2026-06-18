@@ -6,9 +6,9 @@ resources:
 
 images:
   - name: ghcr.io/gorbiel/software_engineering_web_project/backend
-    newTag: 8dbdf0a
+    newTag: c64d5d3
   - name: ghcr.io/gorbiel/software_engineering_web_project/frontend
-    newTag: 8dbdf0a
+    newTag: c64d5d3
 
 patches:
   - target:
