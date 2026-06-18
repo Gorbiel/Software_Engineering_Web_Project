@@ -44,6 +44,9 @@ patches:
       kind: Deployment
       name: backend
     patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0/value
+        value: config.settings.dev
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
