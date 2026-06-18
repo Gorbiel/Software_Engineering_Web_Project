@@ -17,7 +17,9 @@ from apps.tags.models import AchievementTag, GlazeTag, Tag
 from apps.teams.models import Team, TeamLeader, TeamMember
 from apps.users.models import Admin, User
 
-MOCK_DATA_DIR = Path(__file__).resolve().parents[4] / "mock_data"
+BACKEND_DIR = Path(__file__).resolve().parents[4]
+MOCK_DATA_DIR = BACKEND_DIR / "mock_data"
+MOCK_DATA_PROD_DIR = BACKEND_DIR / "mock_data_prod"
 
 
 def split_list(value):
@@ -26,8 +28,8 @@ def split_list(value):
     return [item.strip() for item in value.split(";") if item.strip()]
 
 
-def read_csv(name):
-    with (MOCK_DATA_DIR / name).open(newline="") as csv_file:
+def read_csv(data_dir, name):
+    with (data_dir / name).open(newline="") as csv_file:
         return list(csv.DictReader(csv_file))
 
 
@@ -40,15 +42,22 @@ class Command(BaseCommand):
             action="store_true",
             help="Delete existing app data before seeding mock data.",
         )
+        parser.add_argument(
+            "--prod",
+            action="store_true",
+            help="Seed from mock_data_prod instead of mock_data.",
+        )
 
     def handle(self, *args, **options):
+        data_dir = MOCK_DATA_PROD_DIR if options["prod"] else MOCK_DATA_DIR
+
         if options["reset"]:
             self.reset_data()
 
-        users = self.seed_users()
-        teams = self.seed_teams(users)
-        tags, reactions = self.seed_tags_and_reactions(users)
-        achievements, glazes = self.seed_posts(users, tags, reactions)
+        users = self.seed_users(data_dir)
+        teams = self.seed_teams(data_dir, users)
+        tags, reactions = self.seed_tags_and_reactions(data_dir, users)
+        achievements, glazes = self.seed_posts(data_dir, users, tags, reactions)
         self.seed_notifications(achievements, glazes)
 
         self.stdout.write(
@@ -79,11 +88,11 @@ class Command(BaseCommand):
         Admin.objects.all().delete()
         User.objects.all().delete()
 
-    def seed_users(self):
+    def seed_users(self, data_dir):
         self.stdout.write("Seeding users...")
         users = {}
 
-        for row in read_csv("mock_users.csv"):
+        for row in read_csv(data_dir, "mock_users.csv"):
             user, _ = User.objects.get_or_create(
                 email=row["email"],
                 defaults={"name": row["name"]},
@@ -104,11 +113,11 @@ class Command(BaseCommand):
 
         return users
 
-    def seed_teams(self, users):
+    def seed_teams(self, data_dir, users):
         self.stdout.write("Seeding teams...")
         teams = {}
 
-        for row in read_csv("mock_team_names.csv"):
+        for row in read_csv(data_dir, "mock_team_names.csv"):
             team, _ = Team.objects.get_or_create(name=row["team_name"])
             teams[team.name] = team
 
@@ -122,13 +131,13 @@ class Command(BaseCommand):
 
         return teams
 
-    def seed_tags_and_reactions(self, users):
+    def seed_tags_and_reactions(self, data_dir, users):
         self.stdout.write("Seeding tags and reactions...")
         tags = {}
         reactions = {}
         first_user = next(iter(users.values()))
 
-        for row in read_csv("mock_tags_reactions.csv"):
+        for row in read_csv(data_dir, "mock_tags_reactions.csv"):
             if row["kind"] == "tag":
                 tag, _ = Tag.objects.get_or_create(
                     tag_text=row["name"],
@@ -155,12 +164,12 @@ class Command(BaseCommand):
 
         return tags, reactions
 
-    def seed_posts(self, users, tags, reactions):
+    def seed_posts(self, data_dir, users, tags, reactions):
         self.stdout.write("Seeding achievements, glazes, tags, and reactions...")
         achievements = {}
         glazes = {}
 
-        for row in read_csv("mock_posts.csv"):
+        for row in read_csv(data_dir, "mock_posts.csv"):
             if row["type"] == "achievement":
                 achievement = self.seed_achievement(row, users, tags, reactions)
                 achievements[achievement.title] = achievement
