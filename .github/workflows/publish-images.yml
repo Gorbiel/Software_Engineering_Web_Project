@@ -78,25 +78,20 @@ jobs:
           build-args: ${{ matrix.build_args }}
 
   update-manifests:
-    name: Update deployment manifests
+    name: Update staging deployment manifest
     runs-on: ubuntu-latest
     needs: publish
+    if: github.ref_name == 'dev'
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          ssh-key: ${{ secrets.MANIFEST_UPDATE_DEPLOY_KEY }}
 
       - name: Update image tags
         run: |
-          if [[ "${GITHUB_REF_NAME}" == "prod" ]]; then
-            overlay="k8s/overlays/production"
-          elif [[ "${GITHUB_REF_NAME}" == "dev" ]]; then
-            overlay="k8s/overlays/staging"
-          else
-            echo "Unsupported branch: ${GITHUB_REF_NAME}"
-            exit 1
-          fi
-
+          overlay="k8s/overlays/staging"
           sha_tag="${GITHUB_SHA::7}"
           sed -i -E "s/(newTag: ).*/\1${sha_tag}/" "${overlay}/kustomization.yaml"
 
@@ -113,5 +108,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "${OVERLAY}/kustomization.yaml"
-          git commit -m "chore: deploy images ${SHA_TAG} [skip ci]"
+          git commit -m "chore: deploy images ${SHA_TAG}"
+          git remote set-url origin "git@github.com:${GITHUB_REPOSITORY}.git"
           git push origin "HEAD:${GITHUB_REF_NAME}"
