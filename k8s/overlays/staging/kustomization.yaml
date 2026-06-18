@@ -6,9 +6,9 @@ resources:
 
 images:
   - name: ghcr.io/gorbiel/software_engineering_web_project/backend
-    newTag: 8df9e5a
+    newTag: 8735437
   - name: ghcr.io/gorbiel/software_engineering_web_project/frontend
-    newTag: 8df9e5a
+    newTag: 8735437
 
 patches:
   - target:
@@ -44,6 +44,9 @@ patches:
       kind: Deployment
       name: backend
     patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0/value
+        value: config.settings.dev
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
