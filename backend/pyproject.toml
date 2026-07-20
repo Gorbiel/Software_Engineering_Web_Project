@@ -9,7 +9,7 @@ authors = [
 requires-python = ">=3.14"
 
 dependencies = [
-    "asgiref==3.11.1",
+    "asgiref==3.12.1",
     "Django==6.0.6",
     "djangorestframework>=3.17.1",
     "django-cors-headers>=4.9.0",
